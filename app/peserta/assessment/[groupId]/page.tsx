@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
-import { ArrowLeft, ArrowRight, Save, Send } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Save, Send, AlertTriangle } from 'lucide-react'
 import { toast } from 'sonner'
 import { QuestionInput } from '../components/QuestionTypes'
 import api from '@/lib/api'
@@ -28,6 +28,7 @@ interface Question {
   response?: any
   isAnswered?: boolean
   isSkipped?: boolean
+  reviewComments?: any[]
 }
 
 interface QuestionResponse {
@@ -57,6 +58,7 @@ interface AssessmentSession {
   groupId: number
   groupName: string
   status: string
+  combinedStatus?: string
   currentQuestionId?: number
   progressPercentage: number
   autoSaveEnabled: boolean
@@ -66,6 +68,7 @@ interface AssessmentSession {
   completedAt?: Date
   submittedAt?: Date
   questions?: Question[]
+  feedback?: string
 }
 
 export default function AssessmentPage() {
@@ -96,7 +99,7 @@ export default function AssessmentPage() {
   const fetchSessionData = async () => {
     try {
       setLoading(true)
-      // Get assessment session and questions in one call
+      // Get assessment session and questions with review data
       const assessmentRes = await api.get(`/assessments/session/${groupId}`)
       console.log('Assessment response:', assessmentRes.data)
 
@@ -269,8 +272,42 @@ export default function AssessmentPage() {
 
     try {
       setSaving(true)
-      await api.post(`/assessments/session/${session?.id}/submit`)
-      toast.success('Assessment submitted successfully! It will be reviewed by admin.')
+      
+      // Check if this is a resubmission (has review comments)
+      const isResubmission = questions.some(q => q.reviewComments && q.reviewComments.length > 0)
+      
+      console.log('Submitting assessment:', {
+        sessionId: session?.id,
+        isResubmission,
+        hasReviewComments: questions.filter(q => q.reviewComments && q.reviewComments.length > 0).length,
+        currentStatus: session?.status,
+        currentCombinedStatus: session?.combinedStatus
+      })
+      
+      // Use the same endpoint but include resubmission flag if needed
+      const submitPayload = {
+        isResubmission: isResubmission
+      }
+      
+      const submitResponse = await api.post(`/assessments/session/${session?.id}/submit`, submitPayload)
+      console.log('Submit response:', submitResponse.data)
+      
+      // Force a refresh of the session data to see if status changed
+      try {
+        const refreshResponse = await api.get(`/assessments/session/${groupId}`)
+        console.log('Status after submission:', {
+          status: refreshResponse.data.status,
+          combinedStatus: refreshResponse.data.combinedStatus
+        })
+      } catch (refreshErr) {
+        console.error('Error refreshing session data:', refreshErr)
+      }
+      
+      const successMessage = isResubmission 
+        ? 'Assessment resubmitted successfully! It will be reviewed by admin.'
+        : 'Assessment submitted successfully! It will be reviewed by admin.'
+      
+      toast.success(successMessage)
       router.push('/peserta/submissions')
     } catch (err) {
       console.error('Error submitting assessment:', err)
@@ -334,6 +371,73 @@ export default function AssessmentPage() {
       </div>
 
       <div className="p-4 sm:p-6 max-w-4xl mx-auto space-y-6">
+        {/* Review Feedback Alert */}
+        {session && (session.status === 'needs_revision' || session.combinedStatus === 'needs_revision') && (
+          <Card className="border-orange-200 bg-orange-50">
+            <CardContent className="pt-6">
+              <div className="flex items-start space-x-3">
+                <AlertTriangle className="h-5 w-5 text-orange-500 mt-0.5 flex-shrink-0" />
+                <div className="flex-1">
+                  <h3 className="font-medium text-orange-800 mb-2">Review Feedback</h3>
+                  <p className="text-sm text-orange-700 mb-3">
+                    Your submission has been reviewed and requires revisions. Please address the feedback below before resubmitting.
+                  </p>
+                  
+                  {/* General feedback */}
+                  {session.feedback && (
+                    <div className="mb-3 p-3 bg-orange-100 rounded-lg">
+                      <p className="text-sm font-medium text-orange-800 mb-1">General Feedback:</p>
+                      <p className="text-sm text-orange-700">{session.feedback}</p>
+                    </div>
+                  )}
+                  
+                                     {/* Question-specific feedback */}
+                   {questions.some(q => q.reviewComments && q.reviewComments.length > 0) && (
+                     <div className="space-y-2">
+                       <p className="text-sm font-medium text-orange-800">Question Feedback:</p>
+                       {questions
+                         .filter(q => q.reviewComments && q.reviewComments.length > 0)
+                         .map(question => {
+                           const adminComments = question.reviewComments?.filter((comment: any) => 
+                             comment.stage === 'admin_validation'
+                           ) || []
+                           
+                           return adminComments.map((comment: any, index: number) => (
+                             <div key={`${question.id}-${index}`} className="p-3 bg-orange-100 rounded-lg">
+                               <div className="flex items-center justify-between mb-1">
+                                 <p className="text-sm font-medium text-orange-800">
+                                   Question {question.orderNumber}: {comment.isCritical ? '(Critical)' : ''}
+                                 </p>
+                                 <Button
+                                   variant="ghost"
+                                   size="sm"
+                                   onClick={() => {
+                                     setCurrentSection(question.sectionTitle)
+                                     // Scroll to question after section change
+                                     setTimeout(() => {
+                                       const questionElement = document.getElementById(`question-${question.id}`)
+                                       if (questionElement) {
+                                         questionElement.scrollIntoView({ behavior: 'smooth', block: 'center' })
+                                       }
+                                     }, 100)
+                                   }}
+                                   className="text-orange-600 hover:text-orange-800 text-xs"
+                                 >
+                                   Go to Question
+                                 </Button>
+                               </div>
+                               <p className="text-sm text-orange-700">{comment.comment}</p>
+                             </div>
+                           ))
+                         })}
+                     </div>
+                   )}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Progress */}
         <Card>
           <CardContent className="pt-6">
@@ -368,17 +472,44 @@ export default function AssessmentPage() {
             <CardTitle className="text-lg sm:text-xl">{currentSection}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-6 sm:space-y-8">
-            {questions
-              .filter(q => q.sectionTitle === currentSection)
-              .map((question) => (
-                <QuestionInput
-                  key={question.id}
-                  {...question}
-                  value={responses[question.id]}
-                  onChange={(value) => handleResponseChange(question.id, value)}
-                  validationError={validationErrors[question.id]}
-                />
-              ))}
+                         {questions
+               .filter(q => q.sectionTitle === currentSection)
+               .map((question) => (
+                 <div key={question.id} id={`question-${question.id}`}>
+                   <QuestionInput
+                     {...question}
+                     value={responses[question.id]}
+                     onChange={(value) => handleResponseChange(question.id, value)}
+                     validationError={validationErrors[question.id]}
+                   />
+                   
+                   {/* Show feedback for this question if it exists */}
+                   {question.reviewComments && question.reviewComments.length > 0 && (
+                     <div className="mt-4 p-4 bg-orange-50 border border-orange-200 rounded-lg">
+                       <div className="flex items-start space-x-2">
+                         <AlertTriangle className="h-4 w-4 text-orange-500 mt-0.5 flex-shrink-0" />
+                         <div className="flex-1">
+                           <h4 className="text-sm font-medium text-orange-800 mb-2">
+                             Review Feedback {question.reviewComments.some((c: any) => c.isCritical) && '(Critical)'}
+                           </h4>
+                           {question.reviewComments
+                             .filter((comment: any) => comment.stage === 'admin_validation')
+                             .map((comment: any, index: number) => (
+                               <div key={index} className="mb-2 last:mb-0">
+                                 <p className="text-sm text-orange-700">{comment.comment}</p>
+                                 {comment.reviewerName && (
+                                   <p className="text-xs text-orange-600 mt-1">
+                                     — {comment.reviewerName}
+                                   </p>
+                                 )}
+                               </div>
+                             ))}
+                         </div>
+                       </div>
+                     </div>
+                   )}
+                 </div>
+               ))}
           </CardContent>
         </Card>
 
@@ -396,16 +527,23 @@ export default function AssessmentPage() {
               <span className="sm:hidden">Previous</span>
             </Button>
 
-            {currentSectionIndex === sections.length - 1 ? (
-              <Button
-                onClick={handleSubmit}
-                disabled={saving}
-                className="flex items-center space-x-2"
-              >
-                <Send className="h-4 w-4" />
-                <span>{saving ? 'Submitting...' : 'Submit Assessment'}</span>
-              </Button>
-            ) : (
+                         {currentSectionIndex === sections.length - 1 ? (
+               <Button
+                 onClick={handleSubmit}
+                 disabled={saving}
+                 className="flex items-center space-x-2"
+               >
+                 <Send className="h-4 w-4" />
+                 <span>
+                   {saving 
+                     ? 'Submitting...' 
+                     : questions.some(q => q.reviewComments && q.reviewComments.length > 0)
+                       ? 'Resubmit Assessment'
+                       : 'Submit Assessment'
+                   }
+                 </span>
+               </Button>
+             ) : (
               <Button
                 onClick={() => setCurrentSection(sections[currentSectionIndex + 1] || null)}
                 className="flex items-center space-x-2"

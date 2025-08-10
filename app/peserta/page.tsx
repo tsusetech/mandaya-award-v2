@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { ArrowRight, Clock, CheckCircle, Users, ClipboardList } from 'lucide-react'
+import { ArrowRight, Clock, CheckCircle, Users, ClipboardList, FileText } from 'lucide-react'
 import { toast } from 'sonner'
 import api from '@/lib/api'
 
@@ -251,6 +251,21 @@ export default function PesertaDashboard() {
               <p className="text-gray-600 text-sm">View and complete assessments</p>
               <Button className="mt-4 w-full" variant="outline">
                 View Groups
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => router.push('/peserta/submissions')}>
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                <FileText className="h-5 w-5 text-green-600" />
+                <span>My Submissions</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-gray-600 text-sm">View and track your submissions</p>
+              <Button className="mt-4 w-full" variant="outline">
+                View Submissions
               </Button>
             </CardContent>
           </Card>

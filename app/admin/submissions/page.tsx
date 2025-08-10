@@ -26,6 +26,7 @@ interface Submission {
   userName: string
   userEmail: string
   status: 'draft' | 'in_progress' | 'submitted' | 'needs_revision' | 'resubmitted' | 'approved_for_jury' | 'with_jury'
+  combinedStatus: 'draft' | 'in_progress' | 'submitted' | 'needs_revision' | 'resubmitted' | 'approved_for_jury' | 'with_jury'
   submittedAt: string
   updatedAt: string
   progressPercentage: number
@@ -66,6 +67,7 @@ export default function AdminSubmissionsPage() {
           userName: session.user?.name || session.userName || 'Unknown User',
           userEmail: session.user?.email || session.userEmail || 'unknown@example.com',
           status: session.status,
+          combinedStatus: session.combinedStatus || session.status,
           submittedAt: session.submittedAt || session.updatedAt,
           updatedAt: session.updatedAt,
           progressPercentage: session.progressPercentage || 0,
@@ -80,6 +82,7 @@ export default function AdminSubmissionsPage() {
           userName: session.user?.name || session.userName || 'Unknown User',
           userEmail: session.user?.email || session.userEmail || 'unknown@example.com',
           status: session.status,
+          combinedStatus: session.combinedStatus || session.status,
           submittedAt: session.submittedAt || session.updatedAt,
           updatedAt: session.updatedAt,
           progressPercentage: session.progressPercentage || 0,
@@ -101,6 +104,7 @@ export default function AdminSubmissionsPage() {
             userName: 'John Doe',
             userEmail: 'john@example.com',
             status: 'submitted' as const,
+            combinedStatus: 'submitted' as const,
             submittedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
             updatedAt: new Date().toISOString(),
             progressPercentage: 100,
@@ -114,6 +118,7 @@ export default function AdminSubmissionsPage() {
             userName: 'Jane Smith',
             userEmail: 'jane@example.com',
             status: 'needs_revision' as const,
+            combinedStatus: 'needs_revision' as const,
             submittedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
             updatedAt: new Date().toISOString(),
             progressPercentage: 85,
@@ -127,6 +132,7 @@ export default function AdminSubmissionsPage() {
             userName: 'Bob Wilson',
             userEmail: 'bob@example.com',
             status: 'approved_for_jury' as const,
+            combinedStatus: 'approved_for_jury' as const,
             submittedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
             updatedAt: new Date().toISOString(),
             progressPercentage: 100,
@@ -150,6 +156,20 @@ export default function AdminSubmissionsPage() {
 
   useEffect(() => {
     fetchSubmissions()
+  }, [])
+
+  // Add refresh functionality when page becomes visible
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        fetchSubmissions()
+      }
+    }
+
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+    }
   }, [])
 
   const handleSearch = (term: string) => {
@@ -176,7 +196,7 @@ export default function AdminSubmissionsPage() {
 
     // Apply status filter
     if (status !== 'all') {
-      filtered = filtered.filter(submission => submission.status === status)
+      filtered = filtered.filter(submission => submission.combinedStatus === status)
     }
 
     setFilteredSubmissions(filtered)
@@ -274,22 +294,32 @@ export default function AdminSubmissionsPage() {
       {/* Header */}
       <div className="bg-white shadow-sm border-b">
         <div className="px-4 sm:px-6 py-4">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
-            <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
-              <Button 
-                variant="ghost" 
-                size="sm"
-                onClick={() => router.push('/admin')}
-                className="flex items-center space-x-2 w-fit"
-              >
-                <span>Back to Dashboard</span>
-              </Button>
-              <div>
-                <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Assessment Submissions</h1>
-                <p className="text-sm sm:text-base text-gray-600">Review and manage assessment submissions</p>
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
+              <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => router.push('/admin')}
+                  className="flex items-center space-x-2 w-fit"
+                >
+                  <span>Back to Dashboard</span>
+                </Button>
+                <div>
+                  <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Assessment Submissions</h1>
+                  <p className="text-sm sm:text-base text-gray-600">Review and manage assessment submissions</p>
+                </div>
               </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={fetchSubmissions}
+                disabled={loading}
+                className="flex items-center space-x-2"
+              >
+                <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+                <span>Refresh</span>
+              </Button>
             </div>
-          </div>
         </div>
       </div>
 
@@ -385,8 +415,8 @@ export default function AdminSubmissionsPage() {
                   <div className="flex flex-col space-y-4">
                     <div className="flex-1">
                       <div className="flex items-start space-x-3">
-                        <div className={`p-2 rounded-lg flex-shrink-0 ${getStatusColor(submission.status)}`}>
-                          {getStatusIcon(submission.status)}
+                        <div className={`p-2 rounded-lg flex-shrink-0 ${getStatusColor(submission.combinedStatus)}`}>
+                          {getStatusIcon(submission.combinedStatus)}
                         </div>
                         <div className="flex-1 min-w-0">
                           <h3 className="text-base sm:text-lg font-semibold text-gray-900 truncate">
@@ -402,8 +432,8 @@ export default function AdminSubmissionsPage() {
                       </div>
                       
                       <div className="mt-3 flex flex-wrap items-center gap-2 sm:gap-4">
-                        <Badge variant="outline" className={getStatusColor(submission.status)}>
-                          {getStatusLabel(submission.status)}
+                        <Badge variant="outline" className={getStatusColor(submission.combinedStatus)}>
+                          {getStatusLabel(submission.combinedStatus)}
                         </Badge>
                         <span className="text-sm text-gray-500">
                           Progress: {submission.progressPercentage}%

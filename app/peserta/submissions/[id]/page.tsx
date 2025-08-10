@@ -15,6 +15,7 @@ import {
 } from 'lucide-react'
 import { toast } from 'sonner'
 import api from '@/lib/api'
+import AuthenticatedLayout from '@/components/AuthenticatedLayout'
 
 interface Question {
   id: number
@@ -60,9 +61,124 @@ export default function SubmissionDetailPage() {
   const fetchSubmission = async () => {
     try {
       setLoading(true)
-      const res = await api.get(`/peserta/submissions/${id}`)
-      const submissionData = res.data
-      setSubmission(submissionData)
+      
+      // Use the same endpoint as admin review page to get detailed session information
+      const sessionRes = await api.get(`/assessments/session/${id}/detail`)
+      console.log('Peserta session detail response:', sessionRes.data)
+      
+      if (!sessionRes.data) {
+        throw new Error('Session not found')
+      }
+      
+      const sessionData = sessionRes.data
+      
+      // Transform the session data to match our Submission interface
+      const submissionData: Submission = {
+        id: sessionData.id,
+        groupId: sessionData.groupId,
+        groupName: sessionData.groupName || `Group ${sessionData.groupId}`,
+        status: sessionData.status,
+        submittedAt: sessionData.submittedAt || sessionData.updatedAt,
+        updatedAt: sessionData.updatedAt,
+        progressPercentage: sessionData.progressPercentage || 0,
+        feedback: sessionData.feedback,
+        revisionCount: sessionData.revisionCount || 0,
+        questions: sessionData.questions || [],
+        
+        // Add debug logging
+        console.log('Session status:', sessionData.status)
+        console.log('Session feedback:', sessionData.feedback)
+        console.log('Questions with review comments:', sessionData.questions?.filter(q => q.reviewComments?.length > 0))
+        responses: (() => {
+          // Extract responses directly from questions since they're embedded
+          const responsesFromQuestions = sessionData.questions?.map((question: any) => {
+            if (question.response !== undefined && question.response !== null && question.response !== '') {
+              // Extract feedback from reviewComments if available
+              let feedback: string | undefined
+              let needsRevision: boolean = false
+              
+              if (question.reviewComments && Array.isArray(question.reviewComments)) {
+                const adminComments = question.reviewComments.filter((comment: any) => 
+                  comment.stage === 'admin_validation'
+                )
+                if (adminComments.length > 0) {
+                  feedback = adminComments[0].comment
+                  needsRevision = adminComments[0].isCritical || false
+                }
+              }
+              
+              // Handle different response types
+              if (typeof question.response === 'string') {
+                return {
+                  questionId: question.id,
+                  textValue: question.response,
+                  numericValue: undefined,
+                  booleanValue: undefined,
+                  arrayValue: undefined,
+                  isComplete: true,
+                  feedback: feedback,
+                  needsRevision: needsRevision
+                }
+              } else if (typeof question.response === 'number') {
+                return {
+                  questionId: question.id,
+                  textValue: undefined,
+                  numericValue: question.response,
+                  booleanValue: undefined,
+                  arrayValue: undefined,
+                  isComplete: true,
+                  feedback: feedback,
+                  needsRevision: needsRevision
+                }
+              } else if (typeof question.response === 'boolean') {
+                return {
+                  questionId: question.id,
+                  textValue: undefined,
+                  numericValue: undefined,
+                  booleanValue: question.response,
+                  arrayValue: undefined,
+                  isComplete: true,
+                  feedback: feedback,
+                  needsRevision: needsRevision
+                }
+              } else if (Array.isArray(question.response)) {
+                return {
+                  questionId: question.id,
+                  textValue: undefined,
+                  numericValue: undefined,
+                  booleanValue: undefined,
+                  arrayValue: question.response,
+                  isComplete: true,
+                  feedback: feedback,
+                  needsRevision: needsRevision
+                }
+              } else if (typeof question.response === 'object' && Object.keys(question.response).length > 0) {
+                // Handle object response format
+                const response = question.response
+                return {
+                  questionId: question.id,
+                  textValue: response.textValue,
+                  numericValue: response.numericValue,
+                  booleanValue: response.booleanValue,
+                  arrayValue: response.arrayValue,
+                  isComplete: response.isComplete || true,
+                  feedback: feedback || response.feedback,
+                  needsRevision: needsRevision || response.needsRevision || false
+                }
+              }
+            }
+            return null
+          }).filter(Boolean) || []
+          
+          console.log('Extracted responses from questions:', responsesFromQuestions)
+          return responsesFromQuestions
+        })()
+      }
+      
+              console.log('Transformed submission data:', submissionData)
+        console.log('Responses with feedback:', submissionData.responses.filter(r => r.feedback))
+        console.log('Responses needing revision:', submissionData.responses.filter(r => r.needsRevision))
+        setSubmission(submissionData)
     } catch (err) {
       console.error('Error fetching submission:', err)
       toast.error('Failed to load submission')
@@ -79,7 +195,9 @@ export default function SubmissionDetailPage() {
     if (!submission) return
 
     try {
-      await api.put(`/peserta/submissions/${id}/resubmit`)
+      // Use the assessment session submit endpoint to resubmit
+      // submission.id is the session ID, not the group ID
+      await api.post(`/assessments/session/${submission.id}/submit`)
       toast.success('Submission resubmitted successfully')
       router.push('/peserta/submissions')
     } catch (err) {
@@ -191,9 +309,10 @@ export default function SubmissionDetailPage() {
   const canResubmit = submission.status === 'needs_revision'
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white shadow-sm border-b">
+    <AuthenticatedLayout allowedRoles={['PESERTA']}>
+      <div className="min-h-screen bg-gray-50">
+        {/* Header */}
+        <div className="bg-white shadow-sm border-b">
         <div className="px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
@@ -364,7 +483,7 @@ export default function SubmissionDetailPage() {
           </Card>
         )}
       </div>
-    </div>
+    </AuthenticatedLayout>
   )
 }
 

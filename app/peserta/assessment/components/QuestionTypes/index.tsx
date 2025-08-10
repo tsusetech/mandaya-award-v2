@@ -110,7 +110,7 @@ export function QuestionInput({
           />
         )
 
-      case 'numeric':
+      case 'numeric-open':
         return (
           <Input
             type="number"

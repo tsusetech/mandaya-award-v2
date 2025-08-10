@@ -63,14 +63,48 @@ export default function SubmissionFeedbackPage() {
   const fetchData = async () => {
     try {
       setLoading(true)
-      const [submissionRes, feedbackRes, profile] = await Promise.all([
-        api.get(`/submissions/${id}`),
-        api.get(`/submissions/${id}/feedback`).catch(() => ({ data: { feedback: null } })),
-        getProfile()
-      ])
-
-      setSubmission(submissionRes.data.submission)
-      setExistingFeedback(feedbackRes.data.feedback)
+      
+      // Use the same endpoint as other pages to get detailed session information
+      const sessionRes = await api.get(`/assessments/session/${id}/detail`)
+      console.log('Jury feedback session detail response:', sessionRes.data)
+      
+      if (!sessionRes.data) {
+        throw new Error('Session not found')
+      }
+      
+      const sessionData = sessionRes.data
+      
+      // Transform session data to match Submission interface
+      const submissionData = {
+        id: sessionData.id,
+        title: sessionData.groupName || `Assessment ${sessionData.id}`,
+        description: sessionData.review?.overallComments || 'No description available',
+        content: sessionData.questions?.map((q: any) => 
+          `${q.questionText}: ${q.response || 'No response'}`
+        ).join('\n\n'),
+        files: [], // No files in current implementation
+        createdAt: sessionData.submittedAt || sessionData.createdAt,
+        participantName: sessionData.user?.name || 'Unknown',
+        groupName: sessionData.groupName || 'Unknown Group'
+      }
+      
+      setSubmission(submissionData)
+      
+      // Check for existing jury feedback
+      if (sessionData.review && sessionData.review.stage === 'jury_scoring') {
+        setExistingFeedback({
+          id: sessionData.review.id,
+          status: sessionData.review.status,
+          scores: sessionData.review.juryScores || [],
+          overallComments: sessionData.review.overallComments || '',
+          createdAt: sessionData.review.createdAt,
+          updatedAt: sessionData.review.updatedAt
+        })
+      } else {
+        setExistingFeedback(null)
+      }
+      
+      const profile = await getProfile()
       setCurrentUser(profile)
     } catch (err) {
       console.error('Error fetching submission data:', err)
@@ -82,8 +116,43 @@ export default function SubmissionFeedbackPage() {
 
   const handleSubmitFeedback = async (feedback: FeedbackData) => {
     try {
-      const response = await api.post(`/submissions/${id}/feedback`, feedback)
-      setExistingFeedback(response.data.feedback)
+      // Use the assessment review endpoint for jury feedback
+      const reviewPayload = {
+        stage: 'jury_scoring',
+        decision: 'pass_to_jury',
+        overallComments: feedback.overallComments || '',
+        questionComments: feedback.scores?.map(score => ({
+          questionId: score.questionId,
+          comment: score.comments || '',
+          isCritical: false,
+          stage: 'jury_scoring'
+        })) || [],
+        juryScores: feedback.scores?.map(score => ({
+          questionId: score.questionId,
+          score: score.score,
+          comments: score.comments || ''
+        })) || [],
+        totalScore: feedback.scores?.reduce((sum, score) => sum + score.score, 0) || 0,
+        deliberationNotes: '',
+        internalNotes: '',
+        validationChecklist: [],
+        updateExisting: true
+      }
+      
+      console.log('Jury feedback payload:', reviewPayload)
+      
+      const response = await api.post(`/assessments/session/${id}/review/batch`, reviewPayload)
+      
+      // Update existing feedback with the response
+      setExistingFeedback({
+        id: response.data.reviewId || response.data.id,
+        status: 'completed',
+        scores: feedback.scores || [],
+        overallComments: feedback.overallComments || '',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      })
+      
       setShowFeedbackForm(false)
       toast.success('Feedback submitted successfully')
     } catch (err) {

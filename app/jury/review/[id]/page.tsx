@@ -49,26 +49,36 @@ export default function ReviewPage() {
   const fetchData = async () => {
     try {
       setLoading(true)
-      const [submissionRes, reviewRes] = await Promise.all([
-        api.get(`/submissions/${id}`),
-        api.get(`/jury/reviews/${id}`)
-      ])
-
-      setSubmission(submissionRes.data)
-      setQuestions(submissionRes.data.questions || [])
       
-      if (reviewRes.data) {
-        setReview(reviewRes.data)
+      // Use the same endpoint as admin and peserta to get detailed session information
+      const sessionRes = await api.get(`/assessments/session/${id}/detail`)
+      console.log('Jury session detail response:', sessionRes.data)
+      
+      if (!sessionRes.data) {
+        throw new Error('Session not found')
+      }
+      
+      const sessionData = sessionRes.data
+      setSubmission(sessionData)
+      setQuestions(sessionData.questions || [])
+      
+      // Check if there's an existing jury review
+      if (sessionData.review && sessionData.review.stage === 'jury_scoring') {
+        setReview(sessionData.review)
         // Initialize scores and comments from existing review
         const initialScores: Record<number, number> = {}
         const initialComments: Record<number, string> = {}
-        reviewRes.data.scores.forEach((score: any) => {
-          initialScores[score.questionId] = score.score
-          if (score.comments) initialComments[score.questionId] = score.comments
-        })
+        
+        if (sessionData.review.juryScores) {
+          sessionData.review.juryScores.forEach((score: any) => {
+            initialScores[score.questionId] = score.score
+            if (score.comments) initialComments[score.questionId] = score.comments
+          })
+        }
+        
         setScores(initialScores)
         setComments(initialComments)
-        setOverallComments(reviewRes.data.overallComments || '')
+        setOverallComments(sessionData.review.overallComments || '')
       }
     } catch (err) {
       console.error('Error fetching review data:', err)
@@ -106,15 +116,34 @@ export default function ReviewPage() {
 
     try {
       setSaving(true)
-      await api.put(`/jury/reviews/${id}`, {
-        status: asDraft ? 'in_progress' : 'completed',
-        overallComments,
-        scores: Object.entries(scores).map(([questionId, score]) => ({
+      
+      // Use the assessment review endpoint for jury scoring
+      const reviewPayload = {
+        stage: 'jury_scoring',
+        decision: asDraft ? 'needs_deliberation' : 'pass_to_jury',
+        overallComments: overallComments,
+        questionComments: Object.entries(comments).map(([questionId, comment]) => ({
           questionId: parseInt(questionId),
-          score,
-          comments: comments[parseInt(questionId)]
-        }))
-      })
+          comment: comment,
+          isCritical: false,
+          stage: 'jury_scoring'
+        })),
+        juryScores: Object.entries(scores).map(([questionId, score]) => ({
+          questionId: parseInt(questionId),
+          score: score,
+          comments: comments[parseInt(questionId)] || ''
+        })),
+        totalScore: Object.values(scores).reduce((sum, score) => sum + score, 0),
+        deliberationNotes: '',
+        internalNotes: '',
+        validationChecklist: [],
+        updateExisting: true
+      }
+      
+      console.log('Jury review payload:', reviewPayload)
+      
+      await api.post(`/assessments/session/${id}/review/batch`, reviewPayload)
+      
       toast.success(asDraft ? 'Review saved as draft' : 'Review submitted successfully')
       if (!asDraft) router.push('/jury')
     } catch (err) {

@@ -67,6 +67,7 @@ export default function Navigation({ className = '' }: NavigationProps) {
         return [
           { href: '/peserta', label: 'Dashboard', icon: Home },
           { href: '/peserta/groups', label: 'My Groups', icon: FileText },
+          { href: '/peserta/submissions', label: 'My Submissions', icon: FileText },
           { href: '/peserta/profile', label: 'Profile', icon: User },
           { href: '/peserta/notifications', label: 'Notifications', icon: Bell },
         ]

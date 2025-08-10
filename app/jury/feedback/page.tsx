@@ -46,8 +46,26 @@ export default function JuryFeedbackPage() {
   const fetchSubmissions = async () => {
     try {
       setLoading(true)
-      const response = await api.get('/jury/submissions')
-      setSubmissions(response.data.submissions || [])
+      
+      // Use the reviews endpoint to get jury assignments
+      const response = await api.get('/reviews/my-reviews')
+      const reviewsData = response.data || []
+      
+      // Transform reviews data to match Submission interface
+      const submissionsData = reviewsData.map((review: any) => ({
+        id: review.sessionId,
+        title: review.session?.groupName || `Assessment ${review.sessionId}`,
+        description: review.overallComments || 'No description available',
+        participantName: review.session?.user?.name || 'Unknown',
+        groupName: review.session?.groupName || 'Unknown Group',
+        createdAt: review.session?.submittedAt || review.createdAt,
+        feedback: review.status === 'completed' ? {
+          status: 'submitted',
+          createdAt: review.reviewedAt || review.updatedAt
+        } : null
+      }))
+      
+      setSubmissions(submissionsData)
     } catch (err) {
       console.error('Error fetching submissions:', err)
       toast.error('Failed to load submissions')
