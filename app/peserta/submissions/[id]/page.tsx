@@ -42,7 +42,7 @@ interface Submission {
   id: number
   groupId: number
   groupName: string
-  status: 'submitted' | 'needs_revision' | 'resubmitted' | 'approved_for_jury' | 'with_jury'
+  status: 'submitted' | 'needs_revision' | 'resubmitted' | 'approved_for_juri' | 'with_juri'
   submittedAt: string
   updatedAt: string
   progressPercentage: number
@@ -214,9 +214,9 @@ export default function SubmissionDetailPage() {
         return 'text-orange-500 bg-orange-50'
       case 'resubmitted':
         return 'text-purple-500 bg-purple-50'
-      case 'approved_for_jury':
+      case 'approved_for_juri':
         return 'text-green-500 bg-green-50'
-      case 'with_jury':
+      case 'with_juri':
         return 'text-indigo-500 bg-indigo-50'
       default:
         return 'text-gray-500 bg-gray-50'
@@ -231,9 +231,9 @@ export default function SubmissionDetailPage() {
         return <AlertTriangle className="h-5 w-5" />
       case 'resubmitted':
         return <RefreshCw className="h-5 w-5" />
-      case 'approved_for_jury':
+      case 'approved_for_juri':
         return <CheckCircle className="h-5 w-5" />
-      case 'with_jury':
+      case 'with_juri':
         return <Clock className="h-5 w-5" />
       default:
         return <Clock className="h-5 w-5" />
@@ -248,10 +248,10 @@ export default function SubmissionDetailPage() {
         return 'Needs Revision'
       case 'resubmitted':
         return 'Resubmitted'
-      case 'approved_for_jury':
-        return 'Approved for Jury'
-      case 'with_jury':
-        return 'With Jury'
+      case 'approved_for_juri':
+        return 'Approved for Juri'
+      case 'with_juri':
+        return 'With Juri'
       default:
         return status
     }
@@ -309,7 +309,7 @@ export default function SubmissionDetailPage() {
   const canResubmit = submission.status === 'needs_revision'
 
   return (
-    <AuthenticatedLayout allowedRoles={['PESERTA']}>
+    <AuthenticatedLayout allowedRoles={['PESERTA', 'SUPERADMIN']}>
       <div className="min-h-screen bg-gray-50">
         {/* Header */}
         <div className="bg-white shadow-sm border-b">

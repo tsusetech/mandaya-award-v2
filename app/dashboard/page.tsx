@@ -84,16 +84,16 @@ export default function DashboardPage() {
           </div>
         )
       
-      case 'JURY':
+      case 'JURI':
         return (
           <div className="p-6 space-y-6">
             <div>
-              <h1 className="text-2xl font-bold mb-2">Jury Dashboard</h1>
+              <h1 className="text-2xl font-bold mb-2">Juri Dashboard</h1>
               <p className="text-gray-600">Welcome back, {user?.name || user?.username}</p>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => router.push('/jury/review')}>
+              <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => router.push('/juri/review')}>
                 <CardHeader>
                   <CardTitle className="flex items-center space-x-2">
                     <Award className="h-5 w-5 text-purple-600" />

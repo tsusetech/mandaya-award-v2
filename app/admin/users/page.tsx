@@ -93,7 +93,8 @@ export default function AdminUsersPage() {
         name: data.name,
         email: data.email,
         username: data.username,
-        ...(data.password && { password: data.password })
+        ...(data.password && { password: data.password }),
+        ...(data.groupId && { groupId: parseInt(data.groupId) })
       }
     
       if (selectedUser) {

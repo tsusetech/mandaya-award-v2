@@ -11,7 +11,7 @@ interface AuthenticatedLayoutProps {
 
 export default function AuthenticatedLayout({ 
   children, 
-  allowedRoles = ['PESERTA', 'ADMIN', 'SUPERADMIN', 'JURY'] 
+  allowedRoles = ['PESERTA', 'ADMIN', 'SUPERADMIN', 'JURI'] 
 }: AuthenticatedLayoutProps) {
   return (
     <RequireAuth allowedRoles={allowedRoles}>

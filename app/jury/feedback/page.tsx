@@ -27,7 +27,7 @@ interface Submission {
   }
 }
 
-export default function JuryFeedbackPage() {
+export default function JuriFeedbackPage() {
   const router = useRouter()
   const [submissions, setSubmissions] = useState<Submission[]>([])
   const [filteredSubmissions, setFilteredSubmissions] = useState<Submission[]>([])
@@ -47,7 +47,7 @@ export default function JuryFeedbackPage() {
     try {
       setLoading(true)
       
-      // Use the reviews endpoint to get jury assignments
+      // Use the reviews endpoint to get juri assignments
       const response = await api.get('/reviews/my-reviews')
       const reviewsData = response.data || []
       
@@ -128,8 +128,8 @@ export default function JuryFeedbackPage() {
 
   if (loading) {
     return (
-      <AuthenticatedLayout allowedRoles={['JURY']}>
-        <div className="p-6 space-y-6">
+      <AuthenticatedLayout allowedRoles={['JURI', 'SUPERADMIN']}>
+        <div className="p-4 sm:p-6 space-y-6">
           <div className="animate-pulse">
             <div className="h-8 bg-gray-200 rounded w-48 mb-6"></div>
             <div className="space-y-4">
@@ -144,23 +144,23 @@ export default function JuryFeedbackPage() {
   }
 
   return (
-    <AuthenticatedLayout allowedRoles={['JURY']}>
-      <div className="p-6 space-y-6">
+    <AuthenticatedLayout allowedRoles={['JURI', 'SUPERADMIN']}>
+      <div className="p-4 sm:p-6 space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
             <Button 
               variant="ghost" 
               size="sm"
-              onClick={() => router.push('/jury')}
+              onClick={() => router.push('/juri')}
               className="flex items-center space-x-2"
             >
               <ArrowLeft className="h-4 w-4" />
               <span>Back to Dashboard</span>
             </Button>
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Feedback Management</h1>
-              <p className="text-gray-600">Review and provide feedback on submissions</p>
+              <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Feedback Management</h1>
+              <p className="text-sm sm:text-base text-gray-600">Review and provide feedback on submissions</p>
             </div>
           </div>
         </div>
@@ -257,7 +257,7 @@ export default function JuryFeedbackPage() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => router.push(`/jury/feedback/${submission.id}`)}
+                        onClick={() => router.push(`/juri/feedback/${submission.id}`)}
                         className="flex items-center space-x-2"
                       >
                         <MessageSquare className="h-4 w-4" />

@@ -51,16 +51,22 @@ export default function Navigation({ className = '' }: NavigationProps) {
   const getNavigationItems = () => {
     switch (role) {
       case 'ADMIN':
-      case 'SUPERADMIN':
         return [
           { href: '/admin', label: 'Dashboard', icon: Home },
           { href: '/admin/users', label: 'Users', icon: Users },
           { href: '/admin/groups', label: 'Groups', icon: FileText },
         ]
-      case 'JURY':
+      case 'SUPERADMIN':
         return [
-          { href: '/jury', label: 'Dashboard', icon: Home },
-          { href: '/jury/review', label: 'Reviews', icon: Award },
+          { href: '/admin', label: 'Admin Dashboard', icon: Home },
+          { href: '/admin/users', label: 'Users', icon: Users },
+          { href: '/admin/groups', label: 'Groups', icon: FileText },
+          { href: '/admin/submissions', label: 'Submissions', icon: FileText },
+        ]
+      case 'JURI':
+        return [
+          { href: '/juri', label: 'Dashboard', icon: Home },
+          { href: '/juri/feedback', label: 'Reviews', icon: Award },
         ]
       case 'PESERTA':
       default:
@@ -83,7 +89,7 @@ export default function Navigation({ className = '' }: NavigationProps) {
           <div className="flex items-center space-x-8">
             {/* Logo/Brand */}
             <div className="flex-shrink-0">
-              <h1 className="text-xl font-bold text-gray-900">Mandala Award</h1>
+              <h1 className="text-xl font-bold text-gray-900">Mandaya Award</h1>
             </div>
 
             {/* Navigation Links */}
@@ -127,3 +133,5 @@ export default function Navigation({ className = '' }: NavigationProps) {
     </nav>
   )
 }
+
+

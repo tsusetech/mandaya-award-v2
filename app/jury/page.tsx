@@ -5,9 +5,10 @@ import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Search, ClipboardList, CheckCircle, Clock, AlertTriangle } from 'lucide-react'
+import { Search, ClipboardList, CheckCircle, Clock, AlertTriangle, Award, FileText, ArrowRight } from 'lucide-react'
 import { toast } from 'sonner'
 import api from '@/lib/api'
+import AuthenticatedLayout from '@/components/AuthenticatedLayout'
 
 interface Review {
   id: number
@@ -42,7 +43,7 @@ interface ReviewStats {
   inProgress: number
 }
 
-export default function JuryDashboard() {
+export default function JuriDashboard() {
   const router = useRouter()
   const [reviews, setReviews] = useState<Review[]>([])
   const [filteredReviews, setFilteredReviews] = useState<Review[]>([])
@@ -59,7 +60,7 @@ export default function JuryDashboard() {
     try {
       setLoading(true)
       
-      // Get reviews assigned to current jury member
+      // Get reviews assigned to current juri member
       const reviewsRes = await api.get('/reviews/my-reviews')
       const reviewsData = reviewsRes.data || []
       
@@ -89,7 +90,7 @@ export default function JuryDashboard() {
       setFilteredReviews(reviewsData)
       setStats(statsData)
     } catch (err) {
-      console.error('Error fetching jury data:', err)
+      console.error('Error fetching juri data:', err)
       toast.error('Failed to load dashboard data')
       
       // Use mock data for demonstration
@@ -97,7 +98,7 @@ export default function JuryDashboard() {
         {
           id: 1,
           sessionId: 1,
-          stage: 'jury_scoring',
+          stage: 'juri_scoring',
           status: 'in_progress',
           decision: 'pending',
           createdAt: new Date().toISOString(),
@@ -107,7 +108,7 @@ export default function JuryDashboard() {
             groupId: 1,
             groupName: 'Sample Organization A',
             userId: 1,
-            status: 'approved_for_jury',
+            status: 'approved_for_juri',
             submittedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
             user: {
               id: 1,
@@ -191,86 +192,121 @@ export default function JuryDashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <div className="bg-white shadow-sm border-b">
-          <div className="px-6 py-4">
-            <div className="animate-pulse">
-              <div className="h-8 bg-gray-200 rounded w-48"></div>
-            </div>
-          </div>
-        </div>
-        <div className="p-6">
-          <div className="animate-pulse space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <AuthenticatedLayout allowedRoles={['JURI', 'SUPERADMIN']}>
+        <div className="p-4 sm:p-6 space-y-6">
+          <div className="animate-pulse">
+            <div className="h-8 bg-gray-200 rounded w-48 mb-6"></div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
               {[1, 2, 3, 4].map(i => (
-                <div key={i} className="h-24 bg-gray-200 rounded"></div>
+                <div key={i} className="h-32 bg-gray-200 rounded"></div>
               ))}
             </div>
             <div className="h-64 bg-gray-200 rounded"></div>
           </div>
         </div>
-      </div>
+      </AuthenticatedLayout>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white shadow-sm border-b">
-        <div className="px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Jury Dashboard</h1>
-              <p className="text-gray-600">Review and score submissions</p>
-            </div>
-          </div>
+    <AuthenticatedLayout allowedRoles={['JURI', 'SUPERADMIN']}>
+      <div className="p-4 sm:p-6 space-y-6">
+        <div>
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Juri Dashboard</h1>
+          <p className="text-sm sm:text-base text-gray-600">Review and score submissions</p>
         </div>
-      </div>
 
-      <div className="p-6 space-y-6">
-        {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <Card>
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Card className="hover:shadow-md transition-shadow">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-gray-600">Total Assigned</CardTitle>
               <ClipboardList className="h-4 w-4 text-blue-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.totalAssigned}</div>
-              <p className="text-xs text-gray-500">Submissions to review</p>
+              <div className="text-2xl font-bold text-gray-900">{stats.totalAssigned}</div>
+              <p className="text-xs text-gray-500 mt-1">Submissions to review</p>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="hover:shadow-md transition-shadow">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-gray-600">Reviewed</CardTitle>
               <CheckCircle className="h-4 w-4 text-green-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.reviewed}</div>
-              <p className="text-xs text-gray-500">Completed reviews</p>
+              <div className="text-2xl font-bold text-gray-900">{stats.reviewed}</div>
+              <p className="text-xs text-gray-500 mt-1">Completed reviews</p>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="hover:shadow-md transition-shadow">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-gray-600">In Progress</CardTitle>
               <Clock className="h-4 w-4 text-orange-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.inProgress}</div>
-              <p className="text-xs text-gray-500">Reviews in progress</p>
+              <div className="text-2xl font-bold text-gray-900">{stats.inProgress}</div>
+              <p className="text-xs text-gray-500 mt-1">Reviews in progress</p>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="hover:shadow-md transition-shadow">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-gray-600">Pending</CardTitle>
               <AlertTriangle className="h-4 w-4 text-red-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.pending}</div>
-              <p className="text-xs text-gray-500">Not yet reviewed</p>
+              <div className="text-2xl font-bold text-gray-900">{stats.pending}</div>
+              <p className="text-xs text-gray-500 mt-1">Not yet reviewed</p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Quick Actions */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => router.push('/juri/review')}>
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                <Award className="h-5 w-5 text-blue-600" />
+                <span>Review Submissions</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-gray-600 text-sm">Review and score assigned submissions</p>
+              <Button className="mt-4 w-full" variant="outline">
+                Start Reviewing
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => router.push('/juri/feedback')}>
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                <FileText className="h-5 w-5 text-green-600" />
+                <span>Feedback History</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-gray-600 text-sm">View your review history and feedback</p>
+              <Button className="mt-4 w-full" variant="outline">
+                View History
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card className="cursor-pointer hover:shadow-md transition-shadow">
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                <ClipboardList className="h-5 w-5 text-purple-600" />
+                <span>Review Guidelines</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-gray-600 text-sm">Access review criteria and guidelines</p>
+              <Button className="mt-4 w-full" variant="outline" disabled>
+                Coming Soon
+              </Button>
             </CardContent>
           </Card>
         </div>
@@ -295,10 +331,21 @@ export default function JuryDashboard() {
           </CardContent>
         </Card>
 
-        {/* Submissions List */}
+        {/* Recent Reviews */}
         <Card>
           <CardHeader>
-            <CardTitle>Assigned Reviews</CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle>Recent Reviews</CardTitle>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => router.push('/juri/review')}
+                className="flex items-center space-x-2"
+              >
+                <span>View All</span>
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+            </div>
           </CardHeader>
           <CardContent>
             {filteredReviews.length === 0 ? (
@@ -311,11 +358,11 @@ export default function JuryDashboard() {
               </div>
             ) : (
               <div className="space-y-4">
-                {filteredReviews.map((review) => (
+                {filteredReviews.slice(0, 5).map((review) => (
                   <div
                     key={review.id}
                     className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 cursor-pointer"
-                    onClick={() => router.push(`/jury/review/${review.sessionId}`)}
+                    onClick={() => router.push(`/juri/review/${review.sessionId}`)}
                   >
                     <div className="flex items-center space-x-4">
                       <div className={`p-2 rounded-lg ${getStatusColor(review.status)}`}>
@@ -345,6 +392,6 @@ export default function JuryDashboard() {
           </CardContent>
         </Card>
       </div>
-    </div>
+    </AuthenticatedLayout>
   )
 }

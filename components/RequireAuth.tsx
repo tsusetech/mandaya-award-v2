@@ -21,7 +21,12 @@ export default function RequireAuth({
         const profile = await getProfile()
         const role = profile.userRoles?.[0]?.role?.name || 'PESERTA'
 
-        if (!allowedRoles.includes(role)) {
+        // SUPERADMIN should have access to all pages
+        const effectiveAllowedRoles = allowedRoles.includes('SUPERADMIN') 
+          ? allowedRoles 
+          : [...allowedRoles, 'SUPERADMIN']
+
+        if (!effectiveAllowedRoles.includes(role)) {
           router.push('/unauthorized')
         }
       } catch (err) {

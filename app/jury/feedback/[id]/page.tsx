@@ -66,7 +66,7 @@ export default function SubmissionFeedbackPage() {
       
       // Use the same endpoint as other pages to get detailed session information
       const sessionRes = await api.get(`/assessments/session/${id}/detail`)
-      console.log('Jury feedback session detail response:', sessionRes.data)
+      console.log('Juri feedback session detail response:', sessionRes.data)
       
       if (!sessionRes.data) {
         throw new Error('Session not found')
@@ -90,8 +90,8 @@ export default function SubmissionFeedbackPage() {
       
       setSubmission(submissionData)
       
-      // Check for existing jury feedback
-      if (sessionData.review && sessionData.review.stage === 'jury_scoring') {
+      // Check for existing juri feedback
+      if (sessionData.review && sessionData.review.stage === 'juri_scoring') {
         setExistingFeedback({
           id: sessionData.review.id,
           status: sessionData.review.status,
@@ -116,16 +116,16 @@ export default function SubmissionFeedbackPage() {
 
   const handleSubmitFeedback = async (feedback: FeedbackData) => {
     try {
-      // Use the assessment review endpoint for jury feedback
+      // Use the assessment review endpoint for juri feedback
       const reviewPayload = {
-        stage: 'jury_scoring',
+        stage: 'juri_scoring',
         decision: 'pass_to_jury',
         overallComments: feedback.overallComments || '',
         questionComments: feedback.scores?.map(score => ({
           questionId: score.questionId,
           comment: score.comments || '',
           isCritical: false,
-          stage: 'jury_scoring'
+          stage: 'juri_scoring'
         })) || [],
         juryScores: feedback.scores?.map(score => ({
           questionId: score.questionId,
@@ -139,7 +139,7 @@ export default function SubmissionFeedbackPage() {
         updateExisting: true
       }
       
-      console.log('Jury feedback payload:', reviewPayload)
+      console.log('Juri feedback payload:', reviewPayload)
       
       const response = await api.post(`/assessments/session/${id}/review/batch`, reviewPayload)
       
@@ -186,8 +186,8 @@ export default function SubmissionFeedbackPage() {
 
   if (loading) {
     return (
-      <AuthenticatedLayout allowedRoles={['JURY']}>
-        <div className="p-6 space-y-6">
+      <AuthenticatedLayout allowedRoles={['JURI', 'SUPERADMIN']}>
+        <div className="p-4 sm:p-6 space-y-6">
           <div className="animate-pulse">
             <div className="h-8 bg-gray-200 rounded w-48 mb-6"></div>
             <div className="space-y-4">
@@ -202,8 +202,8 @@ export default function SubmissionFeedbackPage() {
 
   if (!submission) {
     return (
-      <AuthenticatedLayout allowedRoles={['JURY']}>
-        <div className="p-6">
+      <AuthenticatedLayout allowedRoles={['JURI', 'SUPERADMIN']}>
+        <div className="p-4 sm:p-6">
           <div className="text-center">
             <p className="text-gray-500">Submission not found</p>
           </div>
@@ -213,23 +213,23 @@ export default function SubmissionFeedbackPage() {
   }
 
   return (
-    <AuthenticatedLayout allowedRoles={['JURY']}>
-      <div className="p-6 space-y-6">
+    <AuthenticatedLayout allowedRoles={['JURI', 'SUPERADMIN']}>
+      <div className="p-4 sm:p-6 space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
             <Button 
               variant="ghost" 
               size="sm"
-              onClick={() => router.push('/jury/feedback')}
+              onClick={() => router.push('/juri/feedback')}
               className="flex items-center space-x-2"
             >
               <ArrowLeft className="h-4 w-4" />
               <span>Back to Feedback</span>
             </Button>
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Submission Review</h1>
-              <p className="text-gray-600">Provide feedback for: {submission.title}</p>
+              <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Submission Review</h1>
+              <p className="text-sm sm:text-base text-gray-600">Provide feedback for: {submission.title}</p>
             </div>
           </div>
           {!existingFeedback && !showFeedbackForm && (
@@ -327,7 +327,7 @@ export default function SubmissionFeedbackPage() {
             {currentUser && (
               <CommentsSection
                 submissionId={submission.id}
-                currentUserRole={currentUser.userRoles?.[0]?.role?.name || 'JURY'}
+                currentUserRole={currentUser.userRoles?.[0]?.role?.name || 'JURI'}
                 currentUserName={currentUser.name || currentUser.username}
               />
             )}
@@ -360,7 +360,7 @@ export default function SubmissionFeedbackPage() {
                 )}
                 <Button
                   variant="outline"
-                  onClick={() => router.push('/jury/feedback')}
+                  onClick={() => router.push('/juri/feedback')}
                   className="w-full"
                 >
                   Back to List

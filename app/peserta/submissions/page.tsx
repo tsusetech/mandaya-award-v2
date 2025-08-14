@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { ArrowLeft, Search, FileText, Clock, CheckCircle, AlertTriangle, RefreshCw, MessageSquare } from 'lucide-react'
+import { ArrowLeft, Search, FileText, Clock, CheckCircle, AlertTriangle, RefreshCw, MessageSquare, XCircle, Users, BarChart3, Brain, Target, Trophy } from 'lucide-react'
 import { toast } from 'sonner'
 import api from '@/lib/api'
 import { getProfile } from '@/lib/auth'
@@ -15,8 +15,8 @@ interface Submission {
   id: number
   groupId: number
   groupName: string
-  status: 'draft' | 'in_progress' | 'submitted' | 'needs_revision' | 'resubmitted' | 'approved_for_jury' | 'with_jury'
-  combinedStatus: 'draft' | 'in_progress' | 'submitted' | 'needs_revision' | 'resubmitted' | 'approved_for_jury' | 'with_jury'
+  status: 'draft' | 'in_progress' | 'submitted' | 'pending_review' | 'under_review' | 'needs_revision' | 'resubmitted' | 'approved' | 'rejected' | 'passed_to_jury' | 'jury_scoring' | 'jury_deliberation' | 'final_decision' | 'completed'
+  combinedStatus: 'draft' | 'in_progress' | 'submitted' | 'pending_review' | 'under_review' | 'needs_revision' | 'resubmitted' | 'approved' | 'rejected' | 'passed_to_jury' | 'jury_scoring' | 'jury_deliberation' | 'final_decision' | 'completed'
   submittedAt: string
   updatedAt: string
   progressPercentage: number
@@ -32,11 +32,24 @@ export default function SubmissionsPage() {
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [loading, setLoading] = useState(true)
 
+  // Function to fetch review data for a session
+  const fetchSessionReviews = async (sessionId: number) => {
+    try {
+      const reviewsRes = await api.get(`/assessments/session/${sessionId}/reviews`)
+      console.log(`Reviews for session ${sessionId}:`, reviewsRes.data)
+      return reviewsRes.data
+    } catch (error) {
+      console.error('Error fetching session reviews:', error)
+      return []
+    }
+  }
+
   const fetchSubmissions = async () => {
     try {
       setLoading(true)
       
       let allSubmissions: Submission[] = []
+      let userGroups: any[] = []
       
       // Try to get user's sessions with review data using the admin endpoint
       
@@ -50,34 +63,75 @@ export default function SubmissionsPage() {
           }
         })
         console.log('User sessions response:', sessionsRes.data)
+        console.log('Response structure:', {
+          hasData: !!sessionsRes.data,
+          isDataArray: Array.isArray(sessionsRes.data),
+          hasDataData: !!sessionsRes.data?.data,
+          isDataDataArray: Array.isArray(sessionsRes.data?.data),
+          dataLength: sessionsRes.data?.data?.length
+        })
         
         if (sessionsRes.data && Array.isArray(sessionsRes.data.data)) {
+          console.log('Starting to map sessions data...')
           // Transform the user sessions data to match our Submission interface
-          allSubmissions = sessionsRes.data.data.map((session: any) => ({
-            id: session.id,
-            groupId: session.groupId,
-            groupName: session.groupName || `Group ${session.groupId}`,
-            status: session.status,
-            combinedStatus: session.combinedStatus || session.status,
-            submittedAt: session.submittedAt || session.lastActivityAt,
-            updatedAt: session.lastActivityAt,
-            progressPercentage: session.progressPercentage || 0,
-            feedback: session.reviewComments,
-            revisionCount: session.revisionCount || 0
+          allSubmissions = await Promise.all(sessionsRes.data.data.map(async (session: any) => {
+            // If there's a review, fetch review data
+            let sessionReviews = []
+            if (session.finalStatus === 'needs_revision' || session.reviewStatus === 'needs_revision') {
+              console.log(`Fetching review data for session ${session.id}...`)
+              sessionReviews = await fetchSessionReviews(session.id)
+            }
+            
+            const submission = {
+              id: session.id,
+              groupId: session.groupId,
+              groupName: session.groupName || `Group ${session.groupId}`,
+              status: session.finalStatus || session.status,
+              combinedStatus: session.finalStatus || session.combinedStatus || session.status,
+              submittedAt: session.submittedAt || session.lastActivityAt,
+              updatedAt: session.lastActivityAt,
+              progressPercentage: session.progressPercentage || 0,
+              feedback: sessionReviews.length > 0 ? sessionReviews[0]?.overallComments : (session.review?.overallComments || session.reviewComments || session.feedback),
+              revisionCount: session.revisionCount || 0
+            }
+            console.log('Created submission with status:', {
+              finalStatus: session.finalStatus,
+              status: session.status,
+              combinedStatus: session.combinedStatus,
+              finalCombinedStatus: submission.combinedStatus
+            })
+            console.log('Review data available:', {
+              sessionReviews: sessionReviews.length,
+              reviews: sessionReviews,
+              review: session.review,
+              reviewComments: session.reviewComments,
+              feedback: session.feedback,
+              finalFeedback: submission.feedback
+            })
+            return submission
           }))
         } else if (sessionsRes.data && Array.isArray(sessionsRes.data)) {
-          allSubmissions = sessionsRes.data.map((session: any) => ({
-            id: session.id,
-            groupId: session.groupId,
-            groupName: session.groupName || `Group ${session.groupId}`,
-            status: session.status,
-            combinedStatus: session.combinedStatus || session.status,
-            submittedAt: session.submittedAt || session.lastActivityAt,
-            updatedAt: session.lastActivityAt,
-            progressPercentage: session.progressPercentage || 0,
-            feedback: session.reviewComments,
-            revisionCount: session.revisionCount || 0
-          }))
+          allSubmissions = sessionsRes.data.map((session: any) => {
+            const submission = {
+              id: session.id,
+              groupId: session.groupId,
+              groupName: session.groupName || `Group ${session.groupId}`,
+              status: session.finalStatus || session.status,
+              combinedStatus: session.finalStatus || session.combinedStatus || session.status,
+              submittedAt: session.submittedAt || session.lastActivityAt,
+              updatedAt: session.lastActivityAt,
+              progressPercentage: session.progressPercentage || 0,
+              feedback: session.review?.overallComments || session.reviewComments || session.feedback,
+              revisionCount: session.revisionCount || 0
+            }
+            console.log('Created submission (array) with status:', {
+              finalStatus: session.finalStatus,
+              status: session.status,
+              combinedStatus: session.combinedStatus,
+              finalCombinedStatus: submission.combinedStatus
+            })
+            return submission
+          })
         }
       } catch (error) {
         console.log('Failed to fetch user sessions with review data, falling back to group-based approach:', error)
@@ -86,7 +140,7 @@ export default function SubmissionsPage() {
         try {
           const groupsRes = await api.get('/groups/my-groups')
           console.log('Groups response:', groupsRes.data)
-          const userGroups = Array.isArray(groupsRes.data) ? groupsRes.data : groupsRes.data?.groups || []
+          userGroups = Array.isArray(groupsRes.data) ? groupsRes.data : groupsRes.data?.groups || []
           console.log('User groups:', userGroups)
           
           // Process each group
@@ -103,14 +157,20 @@ export default function SubmissionsPage() {
                   id: session.id,
                   groupId: session.groupId,
                   groupName: session.groupName || userGroup.groupName || `Group ${session.groupId}`,
-                  status: session.status,
-                  combinedStatus: session.combinedStatus || session.status,
+                  status: session.finalStatus || session.status,
+                  combinedStatus: session.finalStatus || session.combinedStatus || session.status,
                   submittedAt: session.submittedAt || session.lastActivityAt,
                   updatedAt: session.lastActivityAt,
                   progressPercentage: session.progressPercentage || 0,
                   feedback: session.feedback,
                   revisionCount: session.revisionCount || 0
                 }
+                console.log('Created submission (fallback) with status:', {
+                  finalStatus: session.finalStatus,
+                  status: session.status,
+                  combinedStatus: session.combinedStatus,
+                  finalCombinedStatus: submission.combinedStatus
+                })
                 console.log(`Created submission object:`, submission)
                 allSubmissions.push(submission)
               }
@@ -143,6 +203,11 @@ export default function SubmissionsPage() {
       }
       
       console.log('Final allSubmissions:', allSubmissions)
+      console.log('Final submission statuses:', allSubmissions.map(s => ({
+        id: s.id,
+        status: s.status,
+        combinedStatus: s.combinedStatus
+      })))
       setSubmissions(allSubmissions)
       setFilteredSubmissions(allSubmissions)
     } catch (err) {
@@ -196,14 +261,28 @@ export default function SubmissionsPage() {
         return 'text-yellow-500 bg-yellow-50'
       case 'submitted':
         return 'text-blue-500 bg-blue-50'
-      case 'needs_revision':
+      case 'pending_review':
         return 'text-orange-500 bg-orange-50'
-      case 'resubmitted':
+      case 'under_review':
         return 'text-purple-500 bg-purple-50'
-      case 'approved_for_jury':
+      case 'needs_revision':
+        return 'text-red-500 bg-red-50'
+      case 'resubmitted':
+        return 'text-blue-500 bg-blue-50'
+      case 'approved':
         return 'text-green-500 bg-green-50'
-      case 'with_jury':
+      case 'rejected':
+        return 'text-red-500 bg-red-50'
+      case 'passed_to_jury':
         return 'text-indigo-500 bg-indigo-50'
+      case 'jury_scoring':
+        return 'text-purple-500 bg-purple-50'
+      case 'jury_deliberation':
+        return 'text-indigo-500 bg-indigo-50'
+      case 'final_decision':
+        return 'text-amber-500 bg-amber-50'
+      case 'completed':
+        return 'text-green-500 bg-green-50'
       default:
         return 'text-gray-500 bg-gray-50'
     }
@@ -216,15 +295,29 @@ export default function SubmissionsPage() {
       case 'in_progress':
         return <Clock className="h-5 w-5" />
       case 'submitted':
+        return <FileText className="h-5 w-5" />
+      case 'pending_review':
         return <Clock className="h-5 w-5" />
+      case 'under_review':
+        return <Search className="h-5 w-5" />
       case 'needs_revision':
         return <AlertTriangle className="h-5 w-5" />
       case 'resubmitted':
         return <RefreshCw className="h-5 w-5" />
-      case 'approved_for_jury':
+      case 'approved':
         return <CheckCircle className="h-5 w-5" />
-      case 'with_jury':
-        return <Clock className="h-5 w-5" />
+      case 'rejected':
+        return <XCircle className="h-5 w-5" />
+      case 'passed_to_jury':
+        return <Users className="h-5 w-5" />
+      case 'jury_scoring':
+        return <BarChart3 className="h-5 w-5" />
+      case 'jury_deliberation':
+        return <Brain className="h-5 w-5" />
+      case 'final_decision':
+        return <Target className="h-5 w-5" />
+      case 'completed':
+        return <Trophy className="h-5 w-5" />
       default:
         return <FileText className="h-5 w-5" />
     }
@@ -255,7 +348,7 @@ export default function SubmissionsPage() {
   }
 
   return (
-    <AuthenticatedLayout allowedRoles={['PESERTA']}>
+    <AuthenticatedLayout allowedRoles={['PESERTA', 'SUPERADMIN']}>
       <div className="min-h-screen bg-gray-50">
         {/* Header */}
         <div className="bg-white shadow-sm border-b">
@@ -331,6 +424,20 @@ export default function SubmissionsPage() {
                     Submitted
                   </Button>
                   <Button
+                    variant={statusFilter === 'pending_review' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => handleStatusFilter('pending_review')}
+                  >
+                    Pending Review
+                  </Button>
+                  <Button
+                    variant={statusFilter === 'under_review' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => handleStatusFilter('under_review')}
+                  >
+                    Under Review
+                  </Button>
+                  <Button
                     variant={statusFilter === 'needs_revision' ? 'default' : 'outline'}
                     size="sm"
                     onClick={() => handleStatusFilter('needs_revision')}
@@ -345,11 +452,53 @@ export default function SubmissionsPage() {
                     Resubmitted
                   </Button>
                   <Button
-                    variant={statusFilter === 'approved_for_jury' ? 'default' : 'outline'}
+                    variant={statusFilter === 'approved' ? 'default' : 'outline'}
                     size="sm"
-                    onClick={() => handleStatusFilter('approved_for_jury')}
+                    onClick={() => handleStatusFilter('approved')}
                   >
                     Approved
+                  </Button>
+                  <Button
+                    variant={statusFilter === 'rejected' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => handleStatusFilter('rejected')}
+                  >
+                    Rejected
+                  </Button>
+                  <Button
+                    variant={statusFilter === 'passed_to_jury' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => handleStatusFilter('passed_to_jury')}
+                  >
+                    Passed to Jury
+                  </Button>
+                  <Button
+                    variant={statusFilter === 'jury_scoring' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => handleStatusFilter('jury_scoring')}
+                  >
+                    Jury Scoring
+                  </Button>
+                  <Button
+                    variant={statusFilter === 'jury_deliberation' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => handleStatusFilter('jury_deliberation')}
+                  >
+                    Jury Deliberation
+                  </Button>
+                  <Button
+                    variant={statusFilter === 'final_decision' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => handleStatusFilter('final_decision')}
+                  >
+                    Final Decision
+                  </Button>
+                  <Button
+                    variant={statusFilter === 'completed' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => handleStatusFilter('completed')}
+                  >
+                    Completed
                   </Button>
                 </div>
               </div>

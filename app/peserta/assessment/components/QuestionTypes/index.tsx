@@ -42,14 +42,25 @@ export function QuestionInput({
   validationError,
   autoSave = true
 }: QuestionProps) {
-  const [localValue, setLocalValue] = useState(value)
+  const [localValue, setLocalValue] = useState(() => {
+    // Ensure checkbox and multiple choice questions always have array values
+    if ((inputType === 'checkbox' || inputType === 'multiple-choice' || inputType === 'multiple choice' || inputType === 'multiple_choice') && !Array.isArray(value)) {
+      return []
+    }
+    return value
+  })
   const [isFocused, setIsFocused] = useState(false)
   const [autoSaveStatus, setAutoSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle')
 
   // Update local value when prop value changes
   useEffect(() => {
-    setLocalValue(value)
-  }, [value])
+    // Ensure checkbox and multiple choice questions always have array values
+    if ((inputType === 'checkbox' || inputType === 'multiple-choice' || inputType === 'multiple choice' || inputType === 'multiple_choice') && !Array.isArray(value)) {
+      setLocalValue([])
+    } else {
+      setLocalValue(value)
+    }
+  }, [value, inputType])
 
   const handleChange = (newValue: any) => {
     setLocalValue(newValue)

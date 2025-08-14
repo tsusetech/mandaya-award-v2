@@ -14,7 +14,13 @@ import {
   AlertTriangle, 
   Eye,
   MessageSquare,
-  RefreshCw
+  RefreshCw,
+  XCircle,
+  Users,
+  BarChart3,
+  Brain,
+  Target,
+  Trophy
 } from 'lucide-react'
 import { toast } from 'sonner'
 import api from '@/lib/api'
@@ -25,8 +31,8 @@ interface Submission {
   groupName: string
   userName: string
   userEmail: string
-  status: 'draft' | 'in_progress' | 'submitted' | 'needs_revision' | 'resubmitted' | 'approved_for_jury' | 'with_jury'
-  combinedStatus: 'draft' | 'in_progress' | 'submitted' | 'needs_revision' | 'resubmitted' | 'approved_for_jury' | 'with_jury'
+  status: 'draft' | 'in_progress' | 'submitted' | 'pending_review' | 'under_review' | 'needs_revision' | 'resubmitted' | 'approved' | 'rejected' | 'passed_to_jury' | 'jury_scoring' | 'jury_deliberation' | 'final_decision' | 'completed'
+  combinedStatus: 'draft' | 'in_progress' | 'submitted' | 'pending_review' | 'under_review' | 'needs_revision' | 'resubmitted' | 'approved' | 'rejected' | 'passed_to_jury' | 'jury_scoring' | 'jury_deliberation' | 'final_decision' | 'completed'
   submittedAt: string
   updatedAt: string
   progressPercentage: number
@@ -66,8 +72,8 @@ export default function AdminSubmissionsPage() {
           groupName: session.groupName,
           userName: session.user?.name || session.userName || 'Unknown User',
           userEmail: session.user?.email || session.userEmail || 'unknown@example.com',
-          status: session.status,
-          combinedStatus: session.combinedStatus || session.status,
+          status: session.finalStatus || session.status,
+          combinedStatus: session.finalStatus || session.combinedStatus || session.status,
           submittedAt: session.submittedAt || session.updatedAt,
           updatedAt: session.updatedAt,
           progressPercentage: session.progressPercentage || 0,
@@ -81,8 +87,8 @@ export default function AdminSubmissionsPage() {
           groupName: session.groupName,
           userName: session.user?.name || session.userName || 'Unknown User',
           userEmail: session.user?.email || session.userEmail || 'unknown@example.com',
-          status: session.status,
-          combinedStatus: session.combinedStatus || session.status,
+          status: session.finalStatus || session.status,
+          combinedStatus: session.finalStatus || session.combinedStatus || session.status,
           submittedAt: session.submittedAt || session.updatedAt,
           updatedAt: session.updatedAt,
           progressPercentage: session.progressPercentage || 0,
@@ -131,8 +137,8 @@ export default function AdminSubmissionsPage() {
             groupName: 'Sample Organization C',
             userName: 'Bob Wilson',
             userEmail: 'bob@example.com',
-            status: 'approved_for_jury' as const,
-            combinedStatus: 'approved_for_jury' as const,
+            status: 'approved' as const,
+            combinedStatus: 'approved' as const,
             submittedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
             updatedAt: new Date().toISOString(),
             progressPercentage: 100,
@@ -210,14 +216,28 @@ export default function AdminSubmissionsPage() {
         return 'text-yellow-500 bg-yellow-50'
       case 'submitted':
         return 'text-blue-500 bg-blue-50'
-      case 'needs_revision':
+      case 'pending_review':
         return 'text-orange-500 bg-orange-50'
-      case 'resubmitted':
+      case 'under_review':
         return 'text-purple-500 bg-purple-50'
-      case 'approved_for_jury':
+      case 'needs_revision':
+        return 'text-red-500 bg-red-50'
+      case 'resubmitted':
+        return 'text-blue-500 bg-blue-50'
+      case 'approved':
         return 'text-green-500 bg-green-50'
-      case 'with_jury':
+      case 'rejected':
+        return 'text-red-500 bg-red-50'
+      case 'passed_to_jury':
         return 'text-indigo-500 bg-indigo-50'
+      case 'jury_scoring':
+        return 'text-purple-500 bg-purple-50'
+      case 'jury_deliberation':
+        return 'text-indigo-500 bg-indigo-50'
+      case 'final_decision':
+        return 'text-amber-500 bg-amber-50'
+      case 'completed':
+        return 'text-green-500 bg-green-50'
       default:
         return 'text-gray-500 bg-gray-50'
     }
@@ -231,14 +251,28 @@ export default function AdminSubmissionsPage() {
         return <Clock className="h-5 w-5" />
       case 'submitted':
         return <FileText className="h-5 w-5" />
+      case 'pending_review':
+        return <Clock className="h-5 w-5" />
+      case 'under_review':
+        return <Search className="h-5 w-5" />
       case 'needs_revision':
         return <AlertTriangle className="h-5 w-5" />
       case 'resubmitted':
         return <RefreshCw className="h-5 w-5" />
-      case 'approved_for_jury':
+      case 'approved':
         return <CheckCircle className="h-5 w-5" />
-      case 'with_jury':
-        return <Clock className="h-5 w-5" />
+      case 'rejected':
+        return <XCircle className="h-5 w-5" />
+      case 'passed_to_jury':
+        return <Users className="h-5 w-5" />
+      case 'jury_scoring':
+        return <BarChart3 className="h-5 w-5" />
+      case 'jury_deliberation':
+        return <Brain className="h-5 w-5" />
+      case 'final_decision':
+        return <Target className="h-5 w-5" />
+      case 'completed':
+        return <Trophy className="h-5 w-5" />
       default:
         return <FileText className="h-5 w-5" />
     }
@@ -252,14 +286,28 @@ export default function AdminSubmissionsPage() {
         return 'In Progress'
       case 'submitted':
         return 'Submitted'
+      case 'pending_review':
+        return 'Pending Review'
+      case 'under_review':
+        return 'Under Review'
       case 'needs_revision':
         return 'Needs Revision'
       case 'resubmitted':
         return 'Resubmitted'
-      case 'approved_for_jury':
-        return 'Approved for Jury'
-      case 'with_jury':
-        return 'With Jury'
+      case 'approved':
+        return 'Approved'
+      case 'rejected':
+        return 'Rejected'
+      case 'passed_to_jury':
+        return 'Passed to Jury'
+      case 'jury_scoring':
+        return 'Jury Scoring'
+      case 'jury_deliberation':
+        return 'Jury Deliberation'
+      case 'final_decision':
+        return 'Final Decision'
+      case 'completed':
+        return 'Completed'
       default:
         return status
     }
@@ -367,6 +415,20 @@ export default function AdminSubmissionsPage() {
                   Submitted
                 </Button>
                 <Button
+                  variant={statusFilter === 'pending_review' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => handleStatusFilter('pending_review')}
+                >
+                  Pending Review
+                </Button>
+                <Button
+                  variant={statusFilter === 'under_review' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => handleStatusFilter('under_review')}
+                >
+                  Under Review
+                </Button>
+                <Button
                   variant={statusFilter === 'needs_revision' ? 'default' : 'outline'}
                   size="sm"
                   onClick={() => handleStatusFilter('needs_revision')}
@@ -381,11 +443,53 @@ export default function AdminSubmissionsPage() {
                   Resubmitted
                 </Button>
                 <Button
-                  variant={statusFilter === 'approved_for_jury' ? 'default' : 'outline'}
+                  variant={statusFilter === 'approved' ? 'default' : 'outline'}
                   size="sm"
-                  onClick={() => handleStatusFilter('approved_for_jury')}
+                  onClick={() => handleStatusFilter('approved')}
                 >
                   Approved
+                </Button>
+                <Button
+                  variant={statusFilter === 'rejected' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => handleStatusFilter('rejected')}
+                >
+                  Rejected
+                </Button>
+                <Button
+                  variant={statusFilter === 'passed_to_jury' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => handleStatusFilter('passed_to_jury')}
+                >
+                  Passed to Jury
+                </Button>
+                <Button
+                  variant={statusFilter === 'jury_scoring' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => handleStatusFilter('jury_scoring')}
+                >
+                  Jury Scoring
+                </Button>
+                <Button
+                  variant={statusFilter === 'jury_deliberation' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => handleStatusFilter('jury_deliberation')}
+                >
+                  Jury Deliberation
+                </Button>
+                <Button
+                  variant={statusFilter === 'final_decision' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => handleStatusFilter('final_decision')}
+                >
+                  Final Decision
+                </Button>
+                <Button
+                  variant={statusFilter === 'completed' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => handleStatusFilter('completed')}
+                >
+                  Completed
                 </Button>
               </div>
             </div>

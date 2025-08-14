@@ -27,6 +27,14 @@ interface Question {
   sectionTitle: string
   subsection: string
   orderNumber: number
+  reviewComments?: Array<{
+    id: number
+    comment: string
+    isCritical: boolean
+    stage: string
+    createdAt: string
+    reviewerName?: string
+  }>
 }
 
 interface Response {
@@ -43,7 +51,7 @@ interface Response {
 interface Submission {
   id: number
   groupName: string
-  status: 'submitted' | 'needs_revision' | 'resubmitted' | 'approved_for_jury' | 'with_jury'
+  status: 'submitted' | 'needs_revision' | 'resubmitted' | 'approved' | 'rejected' | 'passed_to_jury' | 'jury_scoring' | 'jury_deliberation' | 'final_decision' | 'completed'
   submittedAt: string
   updatedAt: string
   progressPercentage: number
@@ -86,12 +94,12 @@ export default function AdminSubmissionReviewPage() {
          id: sessionData.id,
          reviewId: sessionData.reviewId,
          review: sessionData.review,
-         hasReviewComments: sessionData.questions?.some(q => q.reviewComments?.length > 0),
-         totalReviewComments: sessionData.questions?.reduce((total, q) => total + (q.reviewComments?.length || 0), 0)
+         hasReviewComments: sessionData.questions?.some((q: any) => q.reviewComments?.length > 0),
+         totalReviewComments: sessionData.questions?.reduce((total: number, q: any) => total + (q.reviewComments?.length || 0), 0)
        })
      
       // Check if we have responses in the session data
-      if (!sessionData.questions?.some(q => q.response !== undefined && q.response !== null)) {
+      if (!sessionData.questions?.some((q: any) => q.response !== undefined && q.response !== null)) {
         console.log('No responses found in session data. This might be because:')
         console.log('1. The session has no responses yet')
         console.log('2. The user has not submitted their assessment')
@@ -352,10 +360,10 @@ export default function AdminSubmissionReviewPage() {
        
        const reviewPayload = {
          stage: 'admin_validation',
-         decision: needsRevision ? 'request_revision' : 'approve',
+         decision: needsRevision ? 'needs_revision' : 'approve',
          overallComments: generalFeedback || '',
          questionComments: allComments,
-         juryScores: [],
+         juriScores: [],
          totalScore: 0,
          deliberationNotes: '',
          internalNotes: '',
@@ -397,7 +405,7 @@ export default function AdminSubmissionReviewPage() {
       })
       
       toast.success('Feedback saved successfully')
-         } catch (err) {
+         } catch (err: any) {
        console.error('Error saving feedback:', err)
        console.log('Error response data:', err.response?.data)
        toast.error('Failed to save feedback')
@@ -430,7 +438,7 @@ export default function AdminSubmissionReviewPage() {
           decision: 'approve',
           overallComments: generalFeedback,
           questionComments: existingComments, // Preserve existing comments
-          juryScores: [],
+          juriScores: [],
           totalScore: 0,
           deliberationNotes: '',
           internalNotes: '',
@@ -464,7 +472,7 @@ export default function AdminSubmissionReviewPage() {
          reviewId: reviewId 
        } : prev)
        toast.success('General feedback saved successfully')
-     } catch (err) {
+     } catch (err: any) {
        console.error('Error saving general feedback:', err)
        console.log('Error response data:', err.response?.data)
        toast.error('Failed to save general feedback')
@@ -473,54 +481,64 @@ export default function AdminSubmissionReviewPage() {
      }
    }
 
-     const handleApprove = async () => {
-     if (!submission) return
- 
-     try {
-       setSaving(true)
-       
-               console.log('Creating/updating assessment review for approval, session:', submission.id)
+           const handleApprove = async () => {
+      if (!submission) return
+  
+      try {
+        setSaving(true)
         
-        // Collect all existing comments from the submission
-        const existingComments = submission.questions
-          .flatMap(q => (q.reviewComments || []).map(comment => ({
-            questionId: q.id,
-            comment: comment.comment,
-            isCritical: comment.isCritical,
-            stage: comment.stage || 'admin_validation'
-          })))
+                console.log('Creating/updating assessment review for approval, session:', submission.id)
+         
+         // Collect all existing comments from the submission
+         const existingComments = submission.questions
+           .flatMap(q => (q.reviewComments || []).map(comment => ({
+             questionId: q.id,
+             comment: comment.comment,
+             isCritical: comment.isCritical,
+             stage: comment.stage || 'admin_validation'
+           })))
+         
+         console.log('Preserving existing comments for approval:', existingComments)
+         
+         // If no existing comments, create a basic approval comment
+         const questionComments = existingComments.length > 0 ? existingComments : [
+           {
+             questionId: submission.questions[0]?.id || 1,
+             comment: 'Submission approved for juri review',
+             isCritical: false,
+             stage: 'admin_validation'
+           }
+         ]
+         
+                   const reviewPayload = {
+            stage: 'admin_validation',
+            decision: 'pass_to_jury',
+            overallComments: generalFeedback || 'Submission approved for jury review',
+            questionComments: questionComments,
+            juriScores: [],
+            totalScore: 0,
+            deliberationNotes: '',
+            internalNotes: '',
+            validationChecklist: [],
+            updateExisting: true
+          }
+         
+         console.log('Approve review payload:', reviewPayload)
+         
+         const createReviewRes = await api.post(`/assessments/session/${submission.id}/review/batch`, reviewPayload)
         
-        console.log('Preserving existing comments for approval:', existingComments)
+        console.log('Create review response:', createReviewRes.data)
         
-        const reviewPayload = {
-          stage: 'admin_validation',
-          decision: 'pass_to_jury',
-          overallComments: generalFeedback,
-          questionComments: existingComments, // Preserve existing comments
-          juryScores: [],
-          totalScore: 0,
-          deliberationNotes: '',
-          internalNotes: '',
-          validationChecklist: [],
-          updateExisting: true
-        }
-        
-        console.log('Approve review payload:', reviewPayload)
-        
-        const createReviewRes = await api.post(`/assessments/session/${submission.id}/review/batch`, reviewPayload)
-       
-       console.log('Create review response:', createReviewRes.data)
-       
-       toast.success('Submission approved for jury review')
-       router.push('/admin/submissions')
-     } catch (err) {
-       console.error('Error approving submission:', err)
-       console.log('Error response data:', err.response?.data)
-       toast.error('Failed to approve submission')
-     } finally {
-       setSaving(false)
-     }
-   }
+        toast.success('Submission approved for juri review')
+        router.push('/admin/submissions')
+      } catch (err: any) {
+        console.error('Error approving submission:', err)
+        console.log('Error response data:', err.response?.data)
+        toast.error('Failed to approve submission')
+      } finally {
+        setSaving(false)
+      }
+    }
 
      const handleRequestRevision = async () => {
      if (!submission) return
@@ -540,13 +558,18 @@ export default function AdminSubmissionReviewPage() {
           })))
         
         console.log('Preserving existing comments for revision request:', existingComments)
+        console.log('Submission questions with review comments:', submission.questions.map(q => ({
+          questionId: q.id,
+          reviewComments: q.reviewComments,
+          reviewCommentsLength: q.reviewComments?.length || 0
+        })))
         
         const reviewPayload = {
           stage: 'admin_validation',
-          decision: 'request_revision',
+          decision: 'needs_revision',
           overallComments: generalFeedback,
           questionComments: existingComments, // Preserve existing comments
-          juryScores: [],
+          juriScores: [],
           totalScore: 0,
           deliberationNotes: '',
           internalNotes: '',
@@ -559,10 +582,11 @@ export default function AdminSubmissionReviewPage() {
         const createReviewRes = await api.post(`/assessments/session/${submission.id}/review/batch`, reviewPayload)
        
        console.log('Create review response:', createReviewRes.data)
+       console.log('Review payload sent:', reviewPayload)
        
        toast.success('Revision requested')
        router.push('/admin/submissions')
-     } catch (err) {
+     } catch (err: any) {
        console.error('Error requesting revision:', err)
        console.log('Error response data:', err.response?.data)
        toast.error('Failed to request revision')
@@ -579,9 +603,9 @@ export default function AdminSubmissionReviewPage() {
         return 'text-orange-500 bg-orange-50'
       case 'resubmitted':
         return 'text-purple-500 bg-purple-50'
-      case 'approved_for_jury':
+      case 'approved_for_juri':
         return 'text-green-500 bg-green-50'
-      case 'with_jury':
+      case 'with_juri':
         return 'text-indigo-500 bg-indigo-50'
       default:
         return 'text-gray-500 bg-gray-50'
@@ -596,10 +620,10 @@ export default function AdminSubmissionReviewPage() {
         return 'Needs Revision'
       case 'resubmitted':
         return 'Resubmitted'
-      case 'approved_for_jury':
-        return 'Approved for Jury'
-      case 'with_jury':
-        return 'With Jury'
+      case 'approved_for_juri':
+        return 'Approved for Juri'
+      case 'with_juri':
+        return 'With Juri'
       default:
         return status
     }
@@ -884,7 +908,7 @@ export default function AdminSubmissionReviewPage() {
                    className="flex items-center justify-center space-x-2"
                  >
                    <CheckCircle className="h-4 w-4" />
-                   <span>Approve for Jury</span>
+                   <span>Approve for Juri</span>
                  </Button>
                </div>
              </div>

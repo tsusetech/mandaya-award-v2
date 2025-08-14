@@ -98,7 +98,7 @@ export default function CommentsSection({
       case 'ADMIN':
       case 'SUPERADMIN':
         return 'bg-red-100 text-red-800'
-      case 'JURY':
+      case 'JURI':
         return 'bg-purple-100 text-purple-800'
       case 'PESERTA':
         return 'bg-blue-100 text-blue-800'

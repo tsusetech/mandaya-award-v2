@@ -5,10 +5,11 @@ import { useParams, useRouter } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
-import { ArrowLeft, ArrowRight, Save, Send, AlertTriangle } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Save, Send, AlertTriangle, CheckCircle, XCircle, Clock, Eye } from 'lucide-react'
 import { toast } from 'sonner'
 import { QuestionInput } from '../components/QuestionTypes'
 import api from '@/lib/api'
+import { getAssessmentStatus, getStatusBadge, type AssessmentStatus } from '@/lib/utils'
 
 interface Question {
   id: number
@@ -58,6 +59,7 @@ interface AssessmentSession {
   groupId: number
   groupName: string
   status: string
+  finalStatus?: string
   combinedStatus?: string
   currentQuestionId?: number
   progressPercentage: number
@@ -69,6 +71,10 @@ interface AssessmentSession {
   submittedAt?: Date
   questions?: Question[]
   feedback?: string
+  review?: {
+    status: string;
+    stage: string;
+  };
 }
 
 export default function AssessmentPage() {
@@ -83,6 +89,11 @@ export default function AssessmentPage() {
   const [validationErrors, setValidationErrors] = useState<Record<number, string>>({})
   const autoSaveTimeouts = useRef<Record<number, NodeJS.Timeout>>({})
 
+  // Get the current assessment status
+  const currentStatus: AssessmentStatus = session 
+    ? getAssessmentStatus(session.status, session.finalStatus || session.review?.status, session.review?.stage)
+    : getAssessmentStatus('draft')
+
   // Calculate progress based on completed questions
   const calculateProgress = () => {
     if (!questions.length) return 0
@@ -92,71 +103,111 @@ export default function AssessmentPage() {
       return response !== undefined && response !== null && response !== ''
     })
     
-    return Math.round((completedQuestions.length / questions.length) * 100)
+    const progress = Math.round((completedQuestions.length / questions.length) * 100)
+    
+    console.log('Progress calculation:', {
+      totalQuestions: questions.length,
+      completedQuestions: completedQuestions.length,
+      progress: progress + '%',
+      responses: Object.keys(responses).length
+    })
+    
+    return progress
   }
 
-    // Function to fetch session data
+  // Update session progress in database
+  const updateSessionProgress = async (progress: number) => {
+    if (!session) return
+    
+    try {
+      console.log('Progress calculated:', progress, '%')
+      
+      // Update local session state to reflect the new progress
+      setSession(prev => prev ? { ...prev, progressPercentage: progress } : null)
+    } catch (err) {
+      console.error('Error updating session progress:', err)
+    }
+  }
+
+  // Function to fetch session data
   const fetchSessionData = async () => {
     try {
       setLoading(true)
-      // Get assessment session and questions with review data
-      const assessmentRes = await api.get(`/assessments/session/${groupId}`)
-      console.log('Assessment response:', assessmentRes.data)
-
-      const sessionData = assessmentRes.data
-      const questionsData = assessmentRes.data.questions || []
       
-      setSession(sessionData)
-      setQuestions(questionsData)
-
-      // Initialize responses from questions data
-      const initialResponses: Record<number, any> = {}
-      questionsData.forEach((question: any) => {
-        console.log('Question:', question.id, 'Response:', question.response)
-        if (question.response !== undefined && question.response !== null) {
-          // Handle both object and primitive response formats
-          let responseValue = null
-          
-          if (typeof question.response === 'object' && Object.keys(question.response).length > 0) {
-            // Response is an object with textValue, numericValue, etc.
-            const response = question.response
-            if (response.textValue !== undefined && response.textValue !== null) {
-              responseValue = response.textValue
-            } else if (response.numericValue !== undefined && response.numericValue !== null) {
-              responseValue = response.numericValue
-            } else if (response.booleanValue !== undefined && response.booleanValue !== null) {
-              responseValue = response.booleanValue
-            } else if (response.arrayValue !== undefined && response.arrayValue !== null) {
-              responseValue = response.arrayValue
-            } else if (response.value !== undefined && response.value !== null) {
-              responseValue = response.value
-            }
-          } else if (question.response !== '' && question.response !== null) {
-            // Response is a primitive value (string, number, boolean, array)
-            responseValue = question.response
-          }
-          
-          if (responseValue !== null) {
-            initialResponses[question.id] = responseValue
-          }
-        }
-      })
-      console.log('Initial responses:', initialResponses)
-      setResponses(initialResponses)
-
-      // Set initial section from first question's section
-      if (questionsData && questionsData.length > 0) {
-        setCurrentSection(questionsData[0].sectionTitle)
+      const response = await api.get(`/assessments/session/${groupId}`)
+      console.log('Session data:', response.data)
+      console.log('Questions with review comments:', response.data?.questions?.map((q: Question) => ({
+        questionId: q.id,
+        reviewComments: q.reviewComments,
+        reviewCommentsLength: q.reviewComments?.length || 0
+      })))
+      
+      if (!response.data) {
+        throw new Error('Session not found')
       }
+      
+      const sessionData = response.data
+      setSession(sessionData)
+      setQuestions(sessionData.questions || [])
+      
+      // Initialize responses from existing data
+      const initialResponses: Record<number, any> = {}
+      if (sessionData.questions) {
+        sessionData.questions.forEach((question: Question) => {
+          if (question.response !== undefined && question.response !== null) {
+            // Process the response data based on input type
+            let processedValue: any
+            
+            if (question.inputType === 'file-upload' && Array.isArray(question.response)) {
+              // For file uploads, use the first file URL or empty string
+              processedValue = question.response.length > 0 ? question.response[0] : ''
+            } else if (question.inputType === 'checkbox') {
+              // For checkboxes, convert boolean to array of selected values
+              if (typeof question.response === 'boolean') {
+                // If it's a simple boolean, we need to determine which options are selected
+                // For now, we'll use an empty array and let the user re-select
+                processedValue = []
+              } else if (Array.isArray(question.response)) {
+                // If it's already an array, use it directly
+                processedValue = question.response
+              } else {
+                // Fallback to empty array
+                processedValue = []
+              }
+            } else if (Array.isArray(question.response)) {
+              // For arrays (multiple choice), use the array directly
+              processedValue = question.response
+            } else if (typeof question.response === 'object' && question.response !== null) {
+              // For object responses, extract the appropriate value
+              processedValue = question.response.textValue || 
+                              question.response.numericValue || 
+                              question.response.arrayValue || 
+                              question.response.booleanValue || 
+                              ''
+            } else {
+              // For simple types (string, number), use directly
+              processedValue = question.response
+            }
+            
+            initialResponses[question.id] = processedValue
+          }
+        })
+      }
+      setResponses(initialResponses)
+      
+      // Set current section to first section if not set
+      if (!currentSection && sessionData.questions && sessionData.questions.length > 0) {
+        setCurrentSection(sessionData.questions[0].sectionTitle)
+      }
+      
     } catch (err) {
-      console.error('Error fetching assessment data:', err)
+      console.error('Error fetching session data:', err)
       toast.error('Failed to load assessment')
     } finally {
       setLoading(false)
     }
   }
 
-  // Fetch questions and session data
   useEffect(() => {
     fetchSessionData()
   }, [groupId])
@@ -185,16 +236,46 @@ export default function AssessmentPage() {
     if (session) {
       autoSaveTimeouts.current[questionId] = setTimeout(async () => {
         try {
-          // Use the correct auto-save endpoint
-          await api.post(`/assessments/session/${session.id}/answer`, {
+          // Calculate the actual overall progress based on all completed questions
+          const actualProgress = calculateProgress()
+          const answerPayload = {
             questionId: questionId,
             value: value,
-            isDraft: true,
-            isComplete: false,
-            timeSpent: 0
+            inputType: questions.find(q => q.id === questionId)?.inputType || 'text-open',
+            isDraft: false,
+            isComplete: true,
+            isSkipped: false,
+            timeSpent: 0,
+            progressPercentage: actualProgress,
+            sessionProgress: actualProgress // Add this as an additional field
+          }
+          
+          console.log('Sending answer with progress:', {
+            questionId: questionId,
+            progressPercentage: actualProgress,
+            payload: answerPayload
           })
           
+          const response = await api.post(`/assessments/session/${session.id}/answer`, answerPayload)
+          console.log('Answer save response:', response.data)
+          
           console.log('Auto-saved response for question', questionId)
+          
+          // Update progress after saving answer
+          await updateSessionProgress(actualProgress)
+          
+          // Refresh session data to get updated progress from backend
+          try {
+            const refreshResponse = await api.get(`/assessments/session/${groupId}`)
+            if (refreshResponse.data) {
+              setSession(refreshResponse.data)
+              setQuestions(refreshResponse.data.questions || [])
+              console.log('Session refreshed, new progress:', refreshResponse.data.progressPercentage)
+              console.log('Full session data after refresh:', refreshResponse.data)
+            }
+          } catch (refreshErr) {
+            console.error('Error refreshing session data:', refreshErr)
+          }
         } catch (err) {
           console.error('Error auto-saving:', err)
         }
@@ -251,9 +332,43 @@ export default function AssessmentPage() {
         timeSpent: 0
       }))
 
-      await api.post(`/assessments/session/${session?.id}/batch-answer`, {
-        answers: responsesToSave
+      const actualProgress = calculateProgress()
+      const batchPayload = {
+        answers: responsesToSave.map(answer => ({
+          ...answer,
+          inputType: questions.find(q => q.id === answer.questionId)?.inputType || 'text-open',
+          isSkipped: false,
+          progressPercentage: actualProgress,
+          sessionProgress: actualProgress // Add this as an additional field
+        })),
+        currentQuestionId: questions.find(q => q.sectionTitle === currentSection)?.id || questions[0]?.id,
+        progressPercentage: actualProgress,
+        sessionProgress: actualProgress // Add this as an additional field
+      }
+      
+      console.log('Sending batch answer with progress:', {
+        progressPercentage: actualProgress,
+        answersCount: responsesToSave.length,
+        payload: batchPayload
       })
+      
+      const response = await api.post(`/assessments/session/${session?.id}/batch-answer`, batchPayload)
+      console.log('Batch answer save response:', response.data)
+      
+      // Update progress after saving section
+      await updateSessionProgress(actualProgress)
+      
+      // Refresh session data to get updated progress from backend
+      try {
+        const refreshResponse = await api.get(`/assessments/session/${groupId}`)
+        if (refreshResponse.data) {
+          setSession(refreshResponse.data)
+          setQuestions(refreshResponse.data.questions || [])
+          console.log('Session refreshed after section save, new progress:', refreshResponse.data.progressPercentage)
+        }
+      } catch (refreshErr) {
+        console.error('Error refreshing session data:', refreshErr)
+      }
       
       toast.success('Section saved successfully')
     } catch (err) {
@@ -281,7 +396,7 @@ export default function AssessmentPage() {
         isResubmission,
         hasReviewComments: questions.filter(q => q.reviewComments && q.reviewComments.length > 0).length,
         currentStatus: session?.status,
-        currentCombinedStatus: session?.combinedStatus
+        currentCombinedStatus: currentStatus.combinedStatus
       })
       
       // Use the same endpoint but include resubmission flag if needed
@@ -289,15 +404,25 @@ export default function AssessmentPage() {
         isResubmission: isResubmission
       }
       
-      const submitResponse = await api.post(`/assessments/session/${session?.id}/submit`, submitPayload)
+      const submitResponse = await api.post(`/assessments/session/${session?.id}/submit`, {
+        ...submitPayload,
+        progressPercentage: 100
+      })
       console.log('Submit response:', submitResponse.data)
+      
+      // Update progress to 100% when submitted
+      await updateSessionProgress(100)
       
       // Force a refresh of the session data to see if status changed
       try {
         const refreshResponse = await api.get(`/assessments/session/${groupId}`)
         console.log('Status after submission:', {
           status: refreshResponse.data.status,
-          combinedStatus: refreshResponse.data.combinedStatus
+          combinedStatus: getAssessmentStatus(
+            refreshResponse.data.status, 
+            refreshResponse.data.review?.status, 
+            refreshResponse.data.review?.stage
+          ).combinedStatus
         })
       } catch (refreshErr) {
         console.error('Error refreshing session data:', refreshErr)
@@ -320,6 +445,7 @@ export default function AssessmentPage() {
   const sections = Array.from(new Set(questions.map(q => q.sectionTitle)))
   const currentSectionIndex = sections.indexOf(currentSection || '')
   const currentProgress = calculateProgress()
+  const statusBadge = getStatusBadge(currentStatus)
 
   if (loading) {
     return (
@@ -366,13 +492,19 @@ export default function AssessmentPage() {
                 <p className="text-gray-600">Complete all sections to submit your assessment</p>
               </div>
             </div>
+            <div className="flex items-center space-x-2">
+              <span className="text-2xl">{statusBadge.icon}</span>
+              <div className={statusBadge.className}>
+                {statusBadge.text}
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
       <div className="p-4 sm:p-6 max-w-4xl mx-auto space-y-6">
-        {/* Review Feedback Alert */}
-        {session && (session.status === 'needs_revision' || session.combinedStatus === 'needs_revision') && (
+        {/* Status-specific alerts */}
+        {currentStatus.combinedStatus === 'needs_revision' && (
           <Card className="border-orange-200 bg-orange-50">
             <CardContent className="pt-6">
               <div className="flex items-start space-x-3">
@@ -384,189 +516,357 @@ export default function AssessmentPage() {
                   </p>
                   
                   {/* General feedback */}
-                  {session.feedback && (
+                  {session?.feedback && (
                     <div className="mb-3 p-3 bg-orange-100 rounded-lg">
                       <p className="text-sm font-medium text-orange-800 mb-1">General Feedback:</p>
                       <p className="text-sm text-orange-700">{session.feedback}</p>
                     </div>
                   )}
                   
-                                     {/* Question-specific feedback */}
-                   {questions.some(q => q.reviewComments && q.reviewComments.length > 0) && (
-                     <div className="space-y-2">
-                       <p className="text-sm font-medium text-orange-800">Question Feedback:</p>
-                       {questions
-                         .filter(q => q.reviewComments && q.reviewComments.length > 0)
-                         .map(question => {
-                           const adminComments = question.reviewComments?.filter((comment: any) => 
-                             comment.stage === 'admin_validation'
-                           ) || []
-                           
-                           return adminComments.map((comment: any, index: number) => (
-                             <div key={`${question.id}-${index}`} className="p-3 bg-orange-100 rounded-lg">
-                               <div className="flex items-center justify-between mb-1">
-                                 <p className="text-sm font-medium text-orange-800">
-                                   Question {question.orderNumber}: {comment.isCritical ? '(Critical)' : ''}
-                                 </p>
-                                 <Button
-                                   variant="ghost"
-                                   size="sm"
-                                   onClick={() => {
-                                     setCurrentSection(question.sectionTitle)
-                                     // Scroll to question after section change
-                                     setTimeout(() => {
-                                       const questionElement = document.getElementById(`question-${question.id}`)
-                                       if (questionElement) {
-                                         questionElement.scrollIntoView({ behavior: 'smooth', block: 'center' })
-                                       }
-                                     }, 100)
-                                   }}
-                                   className="text-orange-600 hover:text-orange-800 text-xs"
-                                 >
-                                   Go to Question
-                                 </Button>
-                               </div>
-                               <p className="text-sm text-orange-700">{comment.comment}</p>
-                             </div>
-                           ))
-                         })}
-                     </div>
-                   )}
+                  {/* Question-specific feedback */}
+                  {questions.some(q => q.reviewComments && q.reviewComments.length > 0) && (
+                    <div className="space-y-2">
+                      <p className="text-sm font-medium text-orange-800">Question Feedback:</p>
+                      {questions
+                        .filter(q => q.reviewComments && q.reviewComments.length > 0)
+                        .map(question => {
+                          const adminComments = question.reviewComments?.filter((comment: any) => 
+                            comment.stage === 'admin_validation'
+                          ) || []
+                          
+                          return adminComments.map((comment: any, index: number) => (
+                            <div key={`${question.id}-${index}`} className="p-3 bg-orange-100 rounded-lg">
+                              <div className="flex items-center justify-between mb-1">
+                                <p className="text-sm font-medium text-orange-800">
+                                  Question {question.orderNumber}: {comment.isCritical ? '(Critical)' : ''}
+                                </p>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => {
+                                    setCurrentSection(question.sectionTitle)
+                                    // Scroll to question after section change
+                                    setTimeout(() => {
+                                      const questionElement = document.getElementById(`question-${question.id}`)
+                                      if (questionElement) {
+                                        questionElement.scrollIntoView({ behavior: 'smooth', block: 'center' })
+                                      }
+                                    }, 100)
+                                  }}
+                                  className="text-orange-600 hover:text-orange-800 text-xs"
+                                >
+                                  Go to Question
+                                </Button>
+                              </div>
+                              <p className="text-sm text-orange-700">{comment.comment}</p>
+                            </div>
+                          ))
+                        })}
+                    </div>
+                  )}
                 </div>
               </div>
             </CardContent>
           </Card>
         )}
 
-        {/* Progress */}
-        <Card>
-          <CardContent className="pt-6">
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm text-gray-600">
-                <span>Progress</span>
-                <span>{currentProgress}%</span>
+        {currentStatus.combinedStatus === 'approved' && (
+          <Card className="border-green-200 bg-green-50">
+            <CardContent className="pt-6">
+              <div className="flex items-start space-x-3">
+                <CheckCircle className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
+                <div className="flex-1">
+                  <h3 className="font-medium text-green-800 mb-2">Assessment Approved</h3>
+                  <p className="text-sm text-green-700">
+                    Congratulations! Your assessment has been approved and will proceed to the next stage.
+                  </p>
+                </div>
               </div>
-              <Progress value={currentProgress} />
+            </CardContent>
+          </Card>
+        )}
+
+        {currentStatus.combinedStatus === 'rejected' && (
+          <Card className="border-red-200 bg-red-50">
+            <CardContent className="pt-6">
+              <div className="flex items-start space-x-3">
+                <XCircle className="h-5 w-5 text-red-500 mt-0.5 flex-shrink-0" />
+                <div className="flex-1">
+                  <h3 className="font-medium text-red-800 mb-2">Assessment Rejected</h3>
+                  <p className="text-sm text-red-700">
+                    Your assessment has been rejected. Please review the feedback below.
+                  </p>
+                  {session?.feedback && (
+                    <div className="mt-3 p-3 bg-red-100 rounded-lg">
+                      <p className="text-sm font-medium text-red-800 mb-1">Feedback:</p>
+                      <p className="text-sm text-red-700">{session.feedback}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {['pending_review', 'under_review', 'passed_to_jury', 'jury_scoring', 'jury_deliberation', 'final_decision'].includes(currentStatus.combinedStatus) && (
+          <Card className={`border-${currentStatus.color}-200 ${currentStatus.bgColor}`}>
+            <CardContent className="pt-6">
+              <div className="flex items-start space-x-3">
+                <Clock className={`h-5 w-5 text-${currentStatus.color}-500 mt-0.5 flex-shrink-0`} />
+                <div className="flex-1">
+                  <h3 className={`font-medium text-${currentStatus.color}-800 mb-2`}>
+                    {currentStatus.description}
+                  </h3>
+                  <p className={`text-sm text-${currentStatus.color}-700`}>
+                    Your assessment is currently being processed. You will be notified when there are updates.
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {currentStatus.combinedStatus === 'completed' && (
+          <Card className="border-green-200 bg-green-50">
+            <CardContent className="pt-6">
+              <div className="flex items-start space-x-3">
+                <CheckCircle className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
+                <div className="flex-1">
+                  <h3 className="font-medium text-green-800 mb-2">Assessment Completed</h3>
+                  <p className="text-sm text-green-700">
+                    Your assessment process has been completed. Thank you for your participation!
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Progress - only show if status allows editing */}
+        {currentStatus.showProgress && (
+          <Card>
+            <CardContent className="pt-6">
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm text-gray-600">
+                  <span>Progress</span>
+                  <span>{currentProgress}%</span>
+                </div>
+                <Progress value={currentProgress} />
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Assessment Form - only show if status allows editing */}
+        {currentStatus.canEdit ? (
+          <>
+            {/* Section Navigation */}
+            <Card>
+              <CardContent className="pt-6">
+                <div className="flex flex-wrap gap-2">
+                  {sections.map((section, index) => (
+                    <Button
+                      key={section}
+                      variant={currentSection === section ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setCurrentSection(section)}
+                      className="text-xs"
+                    >
+                      {section}
+                    </Button>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Current Section */}
+            <Card>
+              <CardHeader>
+                <CardTitle>{currentSection}</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {questions
+                  .filter(q => q.sectionTitle === currentSection)
+                  .map((question) => (
+                    <div key={question.id} id={`question-${question.id}`}>
+                      <QuestionInput
+                        {...question}
+                        value={responses[question.id]}
+                        onChange={(value) => handleResponseChange(question.id, value)}
+                        validationError={validationErrors[question.id]}
+                      />
+                      
+                      {/* Show feedback for this question if it exists */}
+                      {question.reviewComments && question.reviewComments.length > 0 && (
+                        (() => {
+                          console.log(`Displaying review comments for question ${question.id}:`, question.reviewComments)
+                          return null
+                        })(),
+                        <div className="mt-4 p-4 bg-orange-50 border border-orange-200 rounded-lg">
+                          <div className="flex items-start space-x-2">
+                            <AlertTriangle className="h-4 w-4 text-orange-500 mt-0.5 flex-shrink-0" />
+                            <div className="flex-1">
+                              <h4 className="text-sm font-medium text-orange-800 mb-2">
+                                Review Feedback {question.reviewComments.some((c: any) => c.isCritical) && '(Critical)'}
+                              </h4>
+                              {question.reviewComments
+                                .filter((comment: any) => comment.stage === 'admin_validation')
+                                .map((comment: any, index: number) => (
+                                  <div key={index} className="mb-2 last:mb-0">
+                                    <p className="text-sm text-orange-700">{comment.comment}</p>
+                                    {comment.reviewerName && (
+                                      <p className="text-xs text-orange-600 mt-1">
+                                        — {comment.reviewerName}
+                                      </p>
+                                    )}
+                                  </div>
+                                ))}
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+              </CardContent>
+            </Card>
+
+            {/* Navigation Buttons */}
+            <div className="flex flex-col space-y-3">
+              <div className="flex justify-between">
+                <Button
+                  variant="outline"
+                  onClick={() => setCurrentSection(sections[currentSectionIndex - 1] || null)}
+                  disabled={currentSectionIndex === 0}
+                  className="flex items-center space-x-2"
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                  <span className="hidden sm:inline">Previous Section</span>
+                  <span className="sm:hidden">Previous</span>
+                </Button>
+
+                {currentSectionIndex === sections.length - 1 ? (
+                  <Button
+                    onClick={handleSubmit}
+                    disabled={saving || (!currentStatus.canSubmit && !currentStatus.canResubmit)}
+                    className="flex items-center space-x-2"
+                  >
+                    <Send className="h-4 w-4" />
+                    <span>
+                      {saving 
+                        ? 'Submitting...' 
+                        : questions.some(q => q.reviewComments && q.reviewComments.length > 0)
+                          ? 'Resubmit Assessment'
+                          : 'Submit Assessment'
+                      }
+                    </span>
+                  </Button>
+                ) : (
+                  <Button
+                    onClick={() => setCurrentSection(sections[currentSectionIndex + 1] || null)}
+                    className="flex items-center space-x-2"
+                  >
+                    <span className="hidden sm:inline">Next Section</span>
+                    <span className="sm:hidden">Next</span>
+                    <ArrowRight className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
+
+              <div className="flex justify-center">
+                <Button
+                  variant="outline"
+                  onClick={handleSaveSection}
+                  disabled={saving}
+                  className="flex items-center space-x-2 w-full sm:w-auto"
+                >
+                  <Save className="h-4 w-4" />
+                  <span>{saving ? 'Saving...' : 'Save Progress'}</span>
+                </Button>
+              </div>
             </div>
-          </CardContent>
-        </Card>
-
-        {/* Section Navigation */}
-        <div className="flex space-x-2 overflow-x-auto pb-2 scrollbar-hide">
-          {sections.map((section, index) => (
-            <Button
-              key={section}
-              variant={currentSection === section ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => section && setCurrentSection(section)}
-              className="whitespace-nowrap flex-shrink-0"
-            >
-              {section}
-            </Button>
-          ))}
-        </div>
-
-        {/* Questions */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg sm:text-xl">{currentSection}</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6 sm:space-y-8">
-                         {questions
-               .filter(q => q.sectionTitle === currentSection)
-               .map((question) => (
-                 <div key={question.id} id={`question-${question.id}`}>
-                   <QuestionInput
-                     {...question}
-                     value={responses[question.id]}
-                     onChange={(value) => handleResponseChange(question.id, value)}
-                     validationError={validationErrors[question.id]}
-                   />
-                   
-                   {/* Show feedback for this question if it exists */}
-                   {question.reviewComments && question.reviewComments.length > 0 && (
-                     <div className="mt-4 p-4 bg-orange-50 border border-orange-200 rounded-lg">
-                       <div className="flex items-start space-x-2">
-                         <AlertTriangle className="h-4 w-4 text-orange-500 mt-0.5 flex-shrink-0" />
-                         <div className="flex-1">
-                           <h4 className="text-sm font-medium text-orange-800 mb-2">
-                             Review Feedback {question.reviewComments.some((c: any) => c.isCritical) && '(Critical)'}
-                           </h4>
-                           {question.reviewComments
-                             .filter((comment: any) => comment.stage === 'admin_validation')
-                             .map((comment: any, index: number) => (
-                               <div key={index} className="mb-2 last:mb-0">
-                                 <p className="text-sm text-orange-700">{comment.comment}</p>
-                                 {comment.reviewerName && (
-                                   <p className="text-xs text-orange-600 mt-1">
-                                     — {comment.reviewerName}
-                                   </p>
-                                 )}
-                               </div>
-                             ))}
-                         </div>
-                       </div>
-                     </div>
-                   )}
-                 </div>
-               ))}
-          </CardContent>
-        </Card>
-
-        {/* Navigation Buttons */}
-        <div className="flex flex-col space-y-3">
-          <div className="flex justify-between">
-            <Button
-              variant="outline"
-              onClick={() => setCurrentSection(sections[currentSectionIndex - 1] || null)}
-              disabled={currentSectionIndex === 0}
-              className="flex items-center space-x-2"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              <span className="hidden sm:inline">Previous Section</span>
-              <span className="sm:hidden">Previous</span>
-            </Button>
-
-                         {currentSectionIndex === sections.length - 1 ? (
-               <Button
-                 onClick={handleSubmit}
-                 disabled={saving}
-                 className="flex items-center space-x-2"
-               >
-                 <Send className="h-4 w-4" />
-                 <span>
-                   {saving 
-                     ? 'Submitting...' 
-                     : questions.some(q => q.reviewComments && q.reviewComments.length > 0)
-                       ? 'Resubmit Assessment'
-                       : 'Submit Assessment'
-                   }
-                 </span>
-               </Button>
-             ) : (
-              <Button
-                onClick={() => setCurrentSection(sections[currentSectionIndex + 1] || null)}
-                className="flex items-center space-x-2"
-              >
-                <span className="hidden sm:inline">Next Section</span>
-                <span className="sm:hidden">Next</span>
-                <ArrowRight className="h-4 w-4" />
-              </Button>
-            )}
-          </div>
-
-          <div className="flex justify-center">
-            <Button
-              variant="outline"
-              onClick={handleSaveSection}
-              disabled={saving}
-              className="flex items-center space-x-2 w-full sm:w-auto"
-            >
-              <Save className="h-4 w-4" />
-              <span>{saving ? 'Saving...' : 'Save Progress'}</span>
-            </Button>
-          </div>
-        </div>
+          </>
+        ) : (
+          /* Read-only view for non-editable statuses */
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                <Eye className="h-5 w-5" />
+                <span>Assessment Review</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {questions.map((question) => (
+                <div key={question.id} className="p-4 border rounded-lg">
+                  {(() => {
+                    console.log(`Question ${question.id} response data:`, {
+                      questionId: question.id,
+                      response: question.response,
+                      responseType: typeof question.response,
+                      isArray: Array.isArray(question.response)
+                    })
+                    return null
+                  })()}
+                  <h3 className="font-medium mb-2">Question {question.orderNumber}: {question.questionText}</h3>
+                  <div className="bg-gray-50 p-3 rounded">
+                    <p className="text-sm text-gray-700">
+                      {(() => {
+                        // Handle different response formats
+                        if (typeof question.response === 'string') {
+                          return question.response
+                        } else if (typeof question.response === 'number') {
+                          return question.response.toString()
+                        } else if (Array.isArray(question.response)) {
+                          return question.response.join(', ')
+                        } else if (typeof question.response === 'object' && question.response !== null) {
+                          // Handle object response format
+                          return question.response.textValue || 
+                                 question.response.numericValue?.toString() || 
+                                 (Array.isArray(question.response.arrayValue) 
+                                   ? question.response.arrayValue.join(', ') 
+                                   : question.response.arrayValue) || 
+                                 (question.response.booleanValue ? 'Yes' : 'No') || 
+                                 'No response'
+                        } else if (question.response === true) {
+                          return 'Yes'
+                        } else if (question.response === false) {
+                          return 'No'
+                        } else {
+                          return 'No response'
+                        }
+                      })()}
+                    </p>
+                  </div>
+                  
+                  {/* Show feedback for this question if it exists */}
+                  {question.reviewComments && question.reviewComments.length > 0 && (
+                    <div className="mt-4 p-4 bg-orange-50 border border-orange-200 rounded-lg">
+                      <div className="flex items-start space-x-2">
+                        <AlertTriangle className="h-4 w-4 text-orange-500 mt-0.5 flex-shrink-0" />
+                        <div className="flex-1">
+                          <h4 className="text-sm font-medium text-orange-800 mb-2">
+                            Review Feedback {question.reviewComments.some((c: any) => c.isCritical) && '(Critical)'}
+                          </h4>
+                          {question.reviewComments
+                            .filter((comment: any) => comment.stage === 'admin_validation')
+                            .map((comment: any, index: number) => (
+                              <div key={index} className="mb-2 last:mb-0">
+                                <p className="text-sm text-orange-700">{comment.comment}</p>
+                                {comment.reviewerName && (
+                                  <p className="text-xs text-orange-600 mt-1">
+                                    — {comment.reviewerName}
+                                  </p>
+                                )}
+                              </div>
+                            ))}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        )}
       </div>
     </div>
   )
