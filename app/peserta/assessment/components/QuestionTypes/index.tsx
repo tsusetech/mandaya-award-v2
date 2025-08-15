@@ -8,6 +8,47 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Label } from '@/components/ui/label'
 import { uploadToCloudinary, uploadToImgur, getFilenameOnly } from '@/lib/upload'
 
+// Indonesian provinces data (updated 2024)
+const INDONESIAN_PROVINCES = [
+  { id: 1, name: 'Aceh', value: 'Aceh' },
+  { id: 2, name: 'Sumatera Utara', value: 'Sumatera Utara' },
+  { id: 3, name: 'Sumatera Barat', value: 'Sumatera Barat' },
+  { id: 4, name: 'Riau', value: 'Riau' },
+  { id: 5, name: 'Kepulauan Riau', value: 'Kepulauan Riau' },
+  { id: 6, name: 'Jambi', value: 'Jambi' },
+  { id: 7, name: 'Sumatera Selatan', value: 'Sumatera Selatan' },
+  { id: 8, name: 'Kepulauan Bangka Belitung', value: 'Kepulauan Bangka Belitung' },
+  { id: 9, name: 'Bengkulu', value: 'Bengkulu' },
+  { id: 10, name: 'Lampung', value: 'Lampung' },
+  { id: 11, name: 'DKI Jakarta', value: 'DKI Jakarta' },
+  { id: 12, name: 'Banten', value: 'Banten' },
+  { id: 13, name: 'Jawa Barat', value: 'Jawa Barat' },
+  { id: 14, name: 'Jawa Tengah', value: 'Jawa Tengah' },
+  { id: 15, name: 'DI Yogyakarta', value: 'DI Yogyakarta' },
+  { id: 16, name: 'Jawa Timur', value: 'Jawa Timur' },
+  { id: 17, name: 'Bali', value: 'Bali' },
+  { id: 18, name: 'Nusa Tenggara Barat', value: 'Nusa Tenggara Barat' },
+  { id: 19, name: 'Nusa Tenggara Timur', value: 'Nusa Tenggara Timur' },
+  { id: 20, name: 'Kalimantan Barat', value: 'Kalimantan Barat' },
+  { id: 21, name: 'Kalimantan Tengah', value: 'Kalimantan Tengah' },
+  { id: 22, name: 'Kalimantan Selatan', value: 'Kalimantan Selatan' },
+  { id: 23, name: 'Kalimantan Timur', value: 'Kalimantan Timur' },
+  { id: 24, name: 'Kalimantan Utara', value: 'Kalimantan Utara' },
+  { id: 25, name: 'Sulawesi Utara', value: 'Sulawesi Utara' },
+  { id: 26, name: 'Gorontalo', value: 'Gorontalo' },
+  { id: 27, name: 'Sulawesi Tengah', value: 'Sulawesi Tengah' },
+  { id: 28, name: 'Sulawesi Barat', value: 'Sulawesi Barat' },
+  { id: 29, name: 'Sulawesi Selatan', value: 'Sulawesi Selatan' },
+  { id: 30, name: 'Sulawesi Tenggara', value: 'Sulawesi Tenggara' },
+  { id: 31, name: 'Maluku', value: 'Maluku' },
+  { id: 32, name: 'Maluku Utara', value: 'Maluku Utara' },
+  { id: 33, name: 'Papua', value: 'Papua' },
+  { id: 34, name: 'Papua Barat', value: 'Papua Barat' },
+  { id: 35, name: 'Papua Tengah', value: 'Papua Tengah' },
+  { id: 36, name: 'Papua Pegunungan', value: 'Papua Pegunungan' },
+  { id: 37, name: 'Papua Selatan', value: 'Papua Selatan' }
+]
+
 interface QuestionOption {
   id: number
   optionText: string
@@ -42,30 +83,90 @@ export function QuestionInput({
   validationError,
   autoSave = true
 }: QuestionProps) {
+  // Check if this question needs a URL input based on description keywords
+  const needsUrlInput = description && (
+    description.toLowerCase().includes('tautan') ||
+    description.toLowerCase().includes('link') ||
+    description.toLowerCase().includes('bukti') ||
+    description.toLowerCase().includes('bukti dukung') ||
+    description.toLowerCase().includes('lampirkan') ||
+    description.toLowerCase().includes('url') ||
+    description.toLowerCase().includes('website') ||
+    description.toLowerCase().includes('situs')
+  )
   const [localValue, setLocalValue] = useState(() => {
-    // Ensure checkbox and multiple choice questions always have array values
-    if ((inputType === 'checkbox' || inputType === 'multiple-choice' || inputType === 'multiple choice' || inputType === 'multiple_choice') && !Array.isArray(value)) {
+    // Ensure checkbox questions always have array values
+    // Multiple-choice questions (except province) should be single values
+    const isProvinceQuestion = questionText.toLowerCase().includes('nama provinsi') || 
+                              questionText.toLowerCase().includes('provinsi')
+    
+    if (inputType === 'checkbox' && !Array.isArray(value)) {
       return []
     }
     return value
+  })
+  
+  // Handle URL input separately
+  const [urlValue, setUrlValue] = useState(() => {
+    // If value is an object with url property, extract it
+    if (typeof value === 'object' && value !== null && value.url) {
+      return value.url
+    }
+    return ''
   })
   const [isFocused, setIsFocused] = useState(false)
   const [autoSaveStatus, setAutoSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle')
 
   // Update local value when prop value changes
   useEffect(() => {
-    // Ensure checkbox and multiple choice questions always have array values
-    if ((inputType === 'checkbox' || inputType === 'multiple-choice' || inputType === 'multiple choice' || inputType === 'multiple_choice') && !Array.isArray(value)) {
-      setLocalValue([])
+    // Handle combined value structure (answer + url)
+    if (needsUrlInput && typeof value === 'object' && value !== null) {
+      setLocalValue(value.answer || '')
+      setUrlValue(value.url || '')
     } else {
-      setLocalValue(value)
+      // Ensure checkbox questions always have array values
+      // Multiple-choice questions (except province) should be single values
+      if (inputType === 'checkbox' && !Array.isArray(value)) {
+        setLocalValue([])
+      } else {
+        setLocalValue(value)
+      }
+      setUrlValue('')
     }
-  }, [value, inputType])
+  }, [value, inputType, needsUrlInput])
 
   const handleChange = (newValue: any) => {
     setLocalValue(newValue)
     setAutoSaveStatus('saving')
-    onChange(newValue)
+    
+    // If URL input is needed, combine the values
+    if (needsUrlInput) {
+      const combinedValue = {
+        answer: newValue,
+        url: urlValue
+      }
+      onChange(combinedValue)
+    } else {
+      onChange(newValue)
+    }
+    
+    // Reset auto-save status after a delay
+    setTimeout(() => {
+      setAutoSaveStatus('saved')
+      setTimeout(() => setAutoSaveStatus('idle'), 2000)
+    }, 1000)
+  }
+  
+  const handleUrlChange = (newUrlValue: string) => {
+    setUrlValue(newUrlValue)
+    setAutoSaveStatus('saving')
+    
+    // Combine the main answer with the URL
+    const combinedValue = {
+      answer: localValue,
+      url: newUrlValue
+    }
+    onChange(combinedValue)
     
     // Reset auto-save status after a delay
     setTimeout(() => {
@@ -87,15 +188,44 @@ export function QuestionInput({
     // Normalize input type to lowercase for case-insensitive matching
     const normalizedInputType = inputType.toLowerCase()
     
+    // Check if this is a province selection question
+    const isProvinceQuestion = questionText.toLowerCase().includes('nama provinsi') || 
+                              questionText.toLowerCase().includes('provinsi')
+    
     // Debug logging for troubleshooting
     if (process.env.NODE_ENV === 'development') {
       console.log('Rendering input for type:', { 
         inputType, 
         normalizedInputType, 
         optionsLength: options?.length,
-        questionText: questionText.substring(0, 50) + '...'
+        questionText: questionText.substring(0, 50) + '...',
+        isProvinceQuestion
       })
     }
+
+    // Special case for Indonesian provinces - single selection dropdown
+    if (isProvinceQuestion && (normalizedInputType === 'multiple-choice' || normalizedInputType === 'multiple choice' || normalizedInputType === 'multiple_choice')) {
+      // For province selection, we want a single string value, not an array
+      const provinceValue = Array.isArray(localValue) ? (localValue.length > 0 ? localValue[0] : '') : (localValue || '')
+      
+      return (
+        <select
+          value={provinceValue}
+          onChange={(e) => handleChange(e.target.value)} // This will set a single string value
+          onBlur={handleBlur}
+          onFocus={handleFocus}
+          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        >
+          <option value="">Pilih Provinsi...</option>
+          {INDONESIAN_PROVINCES.map((province) => (
+            <option key={province.id} value={province.value}>
+              {province.name}
+            </option>
+          ))}
+        </select>
+      )
+    }
+    
     switch (normalizedInputType) {
       case 'text-open':
         return (
@@ -133,26 +263,88 @@ export function QuestionInput({
           />
         )
 
-      case 'checkbox':
-        return (
-          <div className="space-y-2">
-            {options.map((option) => (
-              <div key={option.id} className="flex items-center space-x-2">
-                <Checkbox
-                  id={`option-${option.id}`}
-                  checked={(localValue || []).includes(option.optionValue)}
-                  onCheckedChange={(checked) => {
-                    const newValue = checked
-                      ? [...(localValue || []), option.optionValue]
-                      : (localValue || []).filter((v: string) => v !== option.optionValue)
-                    handleChange(newValue)
-                  }}
-                />
-                <Label htmlFor={`option-${option.id}`}>{option.optionText}</Label>
-              </div>
-            ))}
-          </div>
-        )
+             case 'checkbox':
+         return (
+           <div className="space-y-2">
+             {options.map((option) => {
+               const isOtherOption = option.optionValue.toLowerCase() === 'other' || option.optionText.toLowerCase() === 'other'
+               const isChecked = (localValue || []).some((v: any) => {
+                 if (typeof v === 'string') {
+                   return v === option.optionValue
+                 }
+                 return v.value === option.optionValue
+               })
+               
+               return (
+                 <div key={option.id} className="space-y-2">
+                   <div className="flex items-center space-x-2">
+                     <Checkbox
+                       id={`option-${option.id}`}
+                       checked={isChecked}
+                       onCheckedChange={(checked) => {
+                         const currentValues = localValue || []
+                         let newValue
+                         
+                         if (checked) {
+                           // Add the option value
+                           newValue = [...currentValues, option.optionValue]
+                         } else {
+                           // Remove the option value and any associated other text
+                           newValue = currentValues.filter((v: any) => {
+                             if (typeof v === 'string') {
+                               return v !== option.optionValue
+                             }
+                             return v.value !== option.optionValue
+                           })
+                         }
+                         
+                         handleChange(newValue)
+                       }}
+                     />
+                     <Label htmlFor={`option-${option.id}`}>{option.optionText}</Label>
+                   </div>
+                   
+                   {/* Show free text input for 'other' option when checked */}
+                   {isOtherOption && isChecked && (
+                     <div className="ml-6 mt-2">
+                       <Input
+                         type="text"
+                         placeholder="Please specify..."
+                         value={(() => {
+                           // Find the other text value from the array
+                           const otherItem = (localValue || []).find((v: any) => {
+                             if (typeof v === 'string') {
+                               return v === option.optionValue
+                             }
+                             return v.value === option.optionValue
+                           })
+                           return typeof otherItem === 'object' ? otherItem.otherText || '' : ''
+                         })()}
+                         onChange={(e) => {
+                           // Update the other text while preserving other selected values
+                           const currentValues = localValue || []
+                           const newValue = currentValues.map((v: any) => {
+                             if (typeof v === 'string' && v === option.optionValue) {
+                               return { value: v, otherText: e.target.value }
+                             }
+                             if (typeof v === 'object' && v.value === option.optionValue) {
+                               return { ...v, otherText: e.target.value }
+                             }
+                             return v
+                           })
+                           handleChange(newValue)
+                         }}
+                         onBlur={handleBlur}
+                         onFocus={handleFocus}
+                         className="w-full"
+                       />
+                     </div>
+                   )}
+                 </div>
+               )
+             })}
+           </div>
+         )
 
       case 'multiple-choice':
       case 'multiple choice':
@@ -182,25 +374,23 @@ export function QuestionInput({
           )
         }
         
-        // Multiple-choice should allow multiple selections like checkboxes
+        // Multiple-choice should be single selection (like radio buttons)
+        // Convert array value to single string for radio group
+        const radioValue = Array.isArray(localValue) ? (localValue.length > 0 ? localValue[0] : '') : (localValue || '')
+        
         return (
-          <div className="space-y-2">
+          <RadioGroup
+            value={radioValue}
+            onValueChange={handleChange}
+            className="space-y-2"
+          >
             {options.map((option) => (
               <div key={option.id} className="flex items-center space-x-2">
-                <Checkbox
-                  id={`option-${option.id}`}
-                  checked={(localValue || []).includes(option.optionValue)}
-                  onCheckedChange={(checked) => {
-                    const newValue = checked
-                      ? [...(localValue || []), option.optionValue]
-                      : (localValue || []).filter((v: string) => v !== option.optionValue)
-                    handleChange(newValue)
-                  }}
-                />
+                <RadioGroupItem value={option.optionValue} id={`option-${option.id}`} />
                 <Label htmlFor={`option-${option.id}`}>{option.optionText}</Label>
               </div>
             ))}
-          </div>
+          </RadioGroup>
         )
 
       case 'radio':
@@ -406,6 +596,27 @@ export function QuestionInput({
       </div>
 
       {renderInput()}
+
+      {/* URL input field for questions that need supporting links/evidence */}
+      {needsUrlInput && (
+        <div className="mt-4">
+          <Label className="text-sm font-medium text-gray-700">
+            Tautan/Bukti Dukung (Opsional)
+          </Label>
+          <Input
+            type="url"
+            value={urlValue}
+            onChange={(e) => handleUrlChange(e.target.value)}
+            onBlur={handleBlur}
+            onFocus={handleFocus}
+            placeholder="https://example.com"
+            className="mt-1"
+          />
+          <p className="text-xs text-gray-500 mt-1">
+            Masukkan tautan atau URL untuk bukti pendukung
+          </p>
+        </div>
+      )}
 
       {validationError && (
         <p className="text-sm text-red-500 mt-1 break-words">{validationError}</p>

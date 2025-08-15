@@ -84,11 +84,6 @@ export default function SubmissionDetailPage() {
         feedback: sessionData.feedback,
         revisionCount: sessionData.revisionCount || 0,
         questions: sessionData.questions || [],
-        
-        // Add debug logging
-        console.log('Session status:', sessionData.status)
-        console.log('Session feedback:', sessionData.feedback)
-        console.log('Questions with review comments:', sessionData.questions?.filter(q => q.reviewComments?.length > 0))
         responses: (() => {
           // Extract responses directly from questions since they're embedded
           const responsesFromQuestions = sessionData.questions?.map((question: any) => {
@@ -175,10 +170,10 @@ export default function SubmissionDetailPage() {
         })()
       }
       
-              console.log('Transformed submission data:', submissionData)
-        console.log('Responses with feedback:', submissionData.responses.filter(r => r.feedback))
-        console.log('Responses needing revision:', submissionData.responses.filter(r => r.needsRevision))
-        setSubmission(submissionData)
+      console.log('Transformed submission data:', submissionData)
+      console.log('Responses with feedback:', submissionData.responses.filter(r => r.feedback))
+      console.log('Responses needing revision:', submissionData.responses.filter(r => r.needsRevision))
+      setSubmission(submissionData)
     } catch (err) {
       console.error('Error fetching submission:', err)
       toast.error('Failed to load submission')
@@ -304,7 +299,9 @@ export default function SubmissionDetailPage() {
     )
   }
 
-  const sections = Array.from(new Set(submission.questions.map(q => q.sectionTitle)))
+  const sections = Array.from(new Set(submission.questions.map(q => 
+    q.sectionTitle === q.subsection ? q.sectionTitle : `${q.sectionTitle} - ${q.subsection}`
+  )))
   const hasRevisions = submission.responses.some(r => r.needsRevision)
   const canResubmit = submission.status === 'needs_revision'
 
@@ -396,7 +393,7 @@ export default function SubmissionDetailPage() {
             </CardHeader>
             <CardContent className="space-y-6">
               {submission.questions
-                .filter(q => q.sectionTitle === section)
+                .filter(q => q.sectionTitle === (section.includes(' - ') ? section.split(' - ')[0] : section))
                 .map(question => {
                   const response = submission.responses.find(r => r.questionId === question.id)
                   return (
@@ -486,4 +483,3 @@ export default function SubmissionDetailPage() {
     </AuthenticatedLayout>
   )
 }
-

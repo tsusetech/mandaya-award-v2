@@ -4,10 +4,11 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { UserForm } from './components/UserForm'
 import { UserTable } from './components/UserTable'
+import { BulkImportModal } from './components/BulkImportModal'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { ArrowLeft, Search, UserPlus, Users, Shield, Activity } from 'lucide-react'
+import { ArrowLeft, Search, UserPlus, Users, Shield, Activity, Upload } from 'lucide-react'
 import api from '@/lib/api'
 import { toast } from 'sonner'
 
@@ -16,6 +17,7 @@ export default function AdminUsersPage() {
   const [users, setUsers] = useState<any[]>([])
   const [filteredUsers, setFilteredUsers] = useState<any[]>([])
   const [formOpen, setFormOpen] = useState(false)
+  const [bulkImportOpen, setBulkImportOpen] = useState(false)
   const [selectedUser, setSelectedUser] = useState<any>(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [loading, setLoading] = useState(true)
@@ -69,6 +71,10 @@ export default function AdminUsersPage() {
   const handleCreate = () => {
     setSelectedUser(null)
     setFormOpen(true)
+  }
+
+  const handleBulkImport = () => {
+    setBulkImportOpen(true)
   }
 
   const handleEdit = (user: any) => {
@@ -162,10 +168,16 @@ export default function AdminUsersPage() {
                 <p className="text-gray-600">Manage system users and their permissions</p>
               </div>
             </div>
-            <Button onClick={handleCreate} className="flex items-center space-x-2">
-              <UserPlus className="h-4 w-4" />
-              <span>Add User</span>
-            </Button>
+            <div className="flex items-center space-x-2">
+              <Button variant="outline" onClick={handleBulkImport} className="flex items-center space-x-2">
+                <Upload className="h-4 w-4" />
+                <span>Bulk Import</span>
+              </Button>
+              <Button onClick={handleCreate} className="flex items-center space-x-2">
+                <UserPlus className="h-4 w-4" />
+                <span>Add User</span>
+              </Button>
+            </div>
           </div>
         </div>
       </div>
@@ -248,6 +260,13 @@ export default function AdminUsersPage() {
         onClose={() => setFormOpen(false)}
         onSubmit={handleSubmit}
         defaultValues={selectedUser}
+      />
+
+      {/* Bulk Import Modal */}
+      <BulkImportModal
+        open={bulkImportOpen}
+        onClose={() => setBulkImportOpen(false)}
+        onSuccess={fetchUsers}
       />
     </div>
   )

@@ -197,7 +197,11 @@ export default function AssessmentPage() {
       
       // Set current section to first section if not set
       if (!currentSection && sessionData.questions && sessionData.questions.length > 0) {
-        setCurrentSection(sessionData.questions[0].sectionTitle)
+        const firstQuestion = sessionData.questions[0]
+        const sectionDisplay = firstQuestion.sectionTitle === firstQuestion.subsection 
+          ? firstQuestion.sectionTitle 
+          : `${firstQuestion.sectionTitle} - ${firstQuestion.subsection}`
+        setCurrentSection(sectionDisplay)
       }
       
     } catch (err) {
@@ -314,7 +318,7 @@ export default function AssessmentPage() {
   }
 
   const handleSaveSection = async () => {
-    const sectionQuestions = questions.filter(q => q.sectionTitle === currentSection)
+    const sectionQuestions = questions.filter(q => q.sectionTitle === getSectionTitleFromCombined(currentSection || ''))
     if (!validateResponses(sectionQuestions)) {
       toast.error('Please fill in all required questions')
       return
@@ -341,7 +345,7 @@ export default function AssessmentPage() {
           progressPercentage: actualProgress,
           sessionProgress: actualProgress // Add this as an additional field
         })),
-        currentQuestionId: questions.find(q => q.sectionTitle === currentSection)?.id || questions[0]?.id,
+        currentQuestionId: questions.find(q => q.sectionTitle === getSectionTitleFromCombined(currentSection || ''))?.id || questions[0]?.id,
         progressPercentage: actualProgress,
         sessionProgress: actualProgress // Add this as an additional field
       }
@@ -442,10 +446,22 @@ export default function AssessmentPage() {
     }
   }
 
-  const sections = Array.from(new Set(questions.map(q => q.sectionTitle)))
+  const sections = Array.from(new Set(questions.map(q => 
+    q.sectionTitle === q.subsection ? q.sectionTitle : `${q.sectionTitle} - ${q.subsection}`
+  )))
   const currentSectionIndex = sections.indexOf(currentSection || '')
   const currentProgress = calculateProgress()
   const statusBadge = getStatusBadge(currentStatus)
+
+  // Helper function to extract sectionTitle from combined format
+  const getSectionTitleFromCombined = (combinedSection: string) => {
+    // If it contains ' - ', split and get the first part
+    if (combinedSection.includes(' - ')) {
+      return combinedSection.split(' - ')[0]
+    }
+    // Otherwise, it's just the section title
+    return combinedSection
+  }
 
   if (loading) {
     return (
@@ -544,7 +560,10 @@ export default function AssessmentPage() {
                                   variant="ghost"
                                   size="sm"
                                   onClick={() => {
-                                    setCurrentSection(question.sectionTitle)
+                                    const sectionDisplay = question.sectionTitle === question.subsection 
+                                      ? question.sectionTitle 
+                                      : `${question.sectionTitle} - ${question.subsection}`
+                                    setCurrentSection(sectionDisplay)
                                     // Scroll to question after section change
                                     setTimeout(() => {
                                       const questionElement = document.getElementById(`question-${question.id}`)
@@ -642,20 +661,89 @@ export default function AssessmentPage() {
           </Card>
         )}
 
-        {/* Progress - only show if status allows editing */}
-        {currentStatus.showProgress && (
-          <Card>
-            <CardContent className="pt-6">
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm text-gray-600">
-                  <span>Progress</span>
-                  <span>{currentProgress}%</span>
-                </div>
-                <Progress value={currentProgress} />
-              </div>
-            </CardContent>
-          </Card>
-        )}
+                 {/* Progress - only show if status allows editing */}
+         {currentStatus.showProgress && (
+           <Card>
+             <CardContent className="pt-6">
+               <div className="space-y-2">
+                 <div className="flex justify-between text-sm text-gray-600">
+                   <span>Progress</span>
+                   <span>{currentProgress}%</span>
+                 </div>
+                 <Progress value={currentProgress} />
+               </div>
+             </CardContent>
+           </Card>
+         )}
+
+         {/* Time Reminder - only show if status allows editing and session is in draft */}
+         {currentStatus.canEdit && session?.status === 'draft' && session?.startedAt && (
+           <Card className="border-amber-200 bg-amber-50">
+             <CardContent className="pt-6">
+               <div className="flex items-start space-x-3">
+                 <Clock className="h-5 w-5 text-amber-500 mt-0.5 flex-shrink-0" />
+                 <div className="flex-1">
+                   <h3 className="font-medium text-amber-800 mb-2">⏰ Time Reminder</h3>
+                   <p className="text-sm text-amber-700 mb-2">
+                     Please complete your assessment within 3 days from when you started.
+                   </p>
+                   {(() => {
+                     const startDate = new Date(session.startedAt)
+                     const deadline = new Date(startDate.getTime() + (3 * 24 * 60 * 60 * 1000)) // 3 days
+                     const now = new Date()
+                     const timeLeft = deadline.getTime() - now.getTime()
+                     const daysLeft = Math.ceil(timeLeft / (24 * 60 * 60 * 1000))
+                     const hoursLeft = Math.ceil(timeLeft / (60 * 60 * 1000))
+                     
+                     if (timeLeft <= 0) {
+                       return (
+                         <div className="p-3 bg-red-100 border border-red-200 rounded-lg">
+                           <p className="text-sm font-medium text-red-800">
+                             ⚠️ Time's up! Please submit your assessment immediately.
+                           </p>
+                         </div>
+                       )
+                     } else if (daysLeft <= 1) {
+                       return (
+                         <div className="p-3 bg-red-100 border border-red-200 rounded-lg">
+                           <p className="text-sm font-medium text-red-800">
+                             ⚠️ Urgent: Less than 24 hours remaining! ({hoursLeft} hours left)
+                           </p>
+                         </div>
+                       )
+                     } else if (daysLeft <= 2) {
+                       return (
+                         <div className="p-3 bg-orange-100 border border-orange-200 rounded-lg">
+                           <p className="text-sm font-medium text-orange-800">
+                             ⚠️ Warning: Only {daysLeft} days remaining!
+                           </p>
+                         </div>
+                       )
+                     } else {
+                       return (
+                         <div className="p-3 bg-blue-100 border border-blue-200 rounded-lg">
+                           <p className="text-sm font-medium text-blue-800">
+                             ℹ️ You have {daysLeft} days remaining to complete this assessment.
+                           </p>
+                         </div>
+                       )
+                     }
+                   })()}
+                   <p className="text-xs text-amber-600 mt-2">
+                     Started: {new Date(session.startedAt).toLocaleDateString('id-ID', { 
+                       weekday: 'long', 
+                       year: 'numeric', 
+                       month: 'long', 
+                       day: 'numeric',
+                       hour: '2-digit',
+                       minute: '2-digit'
+                     })}
+                   </p>
+                 </div>
+               </div>
+             </CardContent>
+           </Card>
+         )}
 
         {/* Assessment Form - only show if status allows editing */}
         {currentStatus.canEdit ? (
@@ -679,29 +767,58 @@ export default function AssessmentPage() {
               </CardContent>
             </Card>
 
-            {/* Current Section */}
-            <Card>
-              <CardHeader>
-                <CardTitle>{currentSection}</CardTitle>
-              </CardHeader>
+                         {/* Current Section */}
+             <Card>
+               <CardHeader>
+                 <div className="flex items-center justify-between">
+                   <CardTitle>{currentSection}</CardTitle>
+                   <div className="text-sm text-gray-500">
+                     {(() => {
+                       const currentSectionQuestions = questions.filter(q => 
+                         q.sectionTitle === getSectionTitleFromCombined(currentSection || '')
+                       )
+                       const answeredQuestions = currentSectionQuestions.filter(q => {
+                         const response = responses[q.id]
+                         return response !== undefined && response !== null && response !== ''
+                       })
+                       return `${answeredQuestions.length}/${currentSectionQuestions.length}`
+                     })()}
+                   </div>
+                 </div>
+                                   {/* Disclaimer for Pengusulan Individu/Tokoh section */}
+                  {currentSection?.startsWith('Pengusulan Individu/Tokoh yang berperan besar pada pemberdayaan masyarakat') && (
+                    <div className="mt-2 p-3 bg-gray-50 border border-gray-200 rounded-lg">
+                      <div className="flex items-start space-x-2">
+                        <div className="flex-1">
+                          <p className="text-sm text-gray-700 font-medium mb-1">⚠️ Optional Section</p>
+                          <p className="text-sm text-gray-600">
+                            Questions in this section are optional. You may skip them if they don't apply to your situation.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+               </CardHeader>
               <CardContent className="space-y-6">
-                {questions
-                  .filter(q => q.sectionTitle === currentSection)
-                  .map((question) => (
-                    <div key={question.id} id={`question-${question.id}`}>
-                      <QuestionInput
-                        {...question}
-                        value={responses[question.id]}
-                        onChange={(value) => handleResponseChange(question.id, value)}
-                        validationError={validationErrors[question.id]}
-                      />
+                                                  {questions
+                   .filter(q => q.sectionTitle === getSectionTitleFromCombined(currentSection || ''))
+                   .map((question) => {
+                     // Check if this question belongs to the "Pengusulan Individu/Tokoh" section
+                     const isPengusulanSection = question.sectionTitle?.startsWith('Pengusulan Individu/Tokoh yang berperan besar pada pemberdayaan masyarakat') ||
+                                                question.subsection?.startsWith('Pengusulan Individu/Tokoh yang berperan besar pada pemberdayaan masyarakat')
+                     
+                     return (
+                       <div key={question.id} id={`question-${question.id}`}>
+                         <QuestionInput
+                           {...question}
+                           isRequired={isPengusulanSection ? false : question.isRequired}
+                           value={responses[question.id]}
+                           onChange={(value) => handleResponseChange(question.id, value)}
+                           validationError={validationErrors[question.id]}
+                         />
                       
                       {/* Show feedback for this question if it exists */}
                       {question.reviewComments && question.reviewComments.length > 0 && (
-                        (() => {
-                          console.log(`Displaying review comments for question ${question.id}:`, question.reviewComments)
-                          return null
-                        })(),
                         <div className="mt-4 p-4 bg-orange-50 border border-orange-200 rounded-lg">
                           <div className="flex items-start space-x-2">
                             <AlertTriangle className="h-4 w-4 text-orange-500 mt-0.5 flex-shrink-0" />
@@ -726,7 +843,7 @@ export default function AssessmentPage() {
                         </div>
                       )}
                     </div>
-                  ))}
+                  )})}
               </CardContent>
             </Card>
 

@@ -677,7 +677,9 @@ export default function AdminSubmissionReviewPage() {
     )
   }
 
-  const sections = Array.from(new Set(submission.questions.map(q => q.sectionTitle)))
+  const sections = Array.from(new Set(submission.questions.map(q => 
+    q.sectionTitle === q.subsection ? q.sectionTitle : `${q.sectionTitle} - ${q.subsection}`
+  )))
   const hasRevisions = submission.responses.some(r => r.needsRevision)
 
   return (
@@ -767,7 +769,7 @@ export default function AdminSubmissionReviewPage() {
             </CardHeader>
             <CardContent className="space-y-6">
               {submission.questions
-                .filter(q => q.sectionTitle === section)
+                .filter(q => q.sectionTitle === (section.includes(' - ') ? section.split(' - ')[0] : section))
                 .map(question => {
                   const response = submission.responses.find(r => r.questionId === question.id)
                   return (
