@@ -64,45 +64,137 @@ export default function QuestionAssignmentModal({
 
   const fetchAssignedQuestions = async () => {
     try {
-      // For now, we'll assume no questions are assigned since the assignment endpoints
-      // might not be implemented yet. This can be updated when the backend provides
-      // the assignment endpoints.
-      setAssignedQuestions([])
+      const response = await api.get(`/question-categories/${category.id}/questions`)
+      console.log('Assigned questions response:', response.data)
       
-      // Uncomment this when the backend provides the endpoint:
-      // const response = await api.get(`/question-categories/${category.id}/questions`)
-      // setAssignedQuestions(response.data || [])
-    } catch (error) {
-      console.error('Failed to fetch assigned questions:', error)
-      setAssignedQuestions([])
-    }
-  }
+      // Handle different possible response structures
+      let assignedQuestionsData = []
+      if (Array.isArray(response.data)) {
+        assignedQuestionsData = response.data
+      } else if (response.data && Array.isArray(response.data.questions)) {
+        assignedQuestionsData = response.data.questions
+      } else if (response.data && Array.isArray(response.data.data)) {
+        assignedQuestionsData = response.data.data
+      } else {
+        console.warn('Unexpected response structure for assigned questions:', response.data)
+        assignedQuestionsData = []
+      }
+      
+             // Transform the data to match our interface
+       const transformedQuestions = assignedQuestionsData.map((aq: any, index: number) => {
+         console.log('Processing assigned question:', aq)
+         
+         // The assigned questions API returns a different structure
+         // It has groupQuestionId, questionId, categoryId, etc.
+         const groupQuestionId = aq.groupQuestionId || aq.id || `assigned-${index}`
+         
+         return {
+           groupQuestionId,
+           groupId: aq.groupId || aq.group?.id,
+           groupName: aq.group?.groupName || aq.groupName || 'Unknown Group',
+           questionId: aq.questionId,
+           questionText: aq.question?.questionText || aq.questionText || aq.sectionTitle || `Question ${aq.orderNumber}`,
+           orderNumber: aq.orderNumber,
+           sectionTitle: aq.sectionTitle,
+           subsection: aq.subsection,
+           assignedAt: aq.createdAt,
+           createdAt: aq.createdAt,
+           updatedAt: aq.updatedAt
+         }
+       })
+      
+             // If we have assigned questions but missing question details, try to enrich them
+       if (transformedQuestions.length > 0) {
+         const enrichedQuestions = await enrichAssignedQuestions(transformedQuestions)
+         setAssignedQuestions(enrichedQuestions)
+       } else {
+         setAssignedQuestions(transformedQuestions)
+       }
+     } catch (error) {
+       console.error('Failed to fetch assigned questions:', error)
+       setAssignedQuestions([])
+     }
+   }
+
+   const enrichAssignedQuestions = async (questions: GroupQuestion[]) => {
+     try {
+       // Get all available questions to match with assigned questions
+       const response = await api.get('/groups')
+       const groups = response.data?.groups || []
+       const allGroupQuestions = groups.flatMap((group: any) => 
+         group.groupQuestions?.map((gq: any) => ({
+           groupQuestionId: gq.id,
+           groupId: group.id,
+           groupName: group.groupName,
+           questionId: gq.questionId,
+           questionText: gq.question?.questionText || gq.sectionTitle || `Question ${gq.orderNumber}`,
+           orderNumber: gq.orderNumber,
+           sectionTitle: gq.sectionTitle,
+           subsection: gq.subsection,
+         })) || []
+       )
+
+       // Enrich assigned questions with details from available questions
+       return questions.map(assignedQ => {
+         const matchingQuestion = allGroupQuestions.find(aq => aq.groupQuestionId === assignedQ.groupQuestionId)
+         if (matchingQuestion) {
+           return {
+             ...assignedQ,
+             questionText: assignedQ.questionText || matchingQuestion.questionText,
+             groupName: assignedQ.groupName || matchingQuestion.groupName,
+             sectionTitle: assignedQ.sectionTitle || matchingQuestion.sectionTitle,
+             subsection: assignedQ.subsection || matchingQuestion.subsection,
+             orderNumber: assignedQ.orderNumber || matchingQuestion.orderNumber,
+           }
+         }
+         return assignedQ
+       })
+     } catch (error) {
+       console.error('Failed to enrich assigned questions:', error)
+       return questions
+     }
+   }
 
   const fetchAvailableQuestions = async () => {
     try {
       // Use the /groups endpoint which includes groupQuestions
       const response = await api.get('/groups')
+      console.log('Groups response:', response.data)
+      
       const groups = response.data?.groups || []
       
       // Extract all group questions from all groups
-      const allGroupQuestions = groups.flatMap((group: any) => 
-        group.groupQuestions?.map((gq: any) => ({
-          groupQuestionId: gq.id,
-          groupId: group.id,
-          groupName: group.groupName,
-          questionId: gq.id, // Using gq.id as questionId for now
-          questionText: gq.sectionTitle || `Question ${gq.orderNumber}`, // Using sectionTitle as question text
-          orderNumber: gq.orderNumber,
-          sectionTitle: gq.sectionTitle,
-          subsection: gq.subsection,
-          createdAt: gq.createdAt,
-          updatedAt: gq.updatedAt
-        })) || []
-      )
+      const allGroupQuestions = groups.flatMap((group: any) => {
+        console.log('Group:', group.groupName, 'GroupQuestions:', group.groupQuestions)
+                 return group.groupQuestions?.map((gq: any, qIndex: number) => {
+           const groupQuestionId = gq.id || `group-${group.id}-question-${qIndex}`
+           return {
+             groupQuestionId,
+             groupId: group.id,
+             groupName: group.groupName,
+             questionId: gq.questionId,
+             questionText: gq.question?.questionText || gq.sectionTitle || `Question ${gq.orderNumber}`,
+             orderNumber: gq.orderNumber,
+             sectionTitle: gq.sectionTitle,
+             subsection: gq.subsection,
+             createdAt: gq.createdAt,
+             updatedAt: gq.updatedAt
+           }
+         }) || []
+      })
       
-      const assignedIds = assignedQuestions.map(q => q.groupQuestionId)
-      const available = allGroupQuestions.filter((q: any) => !assignedIds.includes(q.groupQuestionId))
-      setAvailableQuestions(available)
+             console.log('All group questions:', allGroupQuestions)
+       
+       // Check for duplicate groupQuestionId values
+       const groupQuestionIds = allGroupQuestions.map(q => q.groupQuestionId)
+       const duplicateIds = groupQuestionIds.filter((id, index) => groupQuestionIds.indexOf(id) !== index)
+       if (duplicateIds.length > 0) {
+         console.warn('Duplicate groupQuestionId values found:', duplicateIds)
+       }
+      
+      // For now, show all questions as available since we'll filter them in the UI
+      // The assigned questions will be fetched separately and filtered in the render
+      setAvailableQuestions(allGroupQuestions)
     } catch (error) {
       console.error('Failed to fetch available questions:', error)
       toast.error('Failed to load available questions')
@@ -111,64 +203,71 @@ export default function QuestionAssignmentModal({
 
   const handleAssignQuestion = async (groupQuestionId: number) => {
     try {
-      // For now, show a message that this feature is not yet implemented
-      toast.info('Question assignment feature is not yet implemented in the backend')
-      
-      // Uncomment this when the backend provides the endpoint:
-      // await api.post(`/question-categories/${category.id}/assign-question`, {
-      //   groupQuestionId
-      // })
-      // toast.success('Question assigned successfully')
-      // fetchAssignedQuestions()
-      // fetchAvailableQuestions()
-      // onUpdate()
+      setLoading(true)
+      await api.post(`/question-categories/${category.id}/assign-question`, {
+        groupQuestionId
+      })
+      toast.success('Question assigned successfully')
+      fetchAssignedQuestions()
+      fetchAvailableQuestions()
+      onUpdate()
     } catch (error) {
+      console.error('Failed to assign question:', error)
       toast.error('Failed to assign question')
+    } finally {
+      setLoading(false)
     }
   }
 
   const handleRemoveQuestion = async (groupQuestionId: number) => {
     try {
-      // For now, show a message that this feature is not yet implemented
-      toast.info('Question removal feature is not yet implemented in the backend')
-      
-      // Uncomment this when the backend provides the endpoint:
-      // await api.delete(`/question-categories/${category.id}/questions/${groupQuestionId}`)
-      // toast.success('Question removed successfully')
-      // fetchAssignedQuestions()
-      // fetchAvailableQuestions()
-      // onUpdate()
+      setLoading(true)
+      await api.delete(`/question-categories/${category.id}/questions/${groupQuestionId}`)
+      toast.success('Question removed successfully')
+      fetchAssignedQuestions()
+      fetchAvailableQuestions()
+      onUpdate()
     } catch (error) {
+      console.error('Failed to remove question:', error)
       toast.error('Failed to remove question')
+    } finally {
+      setLoading(false)
     }
   }
 
   const handleBulkAssign = async (questionIds: number[]) => {
     try {
-      // For now, show a message that this feature is not yet implemented
-      toast.info('Bulk assignment feature is not yet implemented in the backend')
+      setLoading(true)
+      const assignments = questionIds.map(id => ({
+        groupQuestionId: id,
+        categoryId: category.id
+      }))
       
-      // Uncomment this when the backend provides the endpoint:
-      // const assignments = questionIds.map(id => ({
-      //   groupQuestionId: id,
-      //   categoryId: category.id
-      // }))
-      // 
-      // await api.post('/question-categories/bulk-assign', { assignments })
-      // toast.success('Questions assigned successfully')
-      // fetchAssignedQuestions()
-      // fetchAvailableQuestions()
-      // onUpdate()
+      await api.post('/question-categories/bulk-assign', { assignments })
+      toast.success('Questions assigned successfully')
+      fetchAssignedQuestions()
+      fetchAvailableQuestions()
+      onUpdate()
     } catch (error) {
+      console.error('Failed to assign questions:', error)
       toast.error('Failed to assign questions')
+    } finally {
+      setLoading(false)
     }
   }
 
-  const filteredAvailableQuestions = availableQuestions.filter(question =>
-    (question.sectionTitle || question.questionText).toLowerCase().includes(searchTerm.toLowerCase()) ||
-    question.groupName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (question.subsection && question.subsection.toLowerCase().includes(searchTerm.toLowerCase()))
-  )
+  const filteredAvailableQuestions = availableQuestions.filter(question => {
+    // First filter by search term
+    const matchesSearch = question.questionText.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (question.sectionTitle && question.sectionTitle.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      question.groupName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (question.subsection && question.subsection.toLowerCase().includes(searchTerm.toLowerCase()))
+    
+    // Then filter out already assigned questions
+    const isNotAssigned = !assignedQuestions.some(aq => aq.groupQuestionId === question.groupQuestionId)
+    
+    return matchesSearch && isNotAssigned
+  })
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -185,12 +284,15 @@ export default function QuestionAssignmentModal({
           <div>
             <h3 className="text-lg font-semibold mb-4">Assigned Questions ({assignedQuestions.length})</h3>
             <div className="space-y-3 max-h-96 overflow-y-auto">
-              {assignedQuestions.map((question) => (
-                <Card key={question.groupQuestionId} className="p-3">
+                             {assignedQuestions.map((question, index) => (
+                 <Card key={`assigned-${question.groupQuestionId}-${index}`} className="p-3">
                   <CardContent className="p-0">
                     <div className="flex justify-between items-start">
                       <div className="flex-1">
-                        <p className="text-sm font-medium mb-1">{question.sectionTitle || question.questionText}</p>
+                        <p className="text-sm font-medium mb-1">{question.questionText}</p>
+                        {question.sectionTitle && question.sectionTitle !== question.questionText && (
+                          <p className="text-xs text-gray-600 mb-1">{question.sectionTitle}</p>
+                        )}
                         <div className="flex items-center space-x-2 text-xs text-gray-500">
                           <span>Group: {question.groupName}</span>
                           {question.subsection && <span>• {question.subsection}</span>}
@@ -200,14 +302,15 @@ export default function QuestionAssignmentModal({
                           )}
                         </div>
                       </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleRemoveQuestion(question.groupQuestionId)}
-                        className="text-red-600 hover:text-red-700"
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
+                                             <Button
+                         variant="ghost"
+                         size="sm"
+                         onClick={() => handleRemoveQuestion(question.groupQuestionId)}
+                         className="text-red-600 hover:text-red-700"
+                         disabled={loading}
+                       >
+                         <X className="h-4 w-4" />
+                       </Button>
                     </div>
                   </CardContent>
                 </Card>
@@ -235,26 +338,30 @@ export default function QuestionAssignmentModal({
               </div>
             </div>
             <div className="space-y-3 max-h-96 overflow-y-auto">
-              {filteredAvailableQuestions.map((question) => (
-                <Card key={question.groupQuestionId} className="p-3">
+                             {filteredAvailableQuestions.map((question, index) => (
+                 <Card key={`available-${question.groupQuestionId}-${index}`} className="p-3">
                   <CardContent className="p-0">
                     <div className="flex justify-between items-start">
                       <div className="flex-1">
-                        <p className="text-sm font-medium mb-1">{question.sectionTitle || question.questionText}</p>
+                        <p className="text-sm font-medium mb-1">{question.questionText}</p>
+                        {question.sectionTitle && question.sectionTitle !== question.questionText && (
+                          <p className="text-xs text-gray-600 mb-1">{question.sectionTitle}</p>
+                        )}
                         <div className="flex items-center space-x-2 text-xs text-gray-500">
                           <span>Group: {question.groupName}</span>
                           {question.subsection && <span>• {question.subsection}</span>}
                           {question.orderNumber && <span>• Order: {question.orderNumber}</span>}
                         </div>
                       </div>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleAssignQuestion(question.groupQuestionId)}
-                      >
-                        <Link className="h-4 w-4 mr-1" />
-                        Assign
-                      </Button>
+                                             <Button
+                         variant="outline"
+                         size="sm"
+                         onClick={() => handleAssignQuestion(question.groupQuestionId)}
+                         disabled={loading}
+                       >
+                         <Link className="h-4 w-4 mr-1" />
+                         {loading ? 'Assigning...' : 'Assign'}
+                       </Button>
                     </div>
                   </CardContent>
                 </Card>

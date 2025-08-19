@@ -24,25 +24,9 @@ export interface AssessmentStatus {
 }
 
 export const ASSESSMENT_STATUSES: Record<string, AssessmentStatus> = {
-  draft: {
-    combinedStatus: 'draft',
-    description: 'Assessment is in draft mode',
-    sessionStatus: 'draft',
-    reviewStatus: null,
-    reviewStage: null,
-    color: 'gray',
-    bgColor: 'bg-gray-50',
-    textColor: 'text-gray-700',
-    icon: '📝',
-    canEdit: true,
-    canSubmit: true,
-    canResubmit: false,
-    showFeedback: false,
-    showProgress: true
-  },
   in_progress: {
     combinedStatus: 'in_progress',
-    description: 'Assessment is being worked on',
+    description: 'In Progress',
     sessionStatus: 'in_progress',
     reviewStatus: null,
     reviewStage: null,
@@ -56,6 +40,7 @@ export const ASSESSMENT_STATUSES: Record<string, AssessmentStatus> = {
     showFeedback: false,
     showProgress: true
   },
+
   submitted: {
     combinedStatus: 'submitted',
     description: 'Assessment submitted, no review yet',
@@ -72,38 +57,7 @@ export const ASSESSMENT_STATUSES: Record<string, AssessmentStatus> = {
     showFeedback: false,
     showProgress: false
   },
-  pending_review: {
-    combinedStatus: 'pending_review',
-    description: 'Assessment submitted, waiting for review',
-    sessionStatus: 'submitted',
-    reviewStatus: 'pending',
-    reviewStage: null,
-    color: 'orange',
-    bgColor: 'bg-orange-50',
-    textColor: 'text-orange-700',
-    icon: '⏳',
-    canEdit: false,
-    canSubmit: false,
-    canResubmit: false,
-    showFeedback: false,
-    showProgress: false
-  },
-  under_review: {
-    combinedStatus: 'under_review',
-    description: 'Assessment is currently being reviewed',
-    sessionStatus: 'submitted',
-    reviewStatus: 'under_review',
-    reviewStage: null,
-    color: 'purple',
-    bgColor: 'bg-purple-50',
-    textColor: 'text-purple-700',
-    icon: '🔍',
-    canEdit: false,
-    canSubmit: false,
-    canResubmit: false,
-    showFeedback: false,
-    showProgress: false
-  },
+
   needs_revision: {
     combinedStatus: 'needs_revision',
     description: 'Assessment needs revision',
@@ -138,7 +92,7 @@ export const ASSESSMENT_STATUSES: Record<string, AssessmentStatus> = {
   },
   approved: {
     combinedStatus: 'approved',
-    description: 'Assessment approved',
+    description: 'Approve to Jury',
     sessionStatus: 'submitted',
     reviewStatus: 'approved',
     reviewStage: null,
@@ -152,86 +106,7 @@ export const ASSESSMENT_STATUSES: Record<string, AssessmentStatus> = {
     showFeedback: false,
     showProgress: false
   },
-  rejected: {
-    combinedStatus: 'rejected',
-    description: 'Assessment rejected',
-    sessionStatus: 'submitted',
-    reviewStatus: 'rejected',
-    reviewStage: null,
-    color: 'red',
-    bgColor: 'bg-red-50',
-    textColor: 'text-red-700',
-    icon: '❌',
-    canEdit: false,
-    canSubmit: false,
-    canResubmit: false,
-    showFeedback: true,
-    showProgress: false
-  },
-  passed_to_jury: {
-    combinedStatus: 'passed_to_jury',
-    description: 'Assessment passed to jury',
-    sessionStatus: 'submitted',
-    reviewStatus: 'passed_to_jury',
-    reviewStage: null,
-    color: 'blue',
-    bgColor: 'bg-blue-50',
-    textColor: 'text-blue-700',
-    icon: '👨‍⚖️',
-    canEdit: false,
-    canSubmit: false,
-    canResubmit: false,
-    showFeedback: false,
-    showProgress: false
-  },
-  jury_scoring: {
-    combinedStatus: 'jury_scoring',
-    description: 'Jury is scoring the assessment',
-    sessionStatus: 'submitted',
-    reviewStatus: null,
-    reviewStage: 'jury_scoring',
-    color: 'purple',
-    bgColor: 'bg-purple-50',
-    textColor: 'text-purple-700',
-    icon: '📊',
-    canEdit: false,
-    canSubmit: false,
-    canResubmit: false,
-    showFeedback: false,
-    showProgress: false
-  },
-  jury_deliberation: {
-    combinedStatus: 'jury_deliberation',
-    description: 'Jury is deliberating',
-    sessionStatus: 'submitted',
-    reviewStatus: null,
-    reviewStage: 'jury_deliberation',
-    color: 'indigo',
-    bgColor: 'bg-indigo-50',
-    textColor: 'text-indigo-700',
-    icon: '🤔',
-    canEdit: false,
-    canSubmit: false,
-    canResubmit: false,
-    showFeedback: false,
-    showProgress: false
-  },
-  final_decision: {
-    combinedStatus: 'final_decision',
-    description: 'Final decision stage',
-    sessionStatus: 'submitted',
-    reviewStatus: null,
-    reviewStage: 'final_decision',
-    color: 'amber',
-    bgColor: 'bg-amber-50',
-    textColor: 'text-amber-700',
-    icon: '🎯',
-    canEdit: false,
-    canSubmit: false,
-    canResubmit: false,
-    showFeedback: false,
-    showProgress: false
-  },
+
   completed: {
     combinedStatus: 'completed',
     description: 'Assessment process completed',
@@ -258,30 +133,16 @@ export function getAssessmentStatus(sessionStatus: string, reviewStatus?: string
   if (sessionStatus === 'resubmitted') {
     combinedStatus = 'resubmitted'
   } else if (sessionStatus === 'submitted') {
-    if (reviewStage === 'jury_scoring') {
-      combinedStatus = 'jury_scoring'
-    } else if (reviewStage === 'jury_deliberation') {
-      combinedStatus = 'jury_deliberation'
-    } else if (reviewStage === 'final_decision') {
-      combinedStatus = 'final_decision'
-    } else if (reviewStatus === 'pending' || reviewStatus === null) {
-      combinedStatus = 'pending_review'
-    } else if (reviewStatus === 'under_review') {
-      combinedStatus = 'under_review'
-    } else if (reviewStatus === 'needs_revision') {
+    if (reviewStatus === 'needs_revision') {
       combinedStatus = 'needs_revision'
     } else if (reviewStatus === 'approved') {
       combinedStatus = 'approved'
-    } else if (reviewStatus === 'rejected') {
-      combinedStatus = 'rejected'
-    } else if (reviewStatus === 'passed_to_jury') {
-      combinedStatus = 'passed_to_jury'
     } else if (reviewStatus === 'completed') {
       combinedStatus = 'completed'
     }
   }
 
-  return ASSESSMENT_STATUSES[combinedStatus] || ASSESSMENT_STATUSES.draft
+  return ASSESSMENT_STATUSES[combinedStatus] || ASSESSMENT_STATUSES.in_progress
 }
 
 export function getStatusBadge(status: AssessmentStatus) {

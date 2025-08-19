@@ -333,7 +333,7 @@ export default function AdminSubmissionReviewPage() {
             setCurrentSection(initialSection)
           }
         }
-         } catch (err) {
+         } catch (err: any) {
        console.error('Error fetching submission:', err)
        console.error('Error details:', {
          message: err.message,
@@ -641,16 +641,16 @@ export default function AdminSubmissionReviewPage() {
       }
       
       switch (status) {
+        case 'in_progress':
+          return 'text-blue-500 bg-blue-50'
         case 'submitted':
           return 'text-blue-500 bg-blue-50'
         case 'needs_revision':
           return 'text-orange-500 bg-orange-50'
         case 'resubmitted':
           return 'text-purple-500 bg-purple-50'
-        case 'approved_for_juri':
+        case 'completed':
           return 'text-green-500 bg-green-50'
-        case 'with_juri':
-          return 'text-indigo-500 bg-indigo-50'
         default:
           return 'text-gray-500 bg-gray-50'
       }
@@ -659,7 +659,7 @@ export default function AdminSubmissionReviewPage() {
        const getStatusLabel = (status: string) => {
       // If status is approved, show approved label regardless of revisions
       if (status === 'approved') {
-        return 'Approved'
+        return 'Approve to Jury'
       }
       
       // If there are revisions needed, override the status label
@@ -668,16 +668,16 @@ export default function AdminSubmissionReviewPage() {
       }
       
       switch (status) {
+        case 'in_progress':
+          return 'In Progress'
         case 'submitted':
           return 'Submitted'
         case 'needs_revision':
           return 'Needs Revision'
         case 'resubmitted':
           return 'Resubmitted'
-        case 'approved_for_juri':
-          return 'Approved for Juri'
-        case 'with_juri':
-          return 'With Juri'
+        case 'completed':
+          return 'Completed'
         default:
           return status
       }

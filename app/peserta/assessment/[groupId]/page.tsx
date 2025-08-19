@@ -637,7 +637,7 @@ export default function AssessmentPage() {
           </Card>
         )}
 
-        {['pending_review', 'under_review', 'passed_to_jury', 'jury_scoring', 'jury_deliberation', 'final_decision'].includes(currentStatus.combinedStatus) && (
+        {['submitted'].includes(currentStatus.combinedStatus) && (
           <Card className={`border-${currentStatus.color}-200 ${currentStatus.bgColor}`}>
             <CardContent className="pt-6">
               <div className="flex items-start space-x-3">
@@ -687,7 +687,7 @@ export default function AssessmentPage() {
          )}
 
          {/* Time Reminder - only show if status allows editing and session is in draft */}
-         {currentStatus.canEdit && session?.status === 'draft' && session?.startedAt && (
+         {currentStatus.canEdit && session?.status === 'in_progress' && session?.startedAt && (
            <Card className="border-amber-200 bg-amber-50">
              <CardContent className="pt-6">
                <div className="flex items-start space-x-3">

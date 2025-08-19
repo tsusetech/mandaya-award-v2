@@ -15,8 +15,8 @@ interface Submission {
   id: number
   groupId: number
   groupName: string
-  status: 'draft' | 'in_progress' | 'submitted' | 'pending_review' | 'under_review' | 'needs_revision' | 'resubmitted' | 'approved' | 'rejected' | 'passed_to_jury' | 'jury_scoring' | 'jury_deliberation' | 'final_decision' | 'completed'
-  combinedStatus: 'draft' | 'in_progress' | 'submitted' | 'pending_review' | 'under_review' | 'needs_revision' | 'resubmitted' | 'approved' | 'rejected' | 'passed_to_jury' | 'jury_scoring' | 'jury_deliberation' | 'final_decision' | 'completed'
+  status: 'in_progress' | 'submitted' | 'needs_revision' | 'resubmitted' | 'approved' | 'completed'
+  combinedStatus: 'in_progress' | 'submitted' | 'needs_revision' | 'resubmitted' | 'approved' | 'completed'
   submittedAt: string
   updatedAt: string
   progressPercentage: number
@@ -256,32 +256,16 @@ export default function SubmissionsPage() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'draft':
-        return 'text-gray-500 bg-gray-50'
       case 'in_progress':
-        return 'text-yellow-500 bg-yellow-50'
+        return 'text-blue-500 bg-blue-50'
       case 'submitted':
         return 'text-blue-500 bg-blue-50'
-      case 'pending_review':
-        return 'text-orange-500 bg-orange-50'
-      case 'under_review':
-        return 'text-purple-500 bg-purple-50'
       case 'needs_revision':
         return 'text-red-500 bg-red-50'
       case 'resubmitted':
         return 'text-blue-500 bg-blue-50'
       case 'approved':
         return 'text-green-500 bg-green-50'
-      case 'rejected':
-        return 'text-red-500 bg-red-50'
-      case 'passed_to_jury':
-        return 'text-indigo-500 bg-indigo-50'
-      case 'jury_scoring':
-        return 'text-purple-500 bg-purple-50'
-      case 'jury_deliberation':
-        return 'text-indigo-500 bg-indigo-50'
-      case 'final_decision':
-        return 'text-amber-500 bg-amber-50'
       case 'completed':
         return 'text-green-500 bg-green-50'
       default:
@@ -291,32 +275,16 @@ export default function SubmissionsPage() {
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'draft':
-        return <FileText className="h-5 w-5" />
       case 'in_progress':
         return <Clock className="h-5 w-5" />
       case 'submitted':
         return <FileText className="h-5 w-5" />
-      case 'pending_review':
-        return <Clock className="h-5 w-5" />
-      case 'under_review':
-        return <Search className="h-5 w-5" />
       case 'needs_revision':
         return <AlertTriangle className="h-5 w-5" />
       case 'resubmitted':
         return <RefreshCw className="h-5 w-5" />
       case 'approved':
         return <CheckCircle className="h-5 w-5" />
-      case 'rejected':
-        return <XCircle className="h-5 w-5" />
-      case 'passed_to_jury':
-        return <Users className="h-5 w-5" />
-      case 'jury_scoring':
-        return <BarChart3 className="h-5 w-5" />
-      case 'jury_deliberation':
-        return <Brain className="h-5 w-5" />
-      case 'final_decision':
-        return <Target className="h-5 w-5" />
       case 'completed':
         return <Trophy className="h-5 w-5" />
       default:

@@ -31,8 +31,8 @@ interface Submission {
   groupName: string
   userName: string
   userEmail: string
-  status: 'draft' | 'in_progress' | 'submitted' | 'pending_review' | 'under_review' | 'needs_revision' | 'resubmitted' | 'approved' | 'rejected' | 'passed_to_jury' | 'jury_scoring' | 'jury_deliberation' | 'final_decision' | 'completed'
-  combinedStatus: 'draft' | 'in_progress' | 'submitted' | 'pending_review' | 'under_review' | 'needs_revision' | 'resubmitted' | 'approved' | 'rejected' | 'passed_to_jury' | 'jury_scoring' | 'jury_deliberation' | 'final_decision' | 'completed'
+  status: 'in_progress' | 'submitted' | 'needs_revision' | 'resubmitted' | 'approved' | 'completed'
+  combinedStatus: 'in_progress' | 'submitted' | 'needs_revision' | 'resubmitted' | 'approved' | 'completed'
   submittedAt: string
   updatedAt: string
   progressPercentage: number
@@ -224,32 +224,16 @@ export default function AdminSubmissionsPage() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'draft':
-        return 'text-gray-500 bg-gray-50'
       case 'in_progress':
-        return 'text-yellow-500 bg-yellow-50'
+        return 'text-blue-500 bg-blue-50'
       case 'submitted':
         return 'text-blue-500 bg-blue-50'
-      case 'pending_review':
-        return 'text-orange-500 bg-orange-50'
-      case 'under_review':
-        return 'text-purple-500 bg-purple-50'
       case 'needs_revision':
         return 'text-red-500 bg-red-50'
       case 'resubmitted':
         return 'text-blue-500 bg-blue-50'
       case 'approved':
         return 'text-green-500 bg-green-50'
-      case 'rejected':
-        return 'text-red-500 bg-red-50'
-      case 'passed_to_jury':
-        return 'text-indigo-500 bg-indigo-50'
-      case 'jury_scoring':
-        return 'text-purple-500 bg-purple-50'
-      case 'jury_deliberation':
-        return 'text-indigo-500 bg-indigo-50'
-      case 'final_decision':
-        return 'text-amber-500 bg-amber-50'
       case 'completed':
         return 'text-green-500 bg-green-50'
       default:
@@ -259,32 +243,16 @@ export default function AdminSubmissionsPage() {
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'draft':
-        return <FileText className="h-5 w-5" />
       case 'in_progress':
         return <Clock className="h-5 w-5" />
       case 'submitted':
         return <FileText className="h-5 w-5" />
-      case 'pending_review':
-        return <Clock className="h-5 w-5" />
-      case 'under_review':
-        return <Search className="h-5 w-5" />
       case 'needs_revision':
         return <AlertTriangle className="h-5 w-5" />
       case 'resubmitted':
         return <RefreshCw className="h-5 w-5" />
       case 'approved':
         return <CheckCircle className="h-5 w-5" />
-      case 'rejected':
-        return <XCircle className="h-5 w-5" />
-      case 'passed_to_jury':
-        return <Users className="h-5 w-5" />
-      case 'jury_scoring':
-        return <BarChart3 className="h-5 w-5" />
-      case 'jury_deliberation':
-        return <Brain className="h-5 w-5" />
-      case 'final_decision':
-        return <Target className="h-5 w-5" />
       case 'completed':
         return <Trophy className="h-5 w-5" />
       default:
@@ -407,13 +375,7 @@ export default function AdminSubmissionsPage() {
                 >
                   All
                 </Button>
-                <Button
-                  variant={statusFilter === 'draft' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => handleStatusFilter('draft')}
-                >
-                  Drafts
-                </Button>
+
                 <Button
                   variant={statusFilter === 'in_progress' ? 'default' : 'outline'}
                   size="sm"
@@ -428,20 +390,7 @@ export default function AdminSubmissionsPage() {
                 >
                   Submitted
                 </Button>
-                <Button
-                  variant={statusFilter === 'pending_review' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => handleStatusFilter('pending_review')}
-                >
-                  Pending Review
-                </Button>
-                <Button
-                  variant={statusFilter === 'under_review' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => handleStatusFilter('under_review')}
-                >
-                  Under Review
-                </Button>
+
                 <Button
                   variant={statusFilter === 'needs_revision' ? 'default' : 'outline'}
                   size="sm"
@@ -461,43 +410,9 @@ export default function AdminSubmissionsPage() {
                   size="sm"
                   onClick={() => handleStatusFilter('approved')}
                 >
-                  Approved
+                  Approve to Jury
                 </Button>
-                <Button
-                  variant={statusFilter === 'rejected' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => handleStatusFilter('rejected')}
-                >
-                  Rejected
-                </Button>
-                <Button
-                  variant={statusFilter === 'passed_to_jury' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => handleStatusFilter('passed_to_jury')}
-                >
-                  Passed to Jury
-                </Button>
-                <Button
-                  variant={statusFilter === 'jury_scoring' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => handleStatusFilter('jury_scoring')}
-                >
-                  Jury Scoring
-                </Button>
-                <Button
-                  variant={statusFilter === 'jury_deliberation' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => handleStatusFilter('jury_deliberation')}
-                >
-                  Jury Deliberation
-                </Button>
-                <Button
-                  variant={statusFilter === 'final_decision' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => handleStatusFilter('final_decision')}
-                >
-                  Final Decision
-                </Button>
+
                 <Button
                   variant={statusFilter === 'completed' ? 'default' : 'outline'}
                   size="sm"

@@ -203,16 +203,18 @@ export default function SubmissionDetailPage() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
+      case 'in_progress':
+        return 'text-blue-500 bg-blue-50'
       case 'submitted':
         return 'text-blue-500 bg-blue-50'
       case 'needs_revision':
         return 'text-orange-500 bg-orange-50'
       case 'resubmitted':
         return 'text-purple-500 bg-purple-50'
-      case 'approved_for_juri':
+      case 'approved':
         return 'text-green-500 bg-green-50'
-      case 'with_juri':
-        return 'text-indigo-500 bg-indigo-50'
+      case 'completed':
+        return 'text-green-500 bg-green-50'
       default:
         return 'text-gray-500 bg-gray-50'
     }
@@ -220,16 +222,18 @@ export default function SubmissionDetailPage() {
 
   const getStatusIcon = (status: string) => {
     switch (status) {
+      case 'in_progress':
+        return <Clock className="h-5 w-5" />
       case 'submitted':
         return <Clock className="h-5 w-5" />
       case 'needs_revision':
         return <AlertTriangle className="h-5 w-5" />
       case 'resubmitted':
         return <RefreshCw className="h-5 w-5" />
-      case 'approved_for_juri':
+      case 'approved':
         return <CheckCircle className="h-5 w-5" />
-      case 'with_juri':
-        return <Clock className="h-5 w-5" />
+      case 'completed':
+        return <Trophy className="h-5 w-5" />
       default:
         return <Clock className="h-5 w-5" />
     }
@@ -237,16 +241,18 @@ export default function SubmissionDetailPage() {
 
   const getStatusLabel = (status: string) => {
     switch (status) {
+      case 'in_progress':
+        return 'In Progress'
       case 'submitted':
         return 'Submitted'
       case 'needs_revision':
         return 'Needs Revision'
       case 'resubmitted':
         return 'Resubmitted'
-      case 'approved_for_juri':
-        return 'Approved for Juri'
-      case 'with_juri':
-        return 'With Juri'
+      case 'approved':
+        return 'Approve to Jury'
+      case 'completed':
+        return 'Completed'
       default:
         return status
     }
