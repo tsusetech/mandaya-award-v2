@@ -66,8 +66,8 @@ export default function Navigation({ className = '' }: NavigationProps) {
         ]
       case 'JURI':
         return [
-          { href: '/juri', label: 'Dashboard', icon: Home },
-          { href: '/juri/feedback', label: 'Reviews', icon: Award },
+          { href: '/jury', label: 'Dashboard', icon: Home },
+          { href: '/jury/feedback', label: 'Reviews', icon: Award },
         ]
       case 'PESERTA':
       default:

@@ -221,7 +221,7 @@ export default function SubmissionFeedbackPage() {
             <Button 
               variant="ghost" 
               size="sm"
-              onClick={() => router.push('/juri/feedback')}
+                              onClick={() => router.push('/jury/feedback')}
               className="flex items-center space-x-2"
             >
               <ArrowLeft className="h-4 w-4" />
@@ -360,7 +360,7 @@ export default function SubmissionFeedbackPage() {
                 )}
                 <Button
                   variant="outline"
-                  onClick={() => router.push('/juri/feedback')}
+                  onClick={() => router.push('/jury/feedback')}
                   className="w-full"
                 >
                   Back to List

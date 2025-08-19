@@ -265,7 +265,7 @@ export default function JuriDashboard() {
 
         {/* Quick Actions */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => router.push('/juri/review')}>
+          <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => router.push('/jury/review')}>
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
                 <Award className="h-5 w-5 text-blue-600" />
@@ -280,7 +280,7 @@ export default function JuriDashboard() {
             </CardContent>
           </Card>
 
-          <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => router.push('/juri/feedback')}>
+          <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => router.push('/jury/feedback')}>
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
                 <FileText className="h-5 w-5 text-green-600" />
@@ -339,7 +339,7 @@ export default function JuriDashboard() {
               <Button 
                 variant="outline" 
                 size="sm"
-                onClick={() => router.push('/juri/review')}
+                onClick={() => router.push('/jury/review')}
                 className="flex items-center space-x-2"
               >
                 <span>View All</span>
@@ -362,7 +362,7 @@ export default function JuriDashboard() {
                   <div
                     key={review.id}
                     className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 cursor-pointer"
-                    onClick={() => router.push(`/juri/review/${review.sessionId}`)}
+                    onClick={() => router.push(`/jury/review/${review.sessionId}`)}
                   >
                     <div className="flex items-center space-x-4">
                       <div className={`p-2 rounded-lg ${getStatusColor(review.status)}`}>

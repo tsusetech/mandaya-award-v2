@@ -47,7 +47,7 @@ export default function LoginPage() {
       } else {
         const role = user.userRoles?.[0]?.role?.name || "PESERTA";
         if (role === "ADMIN" || role === "SUPERADMIN") router.push("/admin");
-        else if (role === "JURI") router.push("/juri");
+        else if (role === "JURI") router.push("/jury");
         else router.push("/peserta");
       }
     } catch (err: any) {

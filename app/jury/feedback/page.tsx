@@ -152,7 +152,7 @@ export default function JuriFeedbackPage() {
             <Button 
               variant="ghost" 
               size="sm"
-              onClick={() => router.push('/juri')}
+                              onClick={() => router.push('/jury')}
               className="flex items-center space-x-2"
             >
               <ArrowLeft className="h-4 w-4" />
@@ -257,7 +257,7 @@ export default function JuriFeedbackPage() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => router.push(`/juri/feedback/${submission.id}`)}
+                        onClick={() => router.push(`/jury/feedback/${submission.id}`)}
                         className="flex items-center space-x-2"
                       >
                         <MessageSquare className="h-4 w-4" />

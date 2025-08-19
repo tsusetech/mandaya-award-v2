@@ -93,7 +93,7 @@ export default function DashboardPage() {
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => router.push('/juri/review')}>
+              <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => router.push('/jury/review')}>
                 <CardHeader>
                   <CardTitle className="flex items-center space-x-2">
                     <Award className="h-5 w-5 text-purple-600" />

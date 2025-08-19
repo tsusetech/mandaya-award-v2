@@ -146,7 +146,7 @@ export default function ReviewPage() {
       await api.post(`/assessments/session/${id}/review/batch`, reviewPayload)
       
       toast.success(asDraft ? 'Review saved as draft' : 'Review submitted successfully')
-      if (!asDraft) router.push('/juri')
+              if (!asDraft) router.push('/jury')
     } catch (err) {
       console.error('Error saving review:', err)
       toast.error('Failed to save review')
@@ -182,7 +182,7 @@ export default function ReviewPage() {
             <Button 
               variant="ghost" 
               size="sm"
-              onClick={() => router.push('/juri')}
+                              onClick={() => router.push('/jury')}
               className="flex items-center space-x-2"
             >
               <ArrowLeft className="h-4 w-4" />
