@@ -62,6 +62,7 @@ export default function Navigation({ className = '' }: NavigationProps) {
           { href: '/admin/users', label: 'Users', icon: Users },
           { href: '/admin/groups', label: 'Groups', icon: FileText },
           { href: '/admin/submissions', label: 'Submissions', icon: FileText },
+          { href: '/admin/scoring-settings', label: 'Scoring Settings', icon: Settings },
         ]
       case 'JURI':
         return [

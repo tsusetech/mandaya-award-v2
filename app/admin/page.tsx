@@ -182,17 +182,17 @@ export default function AdminPage() {
             </CardContent>
           </Card>
 
-          <Card className="cursor-pointer hover:shadow-md transition-shadow">
+          <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigateTo('/admin/scoring-settings')}>
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
                 <Calendar className="h-5 w-5 text-purple-600" />
-                <span>System Settings</span>
+                <span>Scoring Settings</span>
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-gray-600 text-sm">Configure system preferences</p>
-              <Button className="mt-4 w-full" variant="outline" disabled>
-                Coming Soon
+              <p className="text-gray-600 text-sm">Manage question categories and scoring criteria</p>
+              <Button className="mt-4 w-full" variant="outline">
+                Manage Scoring
               </Button>
             </CardContent>
           </Card>
