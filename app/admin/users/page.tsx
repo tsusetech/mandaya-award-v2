@@ -99,6 +99,7 @@ export default function AdminUsersPage() {
         name: data.name,
         email: data.email,
         username: data.username,
+        roleName: data.role,
         ...(data.password && { password: data.password }),
         ...(data.groupId && { groupId: parseInt(data.groupId) })
       }

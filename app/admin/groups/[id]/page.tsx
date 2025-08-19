@@ -18,7 +18,8 @@ interface User {
 
 interface Group {
   id: number
-  name: string
+  groupName: string
+  name?: string
   description?: string
   createdAt?: string
 }
@@ -36,14 +37,19 @@ export default function GroupDetailPage() {
       setLoading(true)
 
       const groupRes = await api.get(`/groups/${groupId}`)
-      setGroup(groupRes.data)
+      console.log('Group API response:', groupRes.data)
+      const groupData = groupRes.data.group || groupRes.data
+      console.log('Group data:', groupData)
+      setGroup(groupData)
 
       const membersRes = await api.get(`/groups/${groupId}/users`)
+      console.log('Members API response:', membersRes.data)
       const membersList = Array.isArray(membersRes.data)
         ? membersRes.data
         : membersRes.data.users || []
       setMembers(membersList)
     } catch (err) {
+      console.error('Error fetching group details:', err)
       toast.error("Failed to load group data.")
     } finally {
       setLoading(false)
@@ -91,7 +97,7 @@ export default function GroupDetailPage() {
                 <span>Back to Groups</span>
               </Button>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">{group?.name || 'Loading...'}</h1>
+                <h1 className="text-2xl font-bold text-gray-900">{group?.groupName || group?.name || 'Loading...'}</h1>
                 <p className="text-gray-600">{group?.description || 'Group details and member management'}</p>
               </div>
             </div>
@@ -116,7 +122,7 @@ export default function GroupDetailPage() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <p className="text-sm font-medium text-gray-500">Group Name</p>
-                <p className="text-lg font-semibold">{group?.name}</p>
+                <p className="text-lg font-semibold">{group?.groupName || group?.name}</p>
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-500">Total Members</p>

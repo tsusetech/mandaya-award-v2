@@ -267,7 +267,12 @@ export function QuestionInput({
          return (
            <div className="space-y-2">
              {options.map((option) => {
-               const isOtherOption = option.optionValue.toLowerCase() === 'other' || option.optionText.toLowerCase() === 'other'
+               const isOtherOption = option.optionValue.toLowerCase() === 'other' || 
+                                   option.optionText.toLowerCase() === 'other' ||
+                                   option.optionValue.toLowerCase() === 'lainnya_sebutkan' ||
+                                   option.optionText.toLowerCase() === 'lainnya sebutkan' ||
+                                   option.optionValue.toLowerCase() === 'lainnya' ||
+                                   option.optionText.toLowerCase() === 'lainnya'
                const isChecked = (localValue || []).some((v: any) => {
                  if (typeof v === 'string') {
                    return v === option.optionValue
@@ -601,7 +606,7 @@ export function QuestionInput({
       {needsUrlInput && (
         <div className="mt-4">
           <Label className="text-sm font-medium text-gray-700">
-            Tautan/Bukti Dukung (Opsional)
+            Tautan/Bukti Dukung
           </Label>
           <Input
             type="url"

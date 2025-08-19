@@ -177,13 +177,18 @@ export default function AssessmentPage() {
             } else if (Array.isArray(question.response)) {
               // For arrays (multiple choice), use the array directly
               processedValue = question.response
-            } else if (typeof question.response === 'object' && question.response !== null) {
-              // For object responses, extract the appropriate value
-              processedValue = question.response.textValue || 
-                              question.response.numericValue || 
-                              question.response.arrayValue || 
-                              question.response.booleanValue || 
-                              ''
+                         } else if (typeof question.response === 'object' && question.response !== null) {
+               // For object responses, extract the appropriate value
+               // Handle combined response structure (answer + url)
+               if (question.response.answer !== undefined) {
+                 processedValue = question.response.answer
+               } else {
+                 processedValue = question.response.textValue || 
+                                 question.response.numericValue || 
+                                 question.response.arrayValue || 
+                                 question.response.booleanValue || 
+                                 ''
+               }
             } else {
               // For simple types (string, number), use directly
               processedValue = question.response
@@ -300,7 +305,12 @@ export default function AssessmentPage() {
     const errors: Record<number, string> = {}
     
     questionsToValidate.forEach(question => {
-      if (question.isRequired && !responses[question.id]) {
+      // Check if this question belongs to the "Pengusulan Individu/Tokoh" section
+      const isPengusulanSection = question.sectionTitle?.startsWith('Pengusulan Individu/Tokoh yang berperan besar pada pemberdayaan masyarakat') ||
+                                 question.subsection?.startsWith('Pengusulan Individu/Tokoh yang berperan besar pada pemberdayaan masyarakat')
+      
+      // Only validate as required if it's not in the Pengusulan section
+      if (!isPengusulanSection && question.isRequired && !responses[question.id]) {
         errors[question.id] = 'This question is required'
       }
 
@@ -902,88 +912,150 @@ export default function AssessmentPage() {
               </div>
             </div>
           </>
-        ) : (
-          /* Read-only view for non-editable statuses */
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <Eye className="h-5 w-5" />
-                <span>Assessment Review</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {questions.map((question) => (
-                <div key={question.id} className="p-4 border rounded-lg">
-                  {(() => {
-                    console.log(`Question ${question.id} response data:`, {
-                      questionId: question.id,
-                      response: question.response,
-                      responseType: typeof question.response,
-                      isArray: Array.isArray(question.response)
-                    })
-                    return null
-                  })()}
-                  <h3 className="font-medium mb-2">Question {question.orderNumber}: {question.questionText}</h3>
-                  <div className="bg-gray-50 p-3 rounded">
-                    <p className="text-sm text-gray-700">
-                      {(() => {
-                        // Handle different response formats
-                        if (typeof question.response === 'string') {
-                          return question.response
-                        } else if (typeof question.response === 'number') {
-                          return question.response.toString()
-                        } else if (Array.isArray(question.response)) {
-                          return question.response.join(', ')
-                        } else if (typeof question.response === 'object' && question.response !== null) {
-                          // Handle object response format
-                          return question.response.textValue || 
-                                 question.response.numericValue?.toString() || 
-                                 (Array.isArray(question.response.arrayValue) 
-                                   ? question.response.arrayValue.join(', ') 
-                                   : question.response.arrayValue) || 
-                                 (question.response.booleanValue ? 'Yes' : 'No') || 
-                                 'No response'
-                        } else if (question.response === true) {
-                          return 'Yes'
-                        } else if (question.response === false) {
-                          return 'No'
-                        } else {
-                          return 'No response'
-                        }
-                      })()}
-                    </p>
-                  </div>
-                  
-                  {/* Show feedback for this question if it exists */}
-                  {question.reviewComments && question.reviewComments.length > 0 && (
-                    <div className="mt-4 p-4 bg-orange-50 border border-orange-200 rounded-lg">
-                      <div className="flex items-start space-x-2">
-                        <AlertTriangle className="h-4 w-4 text-orange-500 mt-0.5 flex-shrink-0" />
-                        <div className="flex-1">
-                          <h4 className="text-sm font-medium text-orange-800 mb-2">
-                            Review Feedback {question.reviewComments.some((c: any) => c.isCritical) && '(Critical)'}
-                          </h4>
-                          {question.reviewComments
-                            .filter((comment: any) => comment.stage === 'admin_validation')
-                            .map((comment: any, index: number) => (
-                              <div key={index} className="mb-2 last:mb-0">
-                                <p className="text-sm text-orange-700">{comment.comment}</p>
-                                {comment.reviewerName && (
-                                  <p className="text-xs text-orange-600 mt-1">
-                                    — {comment.reviewerName}
-                                  </p>
-                                )}
-                              </div>
-                            ))}
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </CardContent>
-          </Card>
-        )}
+                 ) : (
+           /* Read-only view for non-editable statuses */
+           <>
+             {/* Section Navigation */}
+             <Card>
+               <CardContent className="pt-6">
+                 <div className="flex flex-wrap gap-2">
+                   {sections.map((section, index) => (
+                     <Button
+                       key={section}
+                       variant={currentSection === section ? 'default' : 'outline'}
+                       size="sm"
+                       onClick={() => setCurrentSection(section)}
+                       className="text-xs"
+                     >
+                       {section}
+                     </Button>
+                   ))}
+                 </div>
+               </CardContent>
+             </Card>
+
+             {/* Current Section Questions */}
+             <Card>
+               <CardHeader>
+                 <CardTitle className="flex items-center space-x-2">
+                   <Eye className="h-5 w-5" />
+                   <span>{currentSection || 'Assessment Review'}</span>
+                 </CardTitle>
+               </CardHeader>
+               <CardContent className="space-y-6">
+                 {questions
+                   .filter(q => q.sectionTitle === getSectionTitleFromCombined(currentSection || ''))
+                   .map((question) => (
+                     <div key={question.id} className="p-4 border rounded-lg">
+                       {(() => {
+                         console.log(`Question ${question.id} response data:`, {
+                           questionId: question.id,
+                           response: question.response,
+                           responseType: typeof question.response,
+                           isArray: Array.isArray(question.response)
+                         })
+                         return null
+                       })()}
+                       <h3 className="font-medium mb-2">{question.questionText}</h3>
+                       <div className="bg-gray-50 p-3 rounded">
+                         <p className="text-sm text-gray-700">
+                           {(() => {
+                             // Handle different response formats
+                             if (typeof question.response === 'string') {
+                               return question.response
+                             } else if (typeof question.response === 'number') {
+                               return question.response.toString()
+                             } else if (Array.isArray(question.response)) {
+                               // Handle checkbox and multiple-choice responses with proper formatting
+                               return question.response.map((item: any) => {
+                                 if (typeof item === 'string') {
+                                   // For multiple-choice questions, find the optionText that matches the optionValue
+                                   if (question.options && question.options.length > 0) {
+                                     const matchingOption = question.options.find((option: any) => option.optionValue === item)
+                                     if (matchingOption) {
+                                       return matchingOption.optionText
+                                     }
+                                   }
+                                   return item
+                                 } else if (typeof item === 'object' && item.value === 'other' && item.otherText) {
+                                   return item.otherText
+                                 }
+                                 return item
+                               }).join(', ')
+                             } else if (typeof question.response === 'object' && question.response !== null) {
+                               // Handle object response format with URL support
+                               const answer = question.response.answer !== undefined ? question.response.answer :
+                                             question.response.textValue || 
+                                             question.response.numericValue?.toString() || 
+                                             (Array.isArray(question.response.arrayValue) 
+                                               ? question.response.arrayValue.join(', ') 
+                                               : question.response.arrayValue) || 
+                                             (question.response.booleanValue ? 'Yes' : 'No') || 
+                                             'No response'
+                               
+                              return answer
+                             } else if (question.response === true) {
+                               return 'Yes'
+                             } else if (question.response === false) {
+                               return 'No'
+                             } else {
+                               return 'No response'
+                             }
+                           })()}
+                         </p>
+                         
+                         {/* Show URL if it exists in the response */}
+                         {(() => {
+                           if (typeof question.response === 'object' && question.response !== null && question.response.url) {
+                             return (
+                               <div className="mt-2 pt-2 border-t border-gray-200">
+                                 <p className="text-xs text-gray-500 mb-1">Tautan/Bukti Dukung:</p>
+                                 <a 
+                                   href={question.response.url} 
+                                   target="_blank" 
+                                   rel="noopener noreferrer"
+                                   className="text-sm text-blue-600 hover:text-blue-800 underline break-all"
+                                 >
+                                   {question.response.url}
+                                 </a>
+                               </div>
+                             )
+                           }
+                           return null
+                         })()}
+                       </div>
+                       
+                       {/* Show feedback for this question if it exists */}
+                       {question.reviewComments && question.reviewComments.length > 0 && (
+                         <div className="mt-4 p-4 bg-orange-50 border border-orange-200 rounded-lg">
+                           <div className="flex items-start space-x-2">
+                             <AlertTriangle className="h-4 w-4 text-orange-500 mt-0.5 flex-shrink-0" />
+                             <div className="flex-1">
+                               <h4 className="text-sm font-medium text-orange-800 mb-2">
+                                 Review Feedback {question.reviewComments.some((c: any) => c.isCritical) && '(Critical)'}
+                               </h4>
+                               {question.reviewComments
+                                 .filter((comment: any) => comment.stage === 'admin_validation')
+                                 .map((comment: any, index: number) => (
+                                   <div key={index} className="mb-2 last:mb-0">
+                                     <p className="text-sm text-orange-700">{comment.comment}</p>
+                                     {comment.reviewerName && (
+                                       <p className="text-xs text-orange-600 mt-1">
+                                         — {comment.reviewerName}
+                                       </p>
+                                     )}
+                                   </div>
+                                 ))}
+                             </div>
+                           </div>
+                         </div>
+                       )}
+                     </div>
+                   ))}
+               </CardContent>
+             </Card>
+           </>
+         )}
       </div>
     </div>
   )

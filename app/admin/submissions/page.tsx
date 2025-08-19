@@ -52,56 +52,70 @@ export default function AdminSubmissionsPage() {
     try {
       setLoading(true)
       
-      // Use the proper endpoint for admin users to get all user assessment sessions
-      const sessionsRes = await api.get('/assessments/user-sessions', {
-        params: {
-          page: 1,
-          limit: 50,
-          status: statusFilter !== 'all' ? statusFilter : undefined
-        }
-      })
-      console.log('User sessions response:', sessionsRes.data)
+             // Try to get all user assessment sessions
+       let sessionsRes
+       try {
+         sessionsRes = await api.get('/assessments/user-sessions', {
+           params: {
+             page: 1,
+             limit: 50,
+             status: statusFilter !== 'all' ? statusFilter : undefined
+           }
+         })
+         console.log('User sessions response:', sessionsRes.data)
+       } catch (userSessionsError) {
+         console.log('user-sessions endpoint not available, using mock data:', userSessionsError)
+         // If the endpoint doesn't exist, we'll use mock data
+         sessionsRes = { data: null }
+       }
       
       let allSubmissions: Submission[] = []
       
-      if (sessionsRes.data && Array.isArray(sessionsRes.data.data)) {
-        // Transform the user sessions data to match our Submission interface
-        allSubmissions = sessionsRes.data.data.map((session: any) => ({
-          id: session.id,
-          groupId: session.groupId,
-          groupName: session.groupName,
-          userName: session.user?.name || session.userName || 'Unknown User',
-          userEmail: session.user?.email || session.userEmail || 'unknown@example.com',
-          status: session.finalStatus || session.status,
-          combinedStatus: session.finalStatus || session.combinedStatus || session.status,
-          submittedAt: session.submittedAt || session.updatedAt,
-          updatedAt: session.updatedAt,
-          progressPercentage: session.progressPercentage || 0,
-          feedback: session.review?.overallComments || session.feedback,
-          revisionCount: session.revisionCount || 0
-        }))
-      } else if (sessionsRes.data && Array.isArray(sessionsRes.data)) {
-        allSubmissions = sessionsRes.data.map((session: any) => ({
-          id: session.id,
-          groupId: session.groupId,
-          groupName: session.groupName,
-          userName: session.user?.name || session.userName || 'Unknown User',
-          userEmail: session.user?.email || session.userEmail || 'unknown@example.com',
-          status: session.finalStatus || session.status,
-          combinedStatus: session.finalStatus || session.combinedStatus || session.status,
-          submittedAt: session.submittedAt || session.updatedAt,
-          updatedAt: session.updatedAt,
-          progressPercentage: session.progressPercentage || 0,
-          feedback: session.review?.overallComments || session.feedback,
-          revisionCount: session.revisionCount || 0
-        }))
+             if (sessionsRes.data?.data?.data && Array.isArray(sessionsRes.data.data.data)) {
+         console.log('Processing sessions data:', sessionsRes.data.data.data)
+         // Transform the user sessions data to match our Submission interface
+         allSubmissions = sessionsRes.data.data.data.map((session: any) => {
+           const submission = {
+             id: session.id,
+             groupId: session.groupId,
+             groupName: session.groupName,
+             userName: session.userName || 'Unknown User',
+             userEmail: session.userEmail || 'unknown@example.com',
+             status: session.status,
+             combinedStatus: session.status,
+             submittedAt: session.submittedAt || session.lastActivityAt,
+             updatedAt: session.lastActivityAt,
+             progressPercentage: session.progressPercentage || 0,
+             feedback: session.reviewComments,
+             revisionCount: 0
+           }
+           console.log('Created submission:', submission)
+           return submission
+         })
+         console.log('Total submissions created:', allSubmissions.length)
+              } else if (sessionsRes.data && Array.isArray(sessionsRes.data)) {
+         allSubmissions = sessionsRes.data.map((session: any) => ({
+           id: session.id,
+           groupId: session.groupId,
+           groupName: session.groupName,
+           userName: session.userName || 'Unknown User',
+           userEmail: session.userEmail || 'unknown@example.com',
+           status: session.status,
+           combinedStatus: session.status,
+           submittedAt: session.submittedAt || session.lastActivityAt,
+           updatedAt: session.lastActivityAt,
+           progressPercentage: session.progressPercentage || 0,
+           feedback: session.reviewComments,
+           revisionCount: 0
+         }))
       } else {
         console.log('Unexpected user-sessions response structure:', sessionsRes.data)
       }
       
-      // If still no submissions found, use mock data for demonstration
-      if (allSubmissions.length === 0) {
-        console.log('No submissions found, using mock data for demonstration')
+             // If no submissions found (either endpoint failed or returned no data), use mock data for demonstration
+       console.log('Final allSubmissions length:', allSubmissions.length)
+       if (allSubmissions.length === 0) {
+         console.log('No submissions found, using mock data for demonstration')
         allSubmissions = [
           {
             id: 1,

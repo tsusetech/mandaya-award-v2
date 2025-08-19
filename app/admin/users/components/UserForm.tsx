@@ -14,6 +14,12 @@ interface Group {
   description?: string
 }
 
+interface Role {
+  id: number
+  name: string
+  description?: string
+}
+
 export function UserForm({ open, onClose, onSubmit, defaultValues }: {
   open: boolean
   onClose: () => void
@@ -22,15 +28,30 @@ export function UserForm({ open, onClose, onSubmit, defaultValues }: {
 }) {
   const { register, handleSubmit, reset } = useForm({ defaultValues })
   const [groups, setGroups] = useState<Group[]>([])
+  const [roles, setRoles] = useState<Role[]>([])
   const [loadingGroups, setLoadingGroups] = useState(false)
+  const [loadingRoles, setLoadingRoles] = useState(false)
 
   useEffect(() => {
-    reset(defaultValues)
-  }, [defaultValues])
+    // Extract role from userRoles if editing
+    if (defaultValues?.id && defaultValues?.userRoles?.length > 0) {
+      const userRole = defaultValues.userRoles[0]?.role?.name
+      console.log('Extracted role:', userRole) // Debug log
+      const formData = {
+        ...defaultValues,
+        role: userRole || ''
+      }
+      console.log('Form data with role:', formData) // Debug log
+      reset(formData)
+    } else {
+      reset(defaultValues)
+    }
+  }, [defaultValues, reset])
 
   useEffect(() => {
     if (open) {
       fetchGroups()
+      fetchRoles()
     }
   }, [open])
 
@@ -49,6 +70,21 @@ export function UserForm({ open, onClose, onSubmit, defaultValues }: {
     }
   }
 
+  const fetchRoles = async () => {
+    try {
+      setLoadingRoles(true)
+      const res = await api.get('/roles')
+      console.log('Roles API response:', res.data)
+      const rolesList = res.data.data || []
+      console.log('Roles list:', rolesList)
+      setRoles(rolesList)
+    } catch (err) {
+      console.error('Error fetching roles:', err)
+    } finally {
+      setLoadingRoles(false)
+    }
+  }
+
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent>
@@ -63,13 +99,42 @@ export function UserForm({ open, onClose, onSubmit, defaultValues }: {
             <Input {...register('password')} placeholder="Password" type="password" required />
           )}
           
-          {/* Group Selection */}
+          {/* Role Selection */}
           <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-700">Assign to Group</label>
+            <label className="text-sm font-medium text-gray-700">Role</label>
+            <select
+              {...register('role')}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              required
+              disabled={loadingRoles}
+            >
+              <option value="">Select a role</option>
+              {roles.map((role) => (
+                <option key={role.id} value={role.name}>
+                  {role.name}
+                </option>
+              ))}
+            </select>
+            {loadingRoles && (
+              <p className="text-xs text-gray-500">Loading roles...</p>
+            )}
+            {!loadingRoles && roles.length === 0 && (
+              <p className="text-xs text-gray-500">No roles available</p>
+            )}
+            {!loadingRoles && roles.length > 0 && (
+              <p className="text-xs text-gray-500">{roles.length} roles loaded</p>
+            )}
+          </div>
+          
+          {/* Group Selection - Disabled when editing */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-gray-700">
+              Assign to Group {defaultValues?.id && '(Disabled when editing)'}
+            </label>
             <select
               {...register('groupId')}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              disabled={loadingGroups}
+              disabled={loadingGroups || !!defaultValues?.id}
             >
               <option value="">Select a group (optional)</option>
               {groups.map((group) => (

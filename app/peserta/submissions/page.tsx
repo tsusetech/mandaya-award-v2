@@ -54,14 +54,21 @@ export default function SubmissionsPage() {
       // Try to get user's sessions with review data using the admin endpoint
       
       try {
-        // Use the admin endpoint but it will only return current user's sessions
-        const sessionsRes = await api.get('/assessments/user-sessions', {
-          params: {
-            page: 1,
-            limit: 50,
-            status: statusFilter !== 'all' ? statusFilter : undefined
-          }
-        })
+        // Try to get user's sessions - first try the user-sessions endpoint
+        let sessionsRes
+        try {
+          sessionsRes = await api.get('/assessments/user-sessions', {
+            params: {
+              page: 1,
+              limit: 50,
+              status: statusFilter !== 'all' ? statusFilter : undefined
+            }
+          })
+        } catch (userSessionsError) {
+          console.log('user-sessions endpoint not available, trying alternative approach:', userSessionsError)
+          // If user-sessions fails, try to get sessions through groups
+          throw new Error('user-sessions endpoint not available')
+        }
         console.log('User sessions response:', sessionsRes.data)
         console.log('Response structure:', {
           hasData: !!sessionsRes.data,
@@ -71,72 +78,66 @@ export default function SubmissionsPage() {
           dataLength: sessionsRes.data?.data?.length
         })
         
-        if (sessionsRes.data && Array.isArray(sessionsRes.data.data)) {
-          console.log('Starting to map sessions data...')
-          // Transform the user sessions data to match our Submission interface
-          allSubmissions = await Promise.all(sessionsRes.data.data.map(async (session: any) => {
-            // If there's a review, fetch review data
-            let sessionReviews = []
-            if (session.finalStatus === 'needs_revision' || session.reviewStatus === 'needs_revision') {
-              console.log(`Fetching review data for session ${session.id}...`)
-              sessionReviews = await fetchSessionReviews(session.id)
-            }
-            
-            const submission = {
-              id: session.id,
-              groupId: session.groupId,
-              groupName: session.groupName || `Group ${session.groupId}`,
-              status: session.finalStatus || session.status,
-              combinedStatus: session.finalStatus || session.combinedStatus || session.status,
-              submittedAt: session.submittedAt || session.lastActivityAt,
-              updatedAt: session.lastActivityAt,
-              progressPercentage: session.progressPercentage || 0,
-              feedback: sessionReviews.length > 0 ? sessionReviews[0]?.overallComments : (session.review?.overallComments || session.reviewComments || session.feedback),
-              revisionCount: session.revisionCount || 0
-            }
-            console.log('Created submission with status:', {
-              finalStatus: session.finalStatus,
-              status: session.status,
-              combinedStatus: session.combinedStatus,
-              finalCombinedStatus: submission.combinedStatus
-            })
-            console.log('Review data available:', {
-              sessionReviews: sessionReviews.length,
-              reviews: sessionReviews,
-              review: session.review,
-              reviewComments: session.reviewComments,
-              feedback: session.feedback,
-              finalFeedback: submission.feedback
-            })
-            return submission
-          }))
-        } else if (sessionsRes.data && Array.isArray(sessionsRes.data)) {
-          allSubmissions = sessionsRes.data.map((session: any) => {
-            const submission = {
-              id: session.id,
-              groupId: session.groupId,
-              groupName: session.groupName || `Group ${session.groupId}`,
-              status: session.finalStatus || session.status,
-              combinedStatus: session.finalStatus || session.combinedStatus || session.status,
-              submittedAt: session.submittedAt || session.lastActivityAt,
-              updatedAt: session.lastActivityAt,
-              progressPercentage: session.progressPercentage || 0,
-              feedback: session.review?.overallComments || session.reviewComments || session.feedback,
-              revisionCount: session.revisionCount || 0
-            }
-            console.log('Created submission (array) with status:', {
-              finalStatus: session.finalStatus,
-              status: session.status,
-              combinedStatus: session.combinedStatus,
-              finalCombinedStatus: submission.combinedStatus
-            })
-            return submission
-          })
-        }
+                 if (sessionsRes.data?.data && Array.isArray(sessionsRes.data.data)) {
+           console.log('Starting to map sessions data...')
+           // Transform the user sessions data to match our Submission interface
+           allSubmissions = await Promise.all(sessionsRes.data.data.map(async (session: any) => {
+             // If there's a review, fetch review data
+             let sessionReviews = []
+             if (session.status === 'needs_revision' || session.reviewStage === 'needs_revision') {
+               console.log(`Fetching review data for session ${session.id}...`)
+               sessionReviews = await fetchSessionReviews(session.id)
+             }
+             
+             const submission = {
+               id: session.id,
+               groupId: session.groupId,
+               groupName: session.groupName || `Group ${session.groupId}`,
+               status: session.status,
+               combinedStatus: session.status,
+               submittedAt: session.submittedAt || session.lastActivityAt,
+               updatedAt: session.lastActivityAt,
+               progressPercentage: session.progressPercentage || 0,
+               feedback: sessionReviews.length > 0 ? sessionReviews[0]?.overallComments : session.reviewComments,
+               revisionCount: 0 // This field might not be available in the current response
+             }
+             console.log('Created submission with status:', {
+               status: session.status,
+               finalCombinedStatus: submission.combinedStatus
+             })
+             console.log('Review data available:', {
+               sessionReviews: sessionReviews.length,
+               reviews: sessionReviews,
+               reviewComments: session.reviewComments,
+               finalFeedback: submission.feedback
+             })
+             return submission
+           }))
+                  } else if (sessionsRes.data && Array.isArray(sessionsRes.data)) {
+           allSubmissions = sessionsRes.data.map((session: any) => {
+             const submission = {
+               id: session.id,
+               groupId: session.groupId,
+               groupName: session.groupName || `Group ${session.groupId}`,
+               status: session.status,
+               combinedStatus: session.status,
+               submittedAt: session.submittedAt || session.lastActivityAt,
+               updatedAt: session.lastActivityAt,
+               progressPercentage: session.progressPercentage || 0,
+               feedback: session.reviewComments,
+               revisionCount: 0
+             }
+             console.log('Created submission (array) with status:', {
+               status: session.status,
+               finalCombinedStatus: submission.combinedStatus
+             })
+             return submission
+           })
+         }
       } catch (error) {
-        console.log('Failed to fetch user sessions with review data, falling back to group-based approach:', error)
+        console.log('Failed to fetch user sessions, using group-based approach:', error)
         
-        // Fallback: Get user's assigned groups and fetch individual sessions
+        // Use group-based approach to get user's sessions
         try {
           const groupsRes = await api.get('/groups/my-groups')
           console.log('Groups response:', groupsRes.data)

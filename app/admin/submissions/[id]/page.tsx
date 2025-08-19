@@ -9,10 +9,7 @@ import { Badge } from '@/components/ui/badge'
 import { 
   ArrowLeft, 
   CheckCircle, 
-  AlertTriangle, 
   MessageSquare,
-  Send,
-  RefreshCw,
   Eye,
   EyeOff
 } from 'lucide-react'
@@ -46,6 +43,7 @@ interface Response {
   isComplete: boolean
   feedback?: string
   needsRevision?: boolean
+  isResolved?: boolean
 }
 
 interface Submission {
@@ -70,6 +68,7 @@ export default function AdminSubmissionReviewPage() {
   const [saving, setSaving] = useState(false)
   const [generalFeedback, setGeneralFeedback] = useState('')
   const [showFeedback, setShowFeedback] = useState<Record<number, boolean>>({})
+  const [currentSection, setCurrentSection] = useState<string>('')
 
     const fetchSubmission = async () => {
     try {
@@ -78,16 +77,26 @@ export default function AdminSubmissionReviewPage() {
       // Use the new admin endpoint to get detailed session information
       const sessionRes = await api.get(`/assessments/session/${id}/detail`)
       console.log('Admin session detail response:', sessionRes.data)
+      console.log('Response structure check:', {
+        hasData: !!sessionRes.data,
+        hasDataData: !!sessionRes.data?.data,
+        dataKeys: sessionRes.data ? Object.keys(sessionRes.data) : [],
+        dataDataKeys: sessionRes.data?.data ? Object.keys(sessionRes.data.data) : []
+      })
       
       if (!sessionRes.data) {
         throw new Error('Session not found')
       }
       
-             const sessionData = sessionRes.data
-       
-       if (!sessionData) {
-         throw new Error('Session not found')
-       }
+            // The API response has the structure: { success: true, message: "...", data: {...} }
+      const sessionData = sessionRes.data.data || sessionRes.data
+      
+      console.log('Extracted sessionData:', sessionData)
+      console.log('SessionData keys:', sessionData ? Object.keys(sessionData) : [])
+      
+      if (!sessionData) {
+        throw new Error('Session not found')
+      }
        
        // Log the full session data structure to understand what fields are available
        console.log('Full session data structure:', {
@@ -153,88 +162,126 @@ export default function AdminSubmissionReviewPage() {
         id: sessionData.id,
         groupName: sessionData.groupName || `Group ${sessionData.groupId}`,
         status: sessionData.status,
-        submittedAt: sessionData.submittedAt || sessionData.updatedAt,
-        updatedAt: sessionData.updatedAt,
+        submittedAt: sessionData.submittedAt || sessionData.lastActivityAt,
+        updatedAt: sessionData.lastActivityAt,
         progressPercentage: sessionData.progressPercentage || 0,
-        feedback: sessionData.feedback,
-        revisionCount: sessionData.revisionCount || 0,
+        feedback: sessionData.reviewComments,
+        revisionCount: 0,
         reviewId: existingReviewId,
         questions: sessionData.questions || [],
                  responses: (() => {
            // Extract responses directly from questions since they're embedded
            const responsesFromQuestions = sessionData.questions?.map((question: any) => {
              if (question.response !== undefined && question.response !== null && question.response !== '') {
-               // Extract feedback from reviewComments if available
-               let feedback: string | undefined
-               let needsRevision: boolean = false
+                               // Extract feedback from reviewComments if available
+                let feedback: string | undefined
+                let needsRevision: boolean = false
+                let isResolved: boolean = false
+                
+                if (question.reviewComments && Array.isArray(question.reviewComments)) {
+                  const adminComments = question.reviewComments.filter((comment: any) => 
+                    comment.stage === 'admin_validation'
+                  )
+                  if (adminComments.length > 0) {
+                    feedback = adminComments[0].comment
+                    // Only mark as needing revision if not resolved
+                    needsRevision = adminComments[0].isCritical && !adminComments[0].isResolved
+                    isResolved = adminComments[0].isResolved || false
+                  }
+                }
                
-               if (question.reviewComments && Array.isArray(question.reviewComments)) {
-                 const adminComments = question.reviewComments.filter((comment: any) => 
-                   comment.stage === 'admin_validation'
-                 )
-                 if (adminComments.length > 0) {
-                   feedback = adminComments[0].comment
-                   needsRevision = adminComments[0].isCritical || false
-                 }
-               }
-               
-               // Handle different response types
-               if (typeof question.response === 'string') {
-                 return {
-                   questionId: question.id,
-                   textValue: question.response,
-                   numericValue: undefined,
-                   booleanValue: undefined,
-                   arrayValue: undefined,
-                   isComplete: true,
-                   feedback: feedback,
-                   needsRevision: needsRevision
-                 }
-               } else if (typeof question.response === 'number') {
-                 return {
-                   questionId: question.id,
-                   textValue: undefined,
-                   numericValue: question.response,
-                   booleanValue: undefined,
-                   arrayValue: undefined,
-                   isComplete: true,
-                   feedback: feedback,
-                   needsRevision: needsRevision
-                 }
-               } else if (typeof question.response === 'boolean') {
-                 return {
-                   questionId: question.id,
-                   textValue: undefined,
-                   numericValue: undefined,
-                   booleanValue: question.response,
-                   arrayValue: undefined,
-                   isComplete: true,
-                   feedback: feedback,
-                   needsRevision: needsRevision
-                 }
-               } else if (Array.isArray(question.response)) {
-                 return {
-                   questionId: question.id,
-                   textValue: undefined,
-                   numericValue: undefined,
-                   booleanValue: undefined,
-                   arrayValue: question.response,
-                   isComplete: true,
-                   feedback: feedback,
-                   needsRevision: needsRevision
-                 }
+                               // Handle different response types
+                if (typeof question.response === 'string') {
+                  return {
+                    questionId: question.id,
+                    textValue: question.response,
+                    numericValue: undefined,
+                    booleanValue: undefined,
+                    arrayValue: undefined,
+                    isComplete: true,
+                    feedback: feedback,
+                    needsRevision: needsRevision,
+                    isResolved: isResolved
+                  }
+                               } else if (typeof question.response === 'number') {
+                  return {
+                    questionId: question.id,
+                    textValue: undefined,
+                    numericValue: question.response,
+                    booleanValue: undefined,
+                    arrayValue: undefined,
+                    isComplete: true,
+                    feedback: feedback,
+                    needsRevision: needsRevision,
+                    isResolved: isResolved
+                  }
+                               } else if (typeof question.response === 'boolean') {
+                  return {
+                    questionId: question.id,
+                    textValue: undefined,
+                    numericValue: undefined,
+                    booleanValue: question.response,
+                    arrayValue: undefined,
+                    isComplete: true,
+                    feedback: feedback,
+                    needsRevision: needsRevision,
+                    isResolved: isResolved
+                  }
+                               } else if (Array.isArray(question.response)) {
+                  return {
+                    questionId: question.id,
+                    textValue: undefined,
+                    numericValue: undefined,
+                    booleanValue: undefined,
+                    arrayValue: question.response,
+                    isComplete: true,
+                    feedback: feedback,
+                    needsRevision: needsRevision,
+                    isResolved: isResolved
+                  }
                } else if (typeof question.response === 'object' && Object.keys(question.response).length > 0) {
-                 // Handle object response format
+                 // Handle object response format (combined answer + url structure)
                  const response = question.response
-                 return {
-                   questionId: question.id,
-                   textValue: response.textValue,
-                   numericValue: response.numericValue,
-                   booleanValue: response.booleanValue,
-                   arrayValue: response.arrayValue,
-                   isComplete: response.isComplete || true,
-                   feedback: feedback || response.feedback,
-                   needsRevision: needsRevision || response.needsRevision || false
+                 if (response.answer !== undefined) {
+                   // Handle combined response structure { answer: ..., url: ... }
+                                       if (typeof response.answer === 'string') {
+                      return {
+                        questionId: question.id,
+                        textValue: response.answer,
+                        numericValue: undefined,
+                        booleanValue: undefined,
+                        arrayValue: undefined,
+                        isComplete: true,
+                        feedback: feedback,
+                        needsRevision: needsRevision,
+                        isResolved: isResolved
+                      }
+                                       } else if (typeof response.answer === 'number') {
+                      return {
+                        questionId: question.id,
+                        textValue: undefined,
+                        numericValue: response.answer,
+                        booleanValue: undefined,
+                        arrayValue: undefined,
+                        isComplete: true,
+                        feedback: feedback,
+                        needsRevision: needsRevision,
+                        isResolved: isResolved
+                      }
+                   }
+                                   } else {
+                    // Handle old object response format
+                    return {
+                      questionId: question.id,
+                      textValue: response.textValue,
+                      numericValue: response.numericValue,
+                      booleanValue: response.booleanValue,
+                      arrayValue: response.arrayValue,
+                      isComplete: response.isComplete || true,
+                      feedback: feedback || response.feedback,
+                      needsRevision: needsRevision || response.needsRevision || false,
+                      isResolved: isResolved || response.isResolved || false
+                    }
                  }
                }
              }
@@ -247,14 +294,55 @@ export default function AdminSubmissionReviewPage() {
       }
       
       console.log('Extracted responses:', submissionData.responses)
+      console.log('Final submission data:', {
+        id: submissionData.id,
+        groupName: submissionData.groupName,
+        status: submissionData.status,
+        submittedAt: submissionData.submittedAt,
+        progressPercentage: submissionData.progressPercentage,
+        questionsCount: submissionData.questions.length,
+        responsesCount: submissionData.responses.length
+      })
       
-      setSubmission(submissionData)
-      setGeneralFeedback(submissionData.feedback || '')
-    } catch (err) {
-      console.error('Error fetching submission:', err)
-      toast.error('Failed to load submission')
-      
-      // Fallback to mock data if API fails
+             console.log('About to set submission data:', {
+         id: submissionData.id,
+         groupName: submissionData.groupName,
+         status: submissionData.status,
+         submittedAt: submissionData.submittedAt,
+         progressPercentage: submissionData.progressPercentage
+       })
+       
+               setSubmission(submissionData)
+        setGeneralFeedback(submissionData.feedback || '')
+        
+        // Set initial section to "Basic Information" if it exists, otherwise use first section
+        if (submissionData.questions && submissionData.questions.length > 0) {
+          const basicInfoSection = submissionData.questions.find(q => 
+            q.sectionTitle === 'Basic Information' || 
+            (q.sectionTitle === q.subsection && q.sectionTitle === 'Basic Information')
+          )
+          
+          if (basicInfoSection) {
+            setCurrentSection('Basic Information')
+          } else {
+            // Fallback to first section if "Basic Information" doesn't exist
+            const firstQuestion = submissionData.questions[0]
+            const initialSection = firstQuestion.sectionTitle === firstQuestion.subsection 
+              ? firstQuestion.sectionTitle 
+              : `${firstQuestion.sectionTitle} - ${firstQuestion.subsection}`
+            setCurrentSection(initialSection)
+          }
+        }
+         } catch (err) {
+       console.error('Error fetching submission:', err)
+       console.error('Error details:', {
+         message: err.message,
+         response: err.response?.data,
+         status: err.response?.status
+       })
+       toast.error('Failed to load submission')
+       
+       // Fallback to mock data if API fails
       const mockSubmission: Submission = {
         id: parseInt(id),
         groupName: `Sample Organization ${id}`,
@@ -414,45 +502,47 @@ export default function AdminSubmissionReviewPage() {
     }
   }
 
-     const handleGeneralFeedback = async () => {
-     if (!submission) return
- 
-     try {
-       setSaving(true)
-       
-               console.log('Creating/updating assessment review for general feedback, session:', submission.id)
+
+
+           const handleApprove = async () => {
+      if (!submission) return
+  
+      try {
+        setSaving(true)
         
-        // Collect all existing comments from the submission
-        const existingComments = submission.questions
-          .flatMap(q => (q.reviewComments || []).map(comment => ({
-            questionId: q.id,
-            comment: comment.comment,
-            isCritical: comment.isCritical,
-            stage: comment.stage || 'admin_validation'
-          })))
+                console.log('Creating/updating assessment review for general feedback, session:', submission.id)
+         
+         // Collect all existing comments from the submission
+         const existingComments = submission.questions
+           .flatMap(q => (q.reviewComments || []).map(comment => ({
+             questionId: q.id,
+             comment: comment.comment,
+             isCritical: comment.isCritical,
+             stage: comment.stage || 'admin_validation'
+           })))
+         
+         console.log('Preserving existing comments for general feedback:', existingComments)
+         
+         const reviewPayload = {
+            stage: 'admin_validation',
+            decision: 'approve',
+            overallComments: generalFeedback || '',
+            questionComments: existingComments,
+            juriScores: [],
+            totalScore: 0,
+            deliberationNotes: '',
+            internalNotes: '',
+            validationChecklist: [],
+            updateExisting: true
+          }
+         
+         console.log('General feedback review payload:', reviewPayload)
+         
+         const createReviewRes = await api.post(`/assessments/session/${submission.id}/review/batch`, reviewPayload)
         
-        console.log('Preserving existing comments:', existingComments)
+        console.log('Create review response:', createReviewRes.data)
         
-        const reviewPayload = {
-          stage: 'admin_validation',
-          decision: 'approve',
-          overallComments: generalFeedback,
-          questionComments: existingComments, // Preserve existing comments
-          juriScores: [],
-          totalScore: 0,
-          deliberationNotes: '',
-          internalNotes: '',
-          validationChecklist: [],
-          updateExisting: true
-        }
-        
-        console.log('General feedback review payload:', reviewPayload)
-        
-        const createReviewRes = await api.post(`/assessments/session/${submission.id}/review/batch`, reviewPayload)
-       
-       console.log('Create review response:', createReviewRes.data)
-       
-               // Extract review ID from response
+        // Extract review ID from response
         let reviewId: number
         if (createReviewRes.data?.reviewId) {
           reviewId = createReviewRes.data.reviewId
@@ -465,169 +555,26 @@ export default function AdminSubmissionReviewPage() {
           toast.error('Review created but ID not found in response')
           return
         }
-       
-       setSubmission(prev => prev ? { 
-         ...prev, 
-         feedback: generalFeedback,
-         reviewId: reviewId 
-       } : prev)
-       toast.success('General feedback saved successfully')
-     } catch (err: any) {
-       console.error('Error saving general feedback:', err)
-       console.log('Error response data:', err.response?.data)
-       toast.error('Failed to save general feedback')
-     } finally {
-       setSaving(false)
-     }
-   }
-
-           const handleApprove = async () => {
-      if (!submission) return
-  
-      try {
-        setSaving(true)
         
-                console.log('Creating/updating assessment review for approval, session:', submission.id)
-         
-         // Collect all existing comments from the submission
-         const existingComments = submission.questions
-           .flatMap(q => (q.reviewComments || []).map(comment => ({
-             questionId: q.id,
-             comment: comment.comment,
-             isCritical: comment.isCritical,
-             stage: comment.stage || 'admin_validation'
-           })))
-         
-         console.log('Preserving existing comments for approval:', existingComments)
-         
-         // If no existing comments, create a basic approval comment
-         const questionComments = existingComments.length > 0 ? existingComments : [
-           {
-             questionId: submission.questions[0]?.id || 1,
-             comment: 'Submission approved for juri review',
-             isCritical: false,
-             stage: 'admin_validation'
-           }
-         ]
-         
-                   const reviewPayload = {
-            stage: 'admin_validation',
-            decision: 'pass_to_jury',
-            overallComments: generalFeedback || 'Submission approved for jury review',
-            questionComments: questionComments,
-            juriScores: [],
-            totalScore: 0,
-            deliberationNotes: '',
-            internalNotes: '',
-            validationChecklist: [],
-            updateExisting: true
-          }
-         
-         console.log('Approve review payload:', reviewPayload)
-         
-         const createReviewRes = await api.post(`/assessments/session/${submission.id}/review/batch`, reviewPayload)
+        setSubmission(prev => prev ? { 
+          ...prev, 
+          feedback: generalFeedback,
+          reviewId: reviewId 
+        } : prev)
         
-        console.log('Create review response:', createReviewRes.data)
-        
-        toast.success('Submission approved for juri review')
-        router.push('/admin/submissions')
+        toast.success('General feedback saved successfully')
       } catch (err: any) {
-        console.error('Error approving submission:', err)
+        console.error('Error saving general feedback:', err)
         console.log('Error response data:', err.response?.data)
-        toast.error('Failed to approve submission')
+        toast.error('Failed to save general feedback')
       } finally {
         setSaving(false)
       }
     }
 
-     const handleRequestRevision = async () => {
-     if (!submission) return
- 
-     try {
-       setSaving(true)
-       
-               console.log('Creating/updating assessment review for revision request, session:', submission.id)
-        
-        // Collect all existing comments from the submission
-        const existingComments = submission.questions
-          .flatMap(q => (q.reviewComments || []).map(comment => ({
-            questionId: q.id,
-            comment: comment.comment,
-            isCritical: comment.isCritical,
-            stage: comment.stage || 'admin_validation'
-          })))
-        
-        console.log('Preserving existing comments for revision request:', existingComments)
-        console.log('Submission questions with review comments:', submission.questions.map(q => ({
-          questionId: q.id,
-          reviewComments: q.reviewComments,
-          reviewCommentsLength: q.reviewComments?.length || 0
-        })))
-        
-        const reviewPayload = {
-          stage: 'admin_validation',
-          decision: 'needs_revision',
-          overallComments: generalFeedback,
-          questionComments: existingComments, // Preserve existing comments
-          juriScores: [],
-          totalScore: 0,
-          deliberationNotes: '',
-          internalNotes: '',
-          validationChecklist: [],
-          updateExisting: true
-        }
-        
-        console.log('Revision request review payload:', reviewPayload)
-        
-        const createReviewRes = await api.post(`/assessments/session/${submission.id}/review/batch`, reviewPayload)
-       
-       console.log('Create review response:', createReviewRes.data)
-       console.log('Review payload sent:', reviewPayload)
-       
-       toast.success('Revision requested')
-       router.push('/admin/submissions')
-     } catch (err: any) {
-       console.error('Error requesting revision:', err)
-       console.log('Error response data:', err.response?.data)
-       toast.error('Failed to request revision')
-     } finally {
-       setSaving(false)
-     }
-   }
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'submitted':
-        return 'text-blue-500 bg-blue-50'
-      case 'needs_revision':
-        return 'text-orange-500 bg-orange-50'
-      case 'resubmitted':
-        return 'text-purple-500 bg-purple-50'
-      case 'approved_for_juri':
-        return 'text-green-500 bg-green-50'
-      case 'with_juri':
-        return 'text-indigo-500 bg-indigo-50'
-      default:
-        return 'text-gray-500 bg-gray-50'
-    }
-  }
 
-  const getStatusLabel = (status: string) => {
-    switch (status) {
-      case 'submitted':
-        return 'Submitted'
-      case 'needs_revision':
-        return 'Needs Revision'
-      case 'resubmitted':
-        return 'Resubmitted'
-      case 'approved_for_juri':
-        return 'Approved for Juri'
-      case 'with_juri':
-        return 'With Juri'
-      default:
-        return status
-    }
-  }
+
 
   const getResponseValue = (response: Response) => {
     if (response.textValue !== undefined && response.textValue !== null) return response.textValue.toString()
@@ -677,10 +624,78 @@ export default function AdminSubmissionReviewPage() {
     )
   }
 
-  const sections = Array.from(new Set(submission.questions.map(q => 
-    q.sectionTitle === q.subsection ? q.sectionTitle : `${q.sectionTitle} - ${q.subsection}`
-  )))
-  const hasRevisions = submission.responses.some(r => r.needsRevision)
+     const sections = Array.from(new Set(submission.questions.map(q => 
+     q.sectionTitle === q.subsection ? q.sectionTitle : `${q.sectionTitle} - ${q.subsection}`
+   )))
+       const hasRevisions = submission.responses.some(r => r.needsRevision && !r.isResolved)
+   
+       const getStatusColor = (status: string) => {
+      // If status is approved, show approved color regardless of revisions
+      if (status === 'approved') {
+        return 'text-green-500 bg-green-50'
+      }
+      
+      // If there are revisions needed, override the status color
+      if (hasRevisions) {
+        return 'text-orange-500 bg-orange-50'
+      }
+      
+      switch (status) {
+        case 'submitted':
+          return 'text-blue-500 bg-blue-50'
+        case 'needs_revision':
+          return 'text-orange-500 bg-orange-50'
+        case 'resubmitted':
+          return 'text-purple-500 bg-purple-50'
+        case 'approved_for_juri':
+          return 'text-green-500 bg-green-50'
+        case 'with_juri':
+          return 'text-indigo-500 bg-indigo-50'
+        default:
+          return 'text-gray-500 bg-gray-50'
+      }
+    }
+ 
+       const getStatusLabel = (status: string) => {
+      // If status is approved, show approved label regardless of revisions
+      if (status === 'approved') {
+        return 'Approved'
+      }
+      
+      // If there are revisions needed, override the status label
+      if (hasRevisions) {
+        return 'Needs Revision'
+      }
+      
+      switch (status) {
+        case 'submitted':
+          return 'Submitted'
+        case 'needs_revision':
+          return 'Needs Revision'
+        case 'resubmitted':
+          return 'Resubmitted'
+        case 'approved_for_juri':
+          return 'Approved for Juri'
+        case 'with_juri':
+          return 'With Juri'
+        default:
+          return status
+      }
+    }
+   
+   // Helper function to get section title from combined string
+   const getSectionTitleFromCombined = (combinedSection: string) => {
+     if (combinedSection.includes(' - ')) {
+       return combinedSection.split(' - ')[0]
+     }
+     return combinedSection
+   }
+   
+   // Filter questions for current section
+   const currentSectionQuestions = submission.questions.filter(q => {
+     const questionSection = q.sectionTitle === q.subsection ? q.sectionTitle : `${q.sectionTitle} - ${q.subsection}`
+     return questionSection === currentSection
+   })
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -723,7 +738,7 @@ export default function AdminSubmissionReviewPage() {
               <div>
                 <p className="text-sm text-gray-500">Submitted</p>
                 <p className="font-medium">
-                  {new Date(submission.submittedAt).toLocaleDateString()}
+                  {submission.submittedAt ? new Date(submission.submittedAt).toLocaleDateString() : 'Not submitted'}
                 </p>
               </div>
               <div>
@@ -734,43 +749,77 @@ export default function AdminSubmissionReviewPage() {
           </CardContent>
         </Card>
 
-        {/* General Feedback */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              <MessageSquare className="h-5 w-5" />
-              <span>General Feedback</span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <Textarea
-              placeholder="Provide general feedback for this submission..."
-              value={generalFeedback}
-              onChange={(e) => setGeneralFeedback(e.target.value)}
-              rows={4}
-            />
-            <div className="flex justify-end">
-              <Button
-                onClick={handleGeneralFeedback}
-                disabled={saving}
-                variant="outline"
-              >
-                Save Feedback
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+                 {/* General Feedback */}
+         <Card>
+           <CardHeader>
+             <CardTitle className="flex items-center space-x-2">
+               <MessageSquare className="h-5 w-5" />
+               <span>General Feedback</span>
+             </CardTitle>
+           </CardHeader>
+                      <CardContent className="space-y-4">
+                             {hasRevisions && submission.status !== 'approved' && (
+                 <div className="flex items-center space-x-2">
+                   <Badge variant="destructive">
+                     {submission.responses.filter(r => r.needsRevision).length} questions need revision
+                   </Badge>
+                 </div>
+               )}
+              <Textarea
+                placeholder="Provide general feedback for this submission..."
+                value={generalFeedback}
+                onChange={(e) => setGeneralFeedback(e.target.value)}
+                rows={4}
+              />
+                             <div className="flex justify-end">
+                                   <Button
+                    onClick={handleApprove}
+                    disabled={saving || hasRevisions || submission.status === 'approved'}
+                    className="flex items-center justify-center space-x-2"
+                  >
+                    <CheckCircle className="h-4 w-4" />
+                    <span>Approve for Juri</span>
+                  </Button>
+               </div>
+            </CardContent>
+         </Card>
 
-        {/* Questions Review */}
-        {sections.map(section => (
-          <Card key={section}>
-            <CardHeader>
-              <CardTitle>{section}</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {submission.questions
-                .filter(q => q.sectionTitle === (section.includes(' - ') ? section.split(' - ')[0] : section))
-                .map(question => {
+                 {/* Section Navigation */}
+         <Card>
+           <CardContent className="pt-6">
+             <div className="flex flex-wrap gap-2">
+               {sections.map(section => (
+                 <Button
+                   key={section}
+                   variant={currentSection === section ? 'default' : 'outline'}
+                   size="sm"
+                   onClick={() => setCurrentSection(section)}
+                 >
+                   {section}
+                 </Button>
+               ))}
+             </div>
+           </CardContent>
+         </Card>
+
+         {/* Questions Review */}
+         <Card>
+           <CardHeader>
+             <div className="flex items-center justify-between">
+               <CardTitle>{currentSection}</CardTitle>
+               <div className="text-sm text-gray-500">
+                 {(() => {
+                   const answeredQuestions = currentSectionQuestions.filter(q => {
+                     const response = submission.responses.find(r => r.questionId === q.id)
+                     return response !== undefined && response !== null
+                   })
+                   return `${answeredQuestions.length}/${currentSectionQuestions.length}`
+                 })()}
+               </div>
+             </div>
+           </CardHeader>
+           <CardContent className="space-y-6">
+             {currentSectionQuestions.map(question => {
                   const response = submission.responses.find(r => r.questionId === question.id)
                   return (
                                          <div key={question.id} className="border rounded-lg p-4 space-y-4">
@@ -795,127 +844,112 @@ export default function AdminSubmissionReviewPage() {
 
                        <div className="space-y-3">
                          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
-                           <Button
-                             variant="ghost"
-                             size="sm"
-                             onClick={() => setShowFeedback(prev => ({ 
-                               ...prev, 
-                               [question.id]: !prev[question.id] 
-                             }))}
-                             className="flex items-center space-x-2 w-fit"
-                           >
-                             {showFeedback[question.id] ? (
-                               <EyeOff className="h-4 w-4" />
-                             ) : (
-                               <Eye className="h-4 w-4" />
-                             )}
-                             <span>Add Feedback</span>
-                           </Button>
-                           {response?.needsRevision && (
-                             <Badge variant="destructive">Needs Revision</Badge>
-                           )}
+                                                       <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setShowFeedback(prev => ({ 
+                                ...prev, 
+                                [question.id]: !prev[question.id] 
+                              }))}
+                              className="flex items-center space-x-2 w-fit"
+                            >
+                              {showFeedback[question.id] ? (
+                                <EyeOff className="h-4 w-4" />
+                              ) : (
+                                <Eye className="h-4 w-4" />
+                              )}
+                              <span>{submission.status === 'approved' ? 'View Feedback' : 'Add Feedback'}</span>
+                            </Button>
+                                                       {response?.needsRevision && submission.status !== 'approved' && (
+                              <Badge variant="destructive">Needs Revision</Badge>
+                            )}
                          </div>
 
-                         {showFeedback[question.id] && (
-                           <div className="space-y-3">
-                             <Textarea
-                               placeholder="Provide feedback for this question..."
-                               value={response?.feedback || ''}
-                               onChange={(e) => {
-                                 const newFeedback = e.target.value
-                                 setSubmission(prev => {
-                                   if (!prev) return prev
-                                   return {
-                                     ...prev,
-                                     responses: prev.responses.map(r => 
-                                       r.questionId === question.id 
-                                         ? { ...r, feedback: newFeedback }
-                                         : r
-                                     )
-                                   }
-                                 })
-                               }}
-                               rows={3}
-                             />
-                             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
-                               <label className="flex items-center space-x-2">
-                                 <input
-                                   type="checkbox"
-                                   checked={response?.needsRevision || false}
-                                   onChange={(e) => {
-                                     const needsRevision = e.target.checked
-                                     setSubmission(prev => {
-                                       if (!prev) return prev
-                                       return {
-                                         ...prev,
-                                         responses: prev.responses.map(r => 
-                                           r.questionId === question.id 
-                                             ? { ...r, needsRevision }
-                                             : r
-                                         )
-                                       }
-                                     })
-                                   }}
-                                   className="rounded"
-                                 />
-                                 <span className="text-sm">Needs revision</span>
-                               </label>
-                               <Button
-                                 size="sm"
-                                 onClick={() => handleQuestionFeedback(
-                                   question.id,
-                                   response?.feedback || '',
-                                   response?.needsRevision || false
-                                 )}
-                                 disabled={saving}
-                                 className="w-full sm:w-auto"
-                               >
-                                 Save
-                               </Button>
-                             </div>
-                           </div>
-                         )}
+                                                   {showFeedback[question.id] && (
+                            <div className="space-y-3">
+                              {submission.status === 'approved' ? (
+                                // Read-only feedback display for approved submissions
+                                <div className="bg-gray-50 rounded p-3">
+                                  <p className="text-sm text-gray-600 mb-1">Feedback:</p>
+                                  <p className="font-medium break-words">
+                                    {response?.feedback || 'No feedback provided'}
+                                  </p>
+                                  {response?.needsRevision && (
+                                    <div className="mt-2">
+                                      <Badge variant="destructive">Needs Revision</Badge>
+                                    </div>
+                                  )}
+                                </div>
+                              ) : (
+                                // Editable feedback for non-approved submissions
+                                <>
+                                  <Textarea
+                                    placeholder="Provide feedback for this question..."
+                                    value={response?.feedback || ''}
+                                    onChange={(e) => {
+                                      const newFeedback = e.target.value
+                                      setSubmission(prev => {
+                                        if (!prev) return prev
+                                        return {
+                                          ...prev,
+                                          responses: prev.responses.map(r => 
+                                            r.questionId === question.id 
+                                              ? { ...r, feedback: newFeedback }
+                                              : r
+                                          )
+                                        }
+                                      })
+                                    }}
+                                    rows={3}
+                                  />
+                                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
+                                    <label className="flex items-center space-x-2">
+                                      <input
+                                        type="checkbox"
+                                        checked={response?.needsRevision || false}
+                                        onChange={(e) => {
+                                          const needsRevision = e.target.checked
+                                          setSubmission(prev => {
+                                            if (!prev) return prev
+                                            return {
+                                              ...prev,
+                                              responses: prev.responses.map(r => 
+                                                r.questionId === question.id 
+                                                  ? { ...r, needsRevision }
+                                                  : r
+                                              )
+                                            }
+                                          })
+                                        }}
+                                        className="rounded"
+                                      />
+                                      <span className="text-sm">Needs revision</span>
+                                    </label>
+                                    <Button
+                                      size="sm"
+                                      onClick={() => handleQuestionFeedback(
+                                        question.id,
+                                        response?.feedback || '',
+                                        response?.needsRevision || false
+                                      )}
+                                      disabled={saving}
+                                      className="w-full sm:w-auto"
+                                    >
+                                      Save
+                                    </Button>
+                                  </div>
+                                </>
+                              )}
+                            </div>
+                          )}
                        </div>
                      </div>
                   )
                 })}
-            </CardContent>
-          </Card>
-        ))}
+                         </CardContent>
+           </Card>
 
-                 {/* Action Buttons */}
-         <Card>
-           <CardContent className="pt-6">
-             <div className="flex flex-col space-y-4">
-               <div className="flex items-center space-x-2">
-                 {hasRevisions && (
-                   <Badge variant="destructive">
-                     {submission.responses.filter(r => r.needsRevision).length} questions need revision
-                   </Badge>
-                 )}
-               </div>
-               <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-2">
-                 <Button
-                   variant="outline"
-                   onClick={handleRequestRevision}
-                   disabled={saving}
-                   className="flex items-center justify-center space-x-2"
-                 >
-                   <AlertTriangle className="h-4 w-4" />
-                   <span>Request Revision</span>
-                 </Button>
-                 <Button
-                   onClick={handleApprove}
-                   disabled={saving || hasRevisions}
-                   className="flex items-center justify-center space-x-2"
-                 >
-                   <CheckCircle className="h-4 w-4" />
-                   <span>Approve for Juri</span>
-                 </Button>
-               </div>
-             </div>
-           </CardContent>
-         </Card>
+                 
       </div>
     </div>
   )
