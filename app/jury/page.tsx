@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -13,27 +13,12 @@ import AuthenticatedLayout from '@/components/AuthenticatedLayout'
 interface Review {
   id: number
   sessionId: number
-  stage: string
+  groupName: string
+  userName: string
+  userEmail: string
+  submittedAt: string
   status: string
-  decision: string
-  overallComments?: string
-  totalScore?: number
-  reviewedAt?: string
-  createdAt: string
-  updatedAt: string
-  session: {
-    id: number
-    groupId: number
-    groupName: string
-    userId: number
-    status: string
-    submittedAt?: string
-    user: {
-      id: number
-      name: string
-      email: string
-    }
-  }
+  progressPercentage: number
 }
 
 interface ReviewStats {
@@ -41,6 +26,19 @@ interface ReviewStats {
   reviewed: number
   pending: number
   inProgress: number
+}
+
+interface DashboardData {
+  statistics: ReviewStats
+  recentReviews: Review[]
+  pagination: {
+    total: number
+    page: number
+    limit: number
+    totalPages: number
+    hasNext: boolean
+    hasPrev: boolean
+  }
 }
 
 export default function JuriDashboard() {
@@ -55,40 +53,32 @@ export default function JuriDashboard() {
   })
   const [searchTerm, setSearchTerm] = useState('')
   const [loading, setLoading] = useState(true)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [pageSize] = useState(10)
+  const [searchTimeout, setSearchTimeout] = useState<NodeJS.Timeout | null>(null)
 
-  const fetchData = async () => {
+  const fetchData = async (page = 1, search = '') => {
     try {
       setLoading(true)
       
-      // Get reviews assigned to current juri member
-      const reviewsRes = await api.get('/reviews/my-reviews')
-      const reviewsData = reviewsRes.data || []
+      // Build query parameters
+      const params = new URLSearchParams()
+      if (page > 1) params.append('page', page.toString())
+      if (search.trim()) params.append('search', search.trim())
+      params.append('limit', pageSize.toString())
       
-      // Get review statistics
-      let statsData = {
-        totalAssigned: 0,
-        reviewed: 0,
-        pending: 0,
-        inProgress: 0
-      }
-      
-      try {
-        const statsRes = await api.get('/reviews/stats/overview')
-        statsData = statsRes.data || statsData
-      } catch (statsError) {
-        console.log('Failed to fetch stats, using calculated stats')
-        // Calculate stats from reviews data
-        statsData = {
-          totalAssigned: reviewsData.length,
-          reviewed: reviewsData.filter((r: Review) => r.status === 'completed').length,
-          pending: reviewsData.filter((r: Review) => r.status === 'pending').length,
-          inProgress: reviewsData.filter((r: Review) => r.status === 'in_progress').length
-        }
+      // Get jury dashboard data from new endpoint
+      const dashboardRes = await api.get(`/assessments/jury/dashboard?${params.toString()}`)
+      const dashboardData: DashboardData = dashboardRes.data.data || {
+        statistics: { totalAssigned: 0, reviewed: 0, pending: 0, inProgress: 0 },
+        recentReviews: [],
+        pagination: { total: 0, page: 1, limit: 10, totalPages: 0, hasNext: false, hasPrev: false }
       }
 
-      setReviews(reviewsData)
-      setFilteredReviews(reviewsData)
-      setStats(statsData)
+      setReviews(dashboardData.recentReviews)
+      setFilteredReviews(dashboardData.recentReviews)
+      setStats(dashboardData.statistics)
+      setCurrentPage(dashboardData.pagination.page)
     } catch (err) {
       console.error('Error fetching juri data:', err)
       toast.error('Failed to load dashboard data')
@@ -98,24 +88,12 @@ export default function JuriDashboard() {
         {
           id: 1,
           sessionId: 1,
-          stage: 'juri_scoring',
-          status: 'in_progress',
-          decision: 'pending',
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-          session: {
-            id: 1,
-            groupId: 1,
-            groupName: 'Sample Organization A',
-            userId: 1,
-            status: 'approved_for_juri',
-            submittedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-            user: {
-              id: 1,
-              name: 'John Doe',
-              email: 'john@example.com'
-            }
-          }
+          groupName: 'Sample Organization A',
+          userName: 'John Doe',
+          userEmail: 'john@example.com',
+          submittedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+          status: 'approved',
+          progressPercentage: 100
         }
       ]
       
@@ -133,23 +111,24 @@ export default function JuriDashboard() {
   }
 
   useEffect(() => {
-    fetchData()
+    fetchData(1, '')
   }, [])
 
-  const handleSearch = (term: string) => {
-    setSearchTerm(term)
-    if (!term.trim()) {
-      setFilteredReviews(reviews)
-      return
+  useEffect(() => {
+    return () => {
+      if (searchTimeout) {
+        clearTimeout(searchTimeout)
+      }
     }
+  }, [searchTimeout])
 
-    const filtered = reviews.filter(review =>
-      review.session.groupName.toLowerCase().includes(term.toLowerCase()) ||
-      review.session.user.name.toLowerCase().includes(term.toLowerCase()) ||
-      review.session.user.email.toLowerCase().includes(term.toLowerCase())
-    )
-    setFilteredReviews(filtered)
-  }
+  const handleSearch = useCallback((term: string) => {
+    setSearchTerm(term)
+    // Reset to page 1 when searching
+    setCurrentPage(1)
+    // Fetch data with search term
+    fetchData(1, term)
+  }, [])
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -280,32 +259,17 @@ export default function JuriDashboard() {
             </CardContent>
           </Card>
 
-          <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => router.push('/jury/feedback')}>
+          <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => router.push('/jury/rankings')}>
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
-                <FileText className="h-5 w-5 text-green-600" />
-                <span>Feedback History</span>
+                <Award className="h-5 w-5 text-yellow-600" />
+                <span>Award Rankings</span>
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-gray-600 text-sm">View your review history and feedback</p>
+              <p className="text-gray-600 text-sm">View current award rankings and standings</p>
               <Button className="mt-4 w-full" variant="outline">
-                View History
-              </Button>
-            </CardContent>
-          </Card>
-
-          <Card className="cursor-pointer hover:shadow-md transition-shadow">
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <ClipboardList className="h-5 w-5 text-purple-600" />
-                <span>Review Guidelines</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-gray-600 text-sm">Access review criteria and guidelines</p>
-              <Button className="mt-4 w-full" variant="outline" disabled>
-                Coming Soon
+                View Rankings
               </Button>
             </CardContent>
           </Card>
@@ -320,7 +284,21 @@ export default function JuriDashboard() {
                 <Input
                   placeholder="Search reviews by group name, participant, or email..."
                   value={searchTerm}
-                  onChange={(e) => handleSearch(e.target.value)}
+                  onChange={(e) => {
+                    const value = e.target.value
+                    setSearchTerm(value)
+                    
+                    // Clear existing timeout
+                    if (searchTimeout) {
+                      clearTimeout(searchTimeout)
+                    }
+                    
+                    // Set new timeout for debounced search
+                    const timeoutId = setTimeout(() => {
+                      handleSearch(value)
+                    }, 500)
+                    setSearchTimeout(timeoutId)
+                  }}
                   className="pl-10"
                 />
               </div>
@@ -369,17 +347,17 @@ export default function JuriDashboard() {
                         {getStatusIcon(review.status)}
                       </div>
                       <div>
-                        <h3 className="font-medium text-gray-900">{review.session.groupName}</h3>
+                        <h3 className="font-medium text-gray-900">{review.groupName}</h3>
                         <div className="flex items-center space-x-2 text-sm text-gray-500">
-                          <span>{review.session.user.name}</span>
+                          <span>{review.userName}</span>
                           <span>•</span>
-                          <span>{review.session.user.email}</span>
+                          <span>{review.userEmail}</span>
                         </div>
                       </div>
                     </div>
                     <div className="flex items-center space-x-4">
                       <div className="text-sm text-gray-500">
-                        Submitted {new Date(review.session.submittedAt || review.createdAt).toLocaleDateString()}
+                        Submitted {new Date(review.submittedAt).toLocaleDateString()}
                       </div>
                       <Button variant="outline" size="sm">
                         Review

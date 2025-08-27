@@ -68,6 +68,7 @@ interface QuestionProps {
   onBlur?: () => void
   validationError?: string
   autoSave?: boolean
+  isPrefilledFromAuth?: boolean
 }
 
 export function QuestionInput({ 
@@ -81,7 +82,8 @@ export function QuestionInput({
   onChange,
   onBlur,
   validationError,
-  autoSave = true
+  autoSave = true,
+  isPrefilledFromAuth = false
 }: QuestionProps) {
   // Check if this question needs a URL input based on description keywords
   const needsUrlInput = description && (
@@ -465,14 +467,21 @@ export function QuestionInput({
 
       case 'email':
         return (
-          <Input
-            type="email"
-            value={localValue || ''}
-            onChange={(e) => handleChange(e.target.value)}
-            onBlur={handleBlur}
-            onFocus={handleFocus}
-            placeholder="Enter your email address"
-          />
+          <div className="space-y-2">
+            <Input
+              type="email"
+              value={localValue || ''}
+              onChange={(e) => handleChange(e.target.value)}
+              onBlur={handleBlur}
+              onFocus={handleFocus}
+              placeholder="Enter your email address"
+            />
+            {isPrefilledFromAuth && localValue && (
+              <p className="text-xs text-blue-600">
+                ✓ Pre-filled with your authenticated email address
+              </p>
+            )}
+          </div>
         )
 
       case 'url':
@@ -627,13 +636,16 @@ export function QuestionInput({
         <p className="text-sm text-red-500 mt-1 break-words">{validationError}</p>
       )}
 
-      {autoSave && autoSaveStatus !== 'idle' && (
-        <p className={`text-xs mt-1 ${
-          autoSaveStatus === 'saving' ? 'text-blue-500' : 'text-green-500'
-        }`}>
-          {getAutoSaveMessage()}
-        </p>
-      )}
+      {/* Auto-save status - always reserve space to prevent layout shifts */}
+      <div className="h-2 mt-1">
+        {autoSave && autoSaveStatus !== 'idle' && (
+          <p className={`text-xs ${
+            autoSaveStatus === 'saving' ? 'text-blue-500' : 'text-green-500'
+          }`}>
+            {getAutoSaveMessage()}
+          </p>
+        )}
+      </div>
     </div>
   )
 }

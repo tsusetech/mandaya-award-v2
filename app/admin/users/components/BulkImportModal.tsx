@@ -91,9 +91,10 @@ export function BulkImportModal({ open, onClose, onSuccess }: BulkImportModalPro
       setResults(response.data)
       toast.success(`Bulk import completed: ${response.data.successful} successful, ${response.data.failed} failed`)
       onSuccess()
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: { message?: string } } }
       console.error('Bulk import error:', error)
-      toast.error(error.response?.data?.message || 'Failed to upload file')
+      toast.error(err.response?.data?.message || 'Failed to upload file')
     } finally {
       setUploading(false)
     }
@@ -148,7 +149,7 @@ export function BulkImportModal({ open, onClose, onSuccess }: BulkImportModalPro
                  </ul>
                  <p className="mt-2 text-xs text-gray-500">
                    <strong>Note:</strong> The role field accepts: USER, ADMIN, JURY, PESERTA. 
-                   Leave groupId empty if you don't want to assign users to a specific group.
+                   Leave groupId empty if you don&apos;t want to assign users to a specific group.
                  </p>
                </div>
 

@@ -159,7 +159,7 @@ export default function GroupDetailPage() {
               <div className="text-center py-8">
                 <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                 <p className="text-gray-500">No members in this group yet</p>
-                <p className="text-sm text-gray-400">Click "Add Members" to get started</p>
+                <p className="text-sm text-gray-400">Click &quot;Add Members&quot; to get started</p>
               </div>
             ) : (
               <div className="space-y-3">

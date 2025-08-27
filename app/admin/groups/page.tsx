@@ -11,15 +11,33 @@ import { ArrowLeft, Search, Plus, Shield, Users, Activity } from 'lucide-react'
 import api from '@/lib/api'
 import { toast } from 'sonner'
 
+interface Group {
+  id: number
+  groupName: string
+  description?: string
+  memberCount?: number
+}
+
+interface GroupFormData {
+  groupName: string
+  description: string
+}
+
+interface Stats {
+  totalGroups: number
+  totalMembers: number
+  averageGroupSize: number
+}
+
 export default function AdminGroupsPage() {
   const router = useRouter()
-  const [groups, setGroups] = useState<any[]>([])
-  const [filteredGroups, setFilteredGroups] = useState<any[]>([])
+  const [groups, setGroups] = useState<Group[]>([])
+  const [filteredGroups, setFilteredGroups] = useState<Group[]>([])
   const [formOpen, setFormOpen] = useState(false)
-  const [selectedGroup, setSelectedGroup] = useState<any>(null)
+  const [selectedGroup, setSelectedGroup] = useState<Group | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [loading, setLoading] = useState(true)
-  const [stats, setStats] = useState({
+  const [stats, setStats] = useState<Stats>({
     totalGroups: 0,
     totalMembers: 0,
     averageGroupSize: 0
@@ -33,14 +51,14 @@ export default function AdminGroupsPage() {
       
       // Fetch member counts for each group
       const groupsWithMembers = await Promise.all(
-        groupsList.map(async (group: any) => {
+        groupsList.map(async (group: Group) => {
           try {
             const membersRes = await api.get(`/groups/${group.id}/users`)
             const members = Array.isArray(membersRes.data) 
               ? membersRes.data 
               : membersRes.data.users || []
             return { ...group, memberCount: members.length }
-          } catch (err) {
+          } catch {
             return { ...group, memberCount: 0 }
           }
         })
@@ -72,7 +90,7 @@ export default function AdminGroupsPage() {
     }
 
     const filtered = groups.filter(group =>
-      group.name?.toLowerCase().includes(term.toLowerCase()) ||
+      group.groupName?.toLowerCase().includes(term.toLowerCase()) ||
       group.description?.toLowerCase().includes(term.toLowerCase())
     )
     setFilteredGroups(filtered)
@@ -83,7 +101,7 @@ export default function AdminGroupsPage() {
     setFormOpen(true)
   }
 
-  const handleEdit = (group: any) => {
+  const handleEdit = (group: Group) => {
     setSelectedGroup(group)
     setFormOpen(true)
   }
@@ -99,7 +117,7 @@ export default function AdminGroupsPage() {
     }
   }
 
-  const handleSubmit = async (data: any) => {
+  const handleSubmit = async (data: GroupFormData) => {
     try {
       const payload = {
         groupName: data.groupName,
@@ -261,7 +279,11 @@ export default function AdminGroupsPage() {
         open={formOpen}
         onClose={() => setFormOpen(false)}
         onSubmit={handleSubmit}
-        defaultValues={selectedGroup}
+        defaultValues={selectedGroup ? {
+          groupName: selectedGroup.groupName,
+          description: selectedGroup.description || '',
+          id: selectedGroup.id.toString()
+        } : undefined}
       />
     </div>
   )

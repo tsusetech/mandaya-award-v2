@@ -12,16 +12,44 @@ import { ArrowLeft, Search, UserPlus, Users, Shield, Activity, Upload } from 'lu
 import api from '@/lib/api'
 import { toast } from 'sonner'
 
+interface User {
+  id: number
+  name: string
+  email: string
+  username: string
+  isActive?: boolean
+  userRoles?: Array<{
+    role?: {
+      name: string
+    }
+  }>
+}
+
+interface UserFormData {
+  name: string
+  email: string
+  username: string
+  password?: string
+  role: string
+  groupId?: number
+}
+
+interface UserStats {
+  total: number
+  active: number
+  admins: number
+}
+
 export default function AdminUsersPage() {
   const router = useRouter()
-  const [users, setUsers] = useState<any[]>([])
-  const [filteredUsers, setFilteredUsers] = useState<any[]>([])
+  const [users, setUsers] = useState<User[]>([])
+  const [filteredUsers, setFilteredUsers] = useState<User[]>([])
   const [formOpen, setFormOpen] = useState(false)
   const [bulkImportOpen, setBulkImportOpen] = useState(false)
-  const [selectedUser, setSelectedUser] = useState<any>(null)
+  const [selectedUser, setSelectedUser] = useState<User | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [loading, setLoading] = useState(true)
-  const [stats, setStats] = useState({
+  const [stats, setStats] = useState<UserStats>({
     total: 0,
     active: 0,
     admins: 0
@@ -38,9 +66,9 @@ export default function AdminUsersPage() {
       // Calculate stats
       setStats({
         total: usersList.length,
-        active: usersList.filter((user: any) => user.isActive !== false).length,
-        admins: usersList.filter((user: any) => 
-          user.userRoles?.some((role: any) => 
+        active: usersList.filter((user: User) => user.isActive !== false).length,
+        admins: usersList.filter((user: User) => 
+          user.userRoles?.some((role) => 
             role.role?.name === 'ADMIN' || role.role?.name === 'SUPERADMIN'
           )
         ).length
@@ -77,7 +105,7 @@ export default function AdminUsersPage() {
     setBulkImportOpen(true)
   }
 
-  const handleEdit = (user: any) => {
+  const handleEdit = (user: User) => {
     setSelectedUser(user)
     setFormOpen(true)
   }
@@ -93,7 +121,7 @@ export default function AdminUsersPage() {
     }
   }
 
-  const handleSubmit = async (data: any) => {
+  const handleSubmit = async (data: UserFormData) => {
     try {
       const payload = {
         name: data.name,

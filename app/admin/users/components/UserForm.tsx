@@ -20,13 +20,24 @@ interface Role {
   description?: string
 }
 
-export function UserForm({ open, onClose, onSubmit, defaultValues }: {
+interface UserFormData {
+  name: string
+  email: string
+  username: string
+  password?: string
+  role: string
+  groupId?: number
+}
+
+interface UserFormProps {
   open: boolean
   onClose: () => void
-  onSubmit: (data: any) => void
-  defaultValues?: any
-}) {
-  const { register, handleSubmit, reset } = useForm({ defaultValues })
+  onSubmit: (data: UserFormData) => void
+  defaultValues?: Partial<UserFormData> & { id?: string; userRoles?: Array<{ role?: { name: string } }> }
+}
+
+export function UserForm({ open, onClose, onSubmit, defaultValues }: UserFormProps) {
+  const { register, handleSubmit, reset } = useForm<UserFormData>({ defaultValues })
   const [groups, setGroups] = useState<Group[]>([])
   const [roles, setRoles] = useState<Role[]>([])
   const [loadingGroups, setLoadingGroups] = useState(false)

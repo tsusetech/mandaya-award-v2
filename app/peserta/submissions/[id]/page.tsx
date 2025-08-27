@@ -11,7 +11,8 @@ import {
   MessageSquare,
   RefreshCw,
   CheckCircle,
-  Clock
+  Clock,
+  Trophy
 } from 'lucide-react'
 import { toast } from 'sonner'
 import api from '@/lib/api'
@@ -316,31 +317,31 @@ export default function SubmissionDetailPage() {
       <div className="min-h-screen bg-gray-50">
         {/* Header */}
         <div className="bg-white shadow-sm border-b">
-        <div className="px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <Button 
-                variant="ghost" 
-                size="sm"
-                onClick={() => router.push('/peserta/submissions')}
-                className="flex items-center space-x-2"
-              >
-                <ArrowLeft className="h-4 w-4" />
-                <span>Back to Submissions</span>
-              </Button>
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">Submission Details</h1>
-                <p className="text-gray-600">{submission.groupName}</p>
+          <div className="px-6 py-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => router.push('/peserta/submissions')}
+                  className="flex items-center space-x-2"
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                  <span>Back to Submissions</span>
+                </Button>
+                <div>
+                  <h1 className="text-2xl font-bold text-gray-900">Submission Details</h1>
+                  <p className="text-gray-600">{submission.groupName}</p>
+                </div>
               </div>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Badge variant="outline" className={getStatusColor(submission.status)}>
-                {getStatusLabel(submission.status)}
-              </Badge>
+              <div className="flex items-center space-x-2">
+                <Badge variant="outline" className={getStatusColor(submission.status)}>
+                  {getStatusLabel(submission.status)}
+                </Badge>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
       <div className="p-6 max-w-6xl mx-auto space-y-6">
         {/* Submission Info */}
@@ -486,6 +487,7 @@ export default function SubmissionDetailPage() {
           </Card>
         )}
       </div>
+    </div>
     </AuthenticatedLayout>
   )
 }

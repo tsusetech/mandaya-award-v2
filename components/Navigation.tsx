@@ -7,6 +7,16 @@ import { LogOut, User, Users, FileText, Bell, Settings, Award, Home } from 'luci
 import { logoutUser, getProfile } from '@/lib/auth'
 import { toast } from 'sonner'
 
+interface User {
+  name?: string
+  username?: string
+  userRoles?: Array<{
+    role?: {
+      name: string
+    }
+  }>
+}
+
 interface NavigationProps {
   className?: string
 }
@@ -14,7 +24,7 @@ interface NavigationProps {
 export default function Navigation({ className = '' }: NavigationProps) {
   const router = useRouter()
   const pathname = usePathname()
-  const [user, setUser] = useState<any>(null)
+  const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -67,7 +77,7 @@ export default function Navigation({ className = '' }: NavigationProps) {
       case 'JURI':
         return [
           { href: '/jury', label: 'Dashboard', icon: Home },
-          { href: '/jury/feedback', label: 'Reviews', icon: Award },
+          { href: '/jury/review', label: 'Reviews', icon: Award },
         ]
       case 'PESERTA':
       default:

@@ -10,6 +10,7 @@ import { toast } from 'sonner'
 import { QuestionInput } from '../components/QuestionTypes'
 import api from '@/lib/api'
 import { getAssessmentStatus, getStatusBadge, type AssessmentStatus } from '@/lib/utils'
+import { getProfile } from '@/lib/auth'
 
 interface Question {
   id: number
@@ -87,12 +88,63 @@ export default function AssessmentPage() {
   const [currentSection, setCurrentSection] = useState<string | null>(null)
   const [responses, setResponses] = useState<Record<number, any>>({})
   const [validationErrors, setValidationErrors] = useState<Record<number, string>>({})
+  const [userEmail, setUserEmail] = useState<string>('')
   const autoSaveTimeouts = useRef<Record<number, NodeJS.Timeout>>({})
 
   // Get the current assessment status
   const currentStatus: AssessmentStatus = session 
     ? getAssessmentStatus(session.status, session.finalStatus || session.review?.status, session.review?.stage)
     : getAssessmentStatus('draft')
+
+  // Function to get current user's email
+  const getCurrentUserEmail = async () => {
+    try {
+      const user = await getProfile()
+      return user.email || ''
+    } catch (err) {
+      console.error('Error fetching user email:', err)
+      return ''
+    }
+  }
+
+  // Function to check if a question is an email field
+  const isEmailQuestion = (question: Question) => {
+    const questionText = question.questionText.toLowerCase()
+    const inputType = question.inputType.toLowerCase()
+    
+    return inputType === 'email' || 
+           questionText.includes('email') || 
+           questionText.includes('alamat email') ||
+           questionText.includes('e-mail') ||
+           questionText.includes('email address') ||
+           (inputType === 'text-open' && questionText.includes('email'))
+  }
+
+  // Function to pre-fill email fields with authenticated user's email
+  const prefillEmailFields = (questions: Question[], userEmail: string, currentResponses: Record<number, any>) => {
+    if (!userEmail) return currentResponses
+
+    const emailQuestions = questions.filter(isEmailQuestion)
+    const updatedResponses = { ...currentResponses }
+
+    console.log('Pre-filling email fields:', {
+      userEmail,
+      emailQuestionsCount: emailQuestions.length,
+      emailQuestions: emailQuestions.map(q => ({ id: q.id, questionText: q.questionText, inputType: q.inputType }))
+    })
+
+    emailQuestions.forEach(question => {
+      // Only pre-fill if the field is empty or hasn't been answered yet
+      if (!currentResponses[question.id] || currentResponses[question.id] === '') {
+        updatedResponses[question.id] = userEmail
+        console.log(`Pre-filled email for question ${question.id}: ${question.questionText}`)
+      } else {
+        console.log(`Question ${question.id} already has a value, skipping pre-fill`)
+      }
+    })
+
+    return updatedResponses
+  }
 
   // Calculate progress based on completed questions
   const calculateProgress = () => {
@@ -133,6 +185,10 @@ export default function AssessmentPage() {
   const fetchSessionData = async () => {
     try {
       setLoading(true)
+      
+      // Get user email first
+      const email = await getCurrentUserEmail()
+      setUserEmail(email)
       
       const response = await api.get(`/assessments/session/${groupId}`)
       console.log('Session data:', response.data)
@@ -199,6 +255,14 @@ export default function AssessmentPage() {
         })
       }
       setResponses(initialResponses)
+      
+      // Pre-fill email fields with authenticated user's email
+      if (email && sessionData.questions) {
+        const responsesWithEmail = prefillEmailFields(sessionData.questions, email, initialResponses)
+        setResponses(responsesWithEmail)
+      } else {
+        setResponses(initialResponses)
+      }
       
       // Set current section to first section if not set
       if (!currentSection && sessionData.questions && sessionData.questions.length > 0) {
@@ -709,7 +773,7 @@ export default function AssessmentPage() {
                        return (
                          <div className="p-3 bg-red-100 border border-red-200 rounded-lg">
                            <p className="text-sm font-medium text-red-800">
-                             ⚠️ Time's up! Please submit your assessment immediately.
+                             ⚠️ Time&apos;s up! Please submit your assessment immediately.
                            </p>
                          </div>
                        )
@@ -762,17 +826,28 @@ export default function AssessmentPage() {
             <Card>
               <CardContent className="pt-6">
                 <div className="flex flex-wrap gap-2">
-                  {sections.map((section, index) => (
-                    <Button
-                      key={section}
-                      variant={currentSection === section ? 'default' : 'outline'}
-                      size="sm"
-                      onClick={() => setCurrentSection(section)}
-                      className="text-xs"
-                    >
-                      {section}
-                    </Button>
-                  ))}
+                  {sections.map((section, index) => {
+                    const sectionQuestions = questions.filter(q => 
+                      q.sectionTitle === getSectionTitleFromCombined(section)
+                    )
+                    const answeredQuestions = sectionQuestions.filter(q => {
+                      const response = responses[q.id]
+                      return response !== undefined && response !== null && response !== ''
+                    })
+                    const completionStatus = `${answeredQuestions.length}/${sectionQuestions.length}`
+                    
+                    return (
+                      <Button
+                        key={section}
+                        variant={currentSection === section ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => setCurrentSection(section)}
+                        className="text-xs"
+                      >
+                        {section} ({completionStatus})
+                      </Button>
+                    )
+                  })}
                 </div>
               </CardContent>
             </Card>
@@ -802,7 +877,7 @@ export default function AssessmentPage() {
                         <div className="flex-1">
                           <p className="text-sm text-gray-700 font-medium mb-1">⚠️ Optional Section</p>
                           <p className="text-sm text-gray-600">
-                            Questions in this section are optional. You may skip them if they don't apply to your situation.
+                            Questions in this section are optional. You may skip them if they don&apos;t apply to your situation.
                           </p>
                         </div>
                       </div>
@@ -825,6 +900,7 @@ export default function AssessmentPage() {
                            value={responses[question.id]}
                            onChange={(value) => handleResponseChange(question.id, value)}
                            validationError={validationErrors[question.id]}
+                           isPrefilledFromAuth={isEmailQuestion(question) && userEmail && responses[question.id] === userEmail}
                          />
                       
                       {/* Show feedback for this question if it exists */}
@@ -857,60 +933,52 @@ export default function AssessmentPage() {
               </CardContent>
             </Card>
 
-            {/* Navigation Buttons */}
-            <div className="flex flex-col space-y-3">
-              <div className="flex justify-between">
-                <Button
-                  variant="outline"
-                  onClick={() => setCurrentSection(sections[currentSectionIndex - 1] || null)}
-                  disabled={currentSectionIndex === 0}
-                  className="flex items-center space-x-2"
-                >
-                  <ArrowLeft className="h-4 w-4" />
-                  <span className="hidden sm:inline">Previous Section</span>
-                  <span className="sm:hidden">Previous</span>
-                </Button>
+                         {/* Navigation Buttons */}
+             <div className="flex justify-between">
+               <Button
+                 variant="outline"
+                 onClick={() => setCurrentSection(sections[currentSectionIndex - 1] || null)}
+                 disabled={currentSectionIndex === 0}
+                 className="flex items-center space-x-2"
+               >
+                 <ArrowLeft className="h-4 w-4" />
+                 <span className="hidden sm:inline">Previous Section</span>
+                 <span className="sm:hidden">Previous</span>
+               </Button>
 
-                {currentSectionIndex === sections.length - 1 ? (
-                  <Button
-                    onClick={handleSubmit}
-                    disabled={saving || (!currentStatus.canSubmit && !currentStatus.canResubmit)}
-                    className="flex items-center space-x-2"
-                  >
-                    <Send className="h-4 w-4" />
-                    <span>
-                      {saving 
-                        ? 'Submitting...' 
-                        : questions.some(q => q.reviewComments && q.reviewComments.length > 0)
-                          ? 'Resubmit Assessment'
-                          : 'Submit Assessment'
-                      }
-                    </span>
-                  </Button>
-                ) : (
-                  <Button
-                    onClick={() => setCurrentSection(sections[currentSectionIndex + 1] || null)}
-                    className="flex items-center space-x-2"
-                  >
-                    <span className="hidden sm:inline">Next Section</span>
-                    <span className="sm:hidden">Next</span>
-                    <ArrowRight className="h-4 w-4" />
-                  </Button>
-                )}
-              </div>
-
-              <div className="flex justify-center">
-                <Button
-                  variant="outline"
-                  onClick={handleSaveSection}
-                  disabled={saving}
-                  className="flex items-center space-x-2 w-full sm:w-auto"
-                >
-                  <Save className="h-4 w-4" />
-                  <span>{saving ? 'Saving...' : 'Save Progress'}</span>
-                </Button>
-              </div>
-            </div>
+               {currentSectionIndex === sections.length - 1 ? (
+                 <Button
+                   onClick={handleSubmit}
+                   disabled={saving || (!currentStatus.canSubmit && !currentStatus.canResubmit)}
+                   className="flex items-center space-x-2"
+                 >
+                   <Send className="h-4 w-4" />
+                   <span>
+                     {saving 
+                       ? 'Submitting...' 
+                       : questions.some(q => q.reviewComments && q.reviewComments.length > 0)
+                         ? 'Resubmit Assessment'
+                         : 'Submit Assessment'
+                     }
+                   </span>
+                 </Button>
+               ) : (
+                 <Button
+                   onClick={() => {
+                     setCurrentSection(sections[currentSectionIndex + 1] || null)
+                     // Scroll to top after section change
+                     setTimeout(() => {
+                       window.scrollTo({ top: 0, behavior: 'smooth' })
+                     }, 100)
+                   }}
+                   className="flex items-center space-x-2"
+                 >
+                   <span className="hidden sm:inline">Next Section</span>
+                   <span className="sm:hidden">Next</span>
+                   <ArrowRight className="h-4 w-4" />
+                 </Button>
+               )}
+             </div>
           </>
                  ) : (
            /* Read-only view for non-editable statuses */
@@ -919,17 +987,28 @@ export default function AssessmentPage() {
              <Card>
                <CardContent className="pt-6">
                  <div className="flex flex-wrap gap-2">
-                   {sections.map((section, index) => (
-                     <Button
-                       key={section}
-                       variant={currentSection === section ? 'default' : 'outline'}
-                       size="sm"
-                       onClick={() => setCurrentSection(section)}
-                       className="text-xs"
-                     >
-                       {section}
-                     </Button>
-                   ))}
+                   {sections.map((section, index) => {
+                     const sectionQuestions = questions.filter(q => 
+                       q.sectionTitle === getSectionTitleFromCombined(section)
+                     )
+                     const answeredQuestions = sectionQuestions.filter(q => {
+                       const response = responses[q.id]
+                       return response !== undefined && response !== null && response !== ''
+                     })
+                     const completionStatus = `${answeredQuestions.length}/${sectionQuestions.length}`
+                     
+                     return (
+                       <Button
+                         key={section}
+                         variant={currentSection === section ? 'default' : 'outline'}
+                         size="sm"
+                         onClick={() => setCurrentSection(section)}
+                         className="text-xs"
+                       >
+                         {section} ({completionStatus})
+                       </Button>
+                     )
+                   })}
                  </div>
                </CardContent>
              </Card>

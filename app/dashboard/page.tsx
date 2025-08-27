@@ -6,10 +6,20 @@ import { getProfile } from '@/lib/auth'
 import AuthenticatedLayout from '@/components/AuthenticatedLayout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Users, FileText, Award, ArrowRight } from 'lucide-react'
+import { Users, FileText, Award } from 'lucide-react'
+
+interface User {
+  name?: string
+  username?: string
+  userRoles?: Array<{
+    role?: {
+      name: string
+    }
+  }>
+}
 
 export default function DashboardPage() {
-  const [user, setUser] = useState<any>(null)
+  const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const router = useRouter()
 

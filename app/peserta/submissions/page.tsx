@@ -376,14 +376,7 @@ export default function SubmissionsPage() {
                     size="sm"
                     onClick={() => handleStatusFilter('draft')}
                   >
-                    Drafts
-                  </Button>
-                  <Button
-                    variant={statusFilter === 'in_progress' ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => handleStatusFilter('in_progress')}
-                  >
-                    In Progress
+                    Draft
                   </Button>
                   <Button
                     variant={statusFilter === 'submitted' ? 'default' : 'outline'}
@@ -391,20 +384,6 @@ export default function SubmissionsPage() {
                     onClick={() => handleStatusFilter('submitted')}
                   >
                     Submitted
-                  </Button>
-                  <Button
-                    variant={statusFilter === 'pending_review' ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => handleStatusFilter('pending_review')}
-                  >
-                    Pending Review
-                  </Button>
-                  <Button
-                    variant={statusFilter === 'under_review' ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => handleStatusFilter('under_review')}
-                  >
-                    Under Review
                   </Button>
                   <Button
                     variant={statusFilter === 'needs_revision' ? 'default' : 'outline'}
@@ -425,42 +404,7 @@ export default function SubmissionsPage() {
                     size="sm"
                     onClick={() => handleStatusFilter('approved')}
                   >
-                    Approved
-                  </Button>
-                  <Button
-                    variant={statusFilter === 'rejected' ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => handleStatusFilter('rejected')}
-                  >
-                    Rejected
-                  </Button>
-                  <Button
-                    variant={statusFilter === 'passed_to_jury' ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => handleStatusFilter('passed_to_jury')}
-                  >
-                    Passed to Jury
-                  </Button>
-                  <Button
-                    variant={statusFilter === 'jury_scoring' ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => handleStatusFilter('jury_scoring')}
-                  >
-                    Jury Scoring
-                  </Button>
-                  <Button
-                    variant={statusFilter === 'jury_deliberation' ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => handleStatusFilter('jury_deliberation')}
-                  >
-                    Jury Deliberation
-                  </Button>
-                  <Button
-                    variant={statusFilter === 'final_decision' ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => handleStatusFilter('final_decision')}
-                  >
-                    Final Decision
+                    Approve to Jury
                   </Button>
                   <Button
                     variant={statusFilter === 'completed' ? 'default' : 'outline'}

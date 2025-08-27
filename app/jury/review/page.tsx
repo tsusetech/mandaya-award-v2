@@ -14,26 +14,31 @@ import AuthenticatedLayout from '@/components/AuthenticatedLayout'
 interface Review {
   id: number
   sessionId: number
-  stage: string
+  groupName: string
+  userName: string
+  userEmail: string
+  submittedAt: string
   status: string
+  progressPercentage: number
   decision: string
-  overallComments?: string
-  totalScore?: number
-  reviewedAt?: string
-  createdAt: string
-  updatedAt: string
-  session: {
-    id: number
-    groupId: number
-    groupName: string
-    userId: number
-    status: string
-    submittedAt?: string
-    user: {
-      id: number
-      name: string
-      email: string
-    }
+  stage: string
+}
+
+interface ReviewsData {
+  submissions: Review[]
+  pagination: {
+    total: number
+    page: number
+    limit: number
+    totalPages: number
+    hasNext: boolean
+    hasPrev: boolean
+  }
+  filters: {
+    all: number
+    pending: number
+    inProgress: number
+    completed: number
   }
 }
 
@@ -44,25 +49,43 @@ export default function JuriReviewPage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [loading, setLoading] = useState(true)
+  const [searchTimeout, setSearchTimeout] = useState<NodeJS.Timeout | null>(null)
 
   useEffect(() => {
-    fetchReviews()
+    fetchReviews('', 'all', 1, true)
   }, [])
 
   useEffect(() => {
-    filterReviews()
-  }, [reviews, searchTerm, statusFilter])
+    return () => {
+      if (searchTimeout) {
+        clearTimeout(searchTimeout)
+      }
+    }
+  }, [searchTimeout])
 
-  const fetchReviews = async () => {
+  const fetchReviews = async (search = '', filter = 'all', page = 1, showLoading = true) => {
     try {
-      setLoading(true)
+      if (showLoading) {
+        setLoading(true)
+      }
       
-      // Get reviews assigned to current juri member
-      const response = await api.get('/reviews/my-reviews')
-      const reviewsData = response.data || []
+      // Build query parameters
+      const params = new URLSearchParams()
+      if (search.trim()) params.append('search', search.trim())
+      if (filter !== 'all') params.append('filter', filter)
+      if (page > 1) params.append('page', page.toString())
+      params.append('limit', '10')
       
-      setReviews(reviewsData)
-      setFilteredReviews(reviewsData)
+      // Use the new jury reviews endpoint
+      const response = await api.get(`/assessments/jury/reviews?${params.toString()}`)
+      const reviewsData: ReviewsData = response.data?.data || {
+        submissions: [],
+        pagination: { total: 0, page: 1, limit: 10, totalPages: 0, hasNext: false, hasPrev: false },
+        filters: { all: 0, pending: 0, inProgress: 0, completed: 0 }
+      }
+      
+      setReviews(reviewsData.submissions)
+      setFilteredReviews(reviewsData.submissions)
     } catch (err) {
       console.error('Error fetching reviews:', err)
       toast.error('Failed to load reviews')
@@ -72,53 +95,27 @@ export default function JuriReviewPage() {
         {
           id: 1,
           sessionId: 1,
-          stage: 'juri_scoring',
+          groupName: 'Sample Organization A',
+          userName: 'John Doe',
+          userEmail: 'john@example.com',
+          submittedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
           status: 'in_progress',
+          progressPercentage: 50,
           decision: 'pending',
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-          session: {
-            id: 1,
-            groupId: 1,
-            groupName: 'Sample Organization A',
-            userId: 1,
-            status: 'approved_for_juri',
-            submittedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-            user: {
-              id: 1,
-              name: 'John Doe',
-              email: 'john@example.com'
-            }
-          }
+          stage: 'admin_validation'
         }
       ]
       
       setReviews(mockReviews)
       setFilteredReviews(mockReviews)
     } finally {
-      setLoading(false)
+      if (showLoading) {
+        setLoading(false)
+      }
     }
   }
 
-  const filterReviews = () => {
-    let filtered = [...reviews]
 
-    // Apply search filter
-    if (searchTerm) {
-      filtered = filtered.filter(review =>
-        review.session.groupName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        review.session.user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        review.session.user.email.toLowerCase().includes(searchTerm.toLowerCase())
-      )
-    }
-
-    // Apply status filter
-    if (statusFilter !== 'all') {
-      filtered = filtered.filter(review => review.status === statusFilter)
-    }
-
-    setFilteredReviews(filtered)
-  }
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -128,6 +125,8 @@ export default function JuriReviewPage() {
         return <Badge variant="secondary" className="bg-blue-100 text-blue-800">In Progress</Badge>
       case 'pending':
         return <Badge variant="outline" className="bg-yellow-100 text-yellow-800">Pending</Badge>
+      case 'approved':
+        return <Badge variant="default" className="bg-green-100 text-green-800">Approved by admin</Badge>
       default:
         return <Badge variant="outline">{status}</Badge>
     }
@@ -194,7 +193,7 @@ export default function JuriReviewPage() {
           <Button
             variant="outline"
             size="sm"
-            onClick={fetchReviews}
+            onClick={() => fetchReviews(searchTerm, statusFilter, 1, true)}
             className="flex items-center space-x-2"
           >
             <RefreshCw className="h-4 w-4" />
@@ -211,7 +210,21 @@ export default function JuriReviewPage() {
                 <Input
                   placeholder="Search by group name, user name, or email..."
                   value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onChange={(e) => {
+                    const value = e.target.value
+                    setSearchTerm(value)
+                    
+                    // Clear existing timeout
+                    if (searchTimeout) {
+                      clearTimeout(searchTimeout)
+                    }
+                    
+                    // Set new timeout for debounced search
+                    const timeoutId = setTimeout(() => {
+                      fetchReviews(value, statusFilter, 1, false)
+                    }, 500)
+                    setSearchTimeout(timeoutId)
+                  }}
                   className="pl-10"
                 />
               </div>
@@ -219,28 +232,40 @@ export default function JuriReviewPage() {
                 <Button
                   variant={statusFilter === 'all' ? 'default' : 'outline'}
                   size="sm"
-                  onClick={() => setStatusFilter('all')}
+                  onClick={() => {
+                    setStatusFilter('all')
+                    fetchReviews(searchTerm, 'all', 1, false)
+                  }}
                 >
                   All
                 </Button>
                 <Button
                   variant={statusFilter === 'pending' ? 'default' : 'outline'}
                   size="sm"
-                  onClick={() => setStatusFilter('pending')}
+                  onClick={() => {
+                    setStatusFilter('pending')
+                    fetchReviews(searchTerm, 'pending', 1, false)
+                  }}
                 >
                   Pending
                 </Button>
                 <Button
                   variant={statusFilter === 'in_progress' ? 'default' : 'outline'}
                   size="sm"
-                  onClick={() => setStatusFilter('in_progress')}
+                  onClick={() => {
+                    setStatusFilter('in_progress')
+                    fetchReviews(searchTerm, 'in_progress', 1, false)
+                  }}
                 >
                   In Progress
                 </Button>
                 <Button
                   variant={statusFilter === 'completed' ? 'default' : 'outline'}
                   size="sm"
-                  onClick={() => setStatusFilter('completed')}
+                  onClick={() => {
+                    setStatusFilter('completed')
+                    fetchReviews(searchTerm, 'completed', 1, false)
+                  }}
                 >
                   Completed
                 </Button>
@@ -276,20 +301,17 @@ export default function JuriReviewPage() {
                         {getStatusIcon(review.status)}
                       </div>
                       <div className="flex-1">
-                        <h3 className="text-lg font-semibold text-gray-900">{review.session.groupName}</h3>
+                        <h3 className="text-lg font-semibold text-gray-900">{review.groupName}</h3>
                         <p className="text-sm text-gray-600">
-                          Submitted by {review.session.user.name} ({review.session.user.email})
+                          Submitted by {review.userName} ({review.userEmail})
                         </p>
                         <p className="text-sm text-gray-500">
-                          Submitted on {formatDate(review.session.submittedAt || review.createdAt)}
+                          Submitted on {formatDate(review.submittedAt)}
                         </p>
                       </div>
                     </div>
                     <div className="flex items-center space-x-4">
                       {getStatusBadge(review.status)}
-                      <div className="text-sm text-gray-500">
-                        Progress: {review.status === 'completed' ? '100%' : review.status === 'in_progress' ? '50%' : '0%'}
-                      </div>
                       <Button
                         variant="outline"
                         size="sm"

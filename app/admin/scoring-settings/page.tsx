@@ -26,6 +26,27 @@ interface QuestionCategory {
   updatedAt: string
 }
 
+interface CategoryData {
+  id: number
+  name?: string
+  description?: string
+  weight?: number
+  minValue?: number
+  maxValue?: number
+  scoreType?: 'number' | 'percentage' | 'currency' | 'rating' | 'boolean'
+  createdAt?: string
+  updatedAt?: string
+}
+
+interface ApiError {
+  response?: {
+    status?: number
+    data?: {
+      message?: string
+    }
+  }
+}
+
 export default function ScoringSettingsPage() {
   const [categories, setCategories] = useState<QuestionCategory[]>([])
   const [loading, setLoading] = useState(true)
@@ -40,7 +61,7 @@ export default function ScoringSettingsPage() {
     weight: 1.0,
     minValue: 0.0,
     maxValue: 100.0,
-    scoreType: 'number' as const
+    scoreType: 'number' as 'number' | 'percentage' | 'currency' | 'rating' | 'boolean'
   })
   const [scoreTypeFilter, setScoreTypeFilter] = useState<string>('all')
 
@@ -62,22 +83,23 @@ export default function ScoringSettingsPage() {
       console.log('Processed categories:', categoriesData) // Debug log
       
       // Ensure all categories have required properties with defaults
-      const processedCategories = categoriesData.map((category: any) => ({
+      const processedCategories = categoriesData.map((category: CategoryData) => ({
         id: category.id,
         name: category.name || '',
         description: category.description || '',
         weight: category.weight || 1.0,
         minValue: category.minValue || 0.0,
         maxValue: category.maxValue || 100.0,
-        scoreType: category.scoreType || 'number',
+        scoreType: (category.scoreType as 'number' | 'percentage' | 'currency' | 'rating' | 'boolean') || 'number',
         createdAt: category.createdAt || new Date().toISOString(),
         updatedAt: category.updatedAt || new Date().toISOString()
       }))
       
       console.log('Final processed categories:', processedCategories) // Debug log
       setCategories(processedCategories)
-    } catch (error) {
-      console.error('Failed to fetch categories:', error)
+    } catch (error: unknown) {
+      const err = error as ApiError
+      console.error('Failed to fetch categories:', err)
       toast.error('Failed to load question categories')
       setCategories([]) // Set empty array on error
     } finally {
@@ -92,8 +114,9 @@ export default function ScoringSettingsPage() {
       setIsCreateDialogOpen(false)
       resetForm()
       fetchCategories()
-    } catch (error: any) {
-      if (error.response?.status === 409) {
+    } catch (error: unknown) {
+      const err = error as ApiError
+      if (err.response?.status === 409) {
         toast.error('Question category name already exists')
       } else {
         toast.error('Failed to create question category')
@@ -111,8 +134,9 @@ export default function ScoringSettingsPage() {
       setEditingCategory(null)
       resetForm()
       fetchCategories()
-    } catch (error: any) {
-      if (error.response?.status === 409) {
+    } catch (error: unknown) {
+      const err = error as ApiError
+      if (err.response?.status === 409) {
         toast.error('Question category name already exists')
       } else {
         toast.error('Failed to update question category')
@@ -127,8 +151,9 @@ export default function ScoringSettingsPage() {
       await api.delete(`/question-categories/${id}`)
       toast.success('Question category deleted successfully')
       fetchCategories()
-    } catch (error: any) {
-      if (error.response?.status === 409) {
+    } catch (error: unknown) {
+      const err = error as ApiError
+      if (err.response?.status === 409) {
         toast.error('Cannot delete category as it is being used in group questions')
       } else {
         toast.error('Failed to delete question category')

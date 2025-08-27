@@ -10,8 +10,8 @@ import {
   ArrowLeft, 
   CheckCircle, 
   MessageSquare,
-  Eye,
-  EyeOff
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react'
 import { toast } from 'sonner'
 import api from '@/lib/api'
@@ -32,6 +32,15 @@ interface Question {
     createdAt: string
     reviewerName?: string
   }>
+  category?: {
+    id: number
+    name: string
+    description: string
+    weight: number
+    minValue: number
+    maxValue: number
+    scoreType: string
+  }
 }
 
 interface Response {
@@ -67,7 +76,6 @@ export default function AdminSubmissionReviewPage() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [generalFeedback, setGeneralFeedback] = useState('')
-  const [showFeedback, setShowFeedback] = useState<Record<number, boolean>>({})
   const [currentSection, setCurrentSection] = useState<string>('')
 
     const fetchSubmission = async () => {
@@ -559,10 +567,17 @@ export default function AdminSubmissionReviewPage() {
         setSubmission(prev => prev ? { 
           ...prev, 
           feedback: generalFeedback,
-          reviewId: reviewId 
+          reviewId: reviewId,
+          status: 'approved' // Update status to reflect approval
         } : prev)
         
-        toast.success('General feedback saved successfully')
+        toast.success('Submission approved and sent to jury successfully')
+        
+        // Refresh the page data to get updated information
+        setTimeout(() => {
+          fetchSubmission()
+        }, 1000) // Wait 1 second before refreshing to ensure the API has processed the changes
+        
       } catch (err: any) {
         console.error('Error saving general feedback:', err)
         console.log('Error response data:', err.response?.data)
@@ -656,32 +671,35 @@ export default function AdminSubmissionReviewPage() {
       }
     }
  
-       const getStatusLabel = (status: string) => {
-      // If status is approved, show approved label regardless of revisions
-      if (status === 'approved') {
-        return 'Approve to Jury'
-      }
-      
-      // If there are revisions needed, override the status label
-      if (hasRevisions) {
-        return 'Needs Revision'
-      }
-      
-      switch (status) {
-        case 'in_progress':
-          return 'In Progress'
-        case 'submitted':
-          return 'Submitted'
-        case 'needs_revision':
-          return 'Needs Revision'
-        case 'resubmitted':
-          return 'Resubmitted'
-        case 'completed':
-          return 'Completed'
-        default:
-          return status
-      }
+         const getStatusLabel = (status: string) => {
+    // If status is approved, show approved label regardless of revisions
+    if (status === 'approved') {
+      return 'Approve to Jury'
     }
+    
+    // If there are revisions needed, override the status label
+    if (hasRevisions) {
+      return 'Needs Revision'
+    }
+    
+    switch (status) {
+      case 'in_progress':
+        return 'In Progress'
+      case 'submitted':
+        return 'Submitted'
+      case 'needs_revision':
+        return 'Needs Revision'
+      case 'resubmitted':
+        return 'Resubmitted'
+      case 'completed':
+        return 'Completed'
+      default:
+        return status
+    }
+  }
+
+  // Helper function to check if submission is in read-only mode (completed status)
+  const isReadOnly = submission.status === 'completed'
    
    // Helper function to get section title from combined string
    const getSectionTitleFromCombined = (combinedSection: string) => {
@@ -696,6 +714,32 @@ export default function AdminSubmissionReviewPage() {
      const questionSection = q.sectionTitle === q.subsection ? q.sectionTitle : `${q.sectionTitle} - ${q.subsection}`
      return questionSection === currentSection
    })
+
+   // Navigation functions
+   const getCurrentSectionIndex = () => {
+     return sections.findIndex(section => section === currentSection)
+   }
+
+   const goToNextSection = () => {
+     const currentIndex = getCurrentSectionIndex()
+     if (currentIndex < sections.length - 1) {
+       setCurrentSection(sections[currentIndex + 1])
+       // Scroll to top of questions section
+       window.scrollTo({ top: 0, behavior: 'smooth' })
+     }
+   }
+
+   const goToPreviousSection = () => {
+     const currentIndex = getCurrentSectionIndex()
+     if (currentIndex > 0) {
+       setCurrentSection(sections[currentIndex - 1])
+       // Scroll to top of questions section
+       window.scrollTo({ top: 0, behavior: 'smooth' })
+     }
+   }
+
+   const isFirstSection = getCurrentSectionIndex() === 0
+   const isLastSection = getCurrentSectionIndex() === sections.length - 1
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -726,7 +770,7 @@ export default function AdminSubmissionReviewPage() {
         </div>
       </div>
 
-      <div className="p-4 sm:p-6 max-w-6xl mx-auto space-y-6">
+             <div className="p-4 sm:p-6 max-w-6xl mx-auto space-y-8">
         {/* Submission Info */}
         <Card>
           <CardContent className="pt-6">
@@ -758,23 +802,32 @@ export default function AdminSubmissionReviewPage() {
              </CardTitle>
            </CardHeader>
                       <CardContent className="space-y-4">
-                             {hasRevisions && submission.status !== 'approved' && (
+                             {hasRevisions && submission.status !== 'approved' && !isReadOnly && (
                  <div className="flex items-center space-x-2">
                    <Badge variant="destructive">
                      {submission.responses.filter(r => r.needsRevision).length} questions need revision
                    </Badge>
                  </div>
                )}
-              <Textarea
-                placeholder="Provide general feedback for this submission..."
-                value={generalFeedback}
-                onChange={(e) => setGeneralFeedback(e.target.value)}
-                rows={4}
-              />
+              {isReadOnly ? (
+                <div className="bg-gray-50 rounded p-4">
+                  <p className="text-sm text-gray-600 mb-2">Feedback:</p>
+                  <p className="font-medium break-words">
+                    {generalFeedback || 'No feedback provided'}
+                  </p>
+                </div>
+              ) : (
+                <Textarea
+                  placeholder="Provide general feedback for this submission..."
+                  value={generalFeedback}
+                  onChange={(e) => setGeneralFeedback(e.target.value)}
+                  rows={4}
+                />
+              )}
                              <div className="flex justify-end">
                                    <Button
                     onClick={handleApprove}
-                    disabled={saving || hasRevisions || submission.status === 'approved'}
+                    disabled={saving || hasRevisions || submission.status === 'approved' || isReadOnly}
                     className="flex items-center justify-center space-x-2"
                   >
                     <CheckCircle className="h-4 w-4" />
@@ -794,8 +847,22 @@ export default function AdminSubmissionReviewPage() {
                    variant={currentSection === section ? 'default' : 'outline'}
                    size="sm"
                    onClick={() => setCurrentSection(section)}
+                   className="flex items-center space-x-2"
                  >
-                   {section}
+                                       <span>{section}</span>
+                                         <span className="text-xs opacity-75">({(() => {
+                       const sectionQuestions = submission.questions.filter(q => {
+                         const questionSection = q.sectionTitle === q.subsection 
+                           ? q.sectionTitle 
+                           : `${q.sectionTitle} - ${q.subsection}`
+                         return questionSection === section
+                       })
+                       const answeredQuestions = sectionQuestions.filter(q => {
+                         const response = submission.responses.find(r => r.questionId === q.id)
+                         return response !== undefined && response !== null
+                       })
+                       return `${answeredQuestions.length}/${sectionQuestions.length}`
+                     })()})</span>
                  </Button>
                ))}
              </div>
@@ -818,64 +885,140 @@ export default function AdminSubmissionReviewPage() {
                </div>
              </div>
            </CardHeader>
-           <CardContent className="space-y-6">
-             {currentSectionQuestions.map(question => {
-                  const response = submission.responses.find(r => r.questionId === question.id)
-                  return (
-                                         <div key={question.id} className="border rounded-lg p-4 space-y-4">
+                       <CardContent className="space-y-8">
+              {currentSectionQuestions.map(question => {
+                   const response = submission.responses.find(r => r.questionId === question.id)
+                   return (
+                                          <div key={question.id} className="border rounded-lg p-6 space-y-6">
                        <div>
-                         <h4 className="font-medium text-gray-900 mb-2 break-words">
-                           {question.questionText}
-                         </h4>
-                         {question.description && (
-                           <p className="text-sm text-gray-600 mb-3 break-words">{question.description}</p>
-                         )}
-                                                   <div className="bg-gray-50 rounded p-3">
-                            <p className="text-sm text-gray-600 mb-1">Response:</p>
-                            <p className="font-medium break-words">
-                              {response ? getResponseValue(response) : (
-                                <span className="text-gray-500 italic">
-                                  No response yet. Responses will appear here once the user submits their assessment.
-                                </span>
-                              )}
-                            </p>
-                          </div>
+                                                   <h4 className="font-medium text-gray-900 mb-2 break-words">
+                            {question.questionText}
+                          </h4>
+                                                     {question.description && (
+                             <p className="text-sm text-gray-600 mb-4 break-words">{question.description}</p>
+                           )}
+                                                     {question.category && (
+                             <div className="mt-3 mb-4">
+                               <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                 {question.category.name} (Weight: {question.category.weight}, Min: {question.category.minValue}, Max: {question.category.maxValue}, Type: {question.category.scoreType})
+                               </span>
+                             </div>
+                           )}
+                                                                                                                                   <div className="bg-gray-50 rounded p-4">
+                             <div className="flex items-start justify-between">
+                               <div className="flex-1">
+                                 <p className="text-sm text-gray-600 mb-2">Response:</p>
+                                 <p className="font-medium break-words">
+                                   {response ? getResponseValue(response) : (
+                                     <span className="text-gray-500 italic">
+                                       No response yet. Responses will appear here once the user submits their assessment.
+                                     </span>
+                                   )}
+                                 </p>
+                               </div>
+                               {question.category && response && (() => {
+                                 const responseValue = response.numericValue !== undefined ? response.numericValue : 
+                                                      response.textValue !== undefined ? parseFloat(response.textValue) : null
+                                 if (responseValue !== null && !isNaN(responseValue)) {
+                                   const { minValue, maxValue } = question.category
+                                   let resultText = ''
+                                   let resultColor = ''
+                                   
+                                   // Handle cases where minValue > maxValue (inverted range)
+                                   const actualMin = Math.min(minValue, maxValue)
+                                   const actualMax = Math.max(minValue, maxValue)
+                                   
+                                   if (responseValue < actualMin) {
+                                     resultText = `Under minimum (${actualMin})`
+                                     resultColor = 'bg-red-100 text-red-800'
+                                   } else if (responseValue > actualMax) {
+                                     resultText = `Above maximum (${actualMax})`
+                                     resultColor = 'bg-orange-100 text-orange-800'
+                                   } else {
+                                     resultText = `In range (${actualMin}-${actualMax})`
+                                     resultColor = 'bg-green-100 text-green-800'
+                                   }
+                                   
+                                   return (
+                                     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${resultColor} ml-3 flex-shrink-0`}>
+                                       {resultText}
+                                     </span>
+                                   )
+                                 }
+                                 return null
+                               })()}
+                             </div>
+                           </div>
                        </div>
 
-                       <div className="space-y-3">
-                         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
-                                                       <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => setShowFeedback(prev => ({ 
-                                ...prev, 
-                                [question.id]: !prev[question.id] 
-                              }))}
-                              className="flex items-center space-x-2 w-fit"
-                            >
-                              {showFeedback[question.id] ? (
-                                <EyeOff className="h-4 w-4" />
-                              ) : (
-                                <Eye className="h-4 w-4" />
-                              )}
-                              <span>{submission.status === 'approved' ? 'View Feedback' : 'Add Feedback'}</span>
-                            </Button>
-                                                       {response?.needsRevision && submission.status !== 'approved' && (
-                              <Badge variant="destructive">Needs Revision</Badge>
-                            )}
-                         </div>
+                                               <div className="space-y-3">
+                                                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
+                                                        {response?.needsRevision && submission.status !== 'approved' && (
+                               <Badge variant="destructive">Needs Revision</Badge>
+                             )}
+                          </div>
 
-                                                   {showFeedback[question.id] && (
-                            <div className="space-y-3">
-                              {submission.status === 'approved' ? (
+                                                    {(
+                            <div className="space-y-4">
+                              {isReadOnly ? (
+                                // Read-only score display for completed submissions
+                                <div className="bg-gray-50 rounded p-4">
+                                  {question.category ? (
+                                    <div className="space-y-2">
+                                      <p className="text-sm text-gray-600">Score:</p>
+                                      <div className="flex items-center space-x-2">
+                                        <span className="text-lg font-bold text-green-600">
+                                          {(() => {
+                                            // Check if there are jury scores available
+                                            // First try to get jury score from the question's juryScores array
+                                            const juryScore = question.juryScores && question.juryScores.length > 0 
+                                              ? question.juryScores[0].score 
+                                              : null
+                                            
+                                            if (juryScore !== undefined && juryScore !== null) {
+                                              return `${juryScore}`
+                                            }
+                                            
+                                            // Fallback to response value if no jury score
+                                            const responseValue = response?.numericValue !== undefined ? response?.numericValue : 
+                                              response?.textValue !== undefined ? parseFloat(response?.textValue) : null
+                                            if (responseValue !== null && !isNaN(responseValue)) {
+                                              return `${responseValue}`
+                                            }
+                                            return 'N/A'
+                                          })()}
+                                        </span>
+                                        <Badge variant="outline" className="text-xs">
+                                          {question.category.name}
+                                        </Badge>
+                                      </div>
+                                      <p className="text-xs text-gray-500">
+                                        Weight: {question.category.weight}, Range: {question.category.minValue}-{question.category.maxValue}
+                                      </p>
+                                    </div>
+                                  ) : (
+                                    <div>
+                                      <p className="text-sm text-gray-600 mb-2">Feedback:</p>
+                                      <p className="font-medium break-words">
+                                        {response?.feedback || 'No feedback provided'}
+                                      </p>
+                                    </div>
+                                  )}
+                                  {response?.needsRevision && (
+                                    <div className="mt-3">
+                                      <Badge variant="destructive">Needs Revision</Badge>
+                                    </div>
+                                  )}
+                                </div>
+                              ) : submission.status === 'approved' ? (
                                 // Read-only feedback display for approved submissions
-                                <div className="bg-gray-50 rounded p-3">
-                                  <p className="text-sm text-gray-600 mb-1">Feedback:</p>
+                                <div className="bg-gray-50 rounded p-4">
+                                  <p className="text-sm text-gray-600 mb-2">Feedback:</p>
                                   <p className="font-medium break-words">
                                     {response?.feedback || 'No feedback provided'}
                                   </p>
                                   {response?.needsRevision && (
-                                    <div className="mt-2">
+                                    <div className="mt-3">
                                       <Badge variant="destructive">Needs Revision</Badge>
                                     </div>
                                   )}
@@ -902,7 +1045,7 @@ export default function AdminSubmissionReviewPage() {
                                     }}
                                     rows={3}
                                   />
-                                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
+                                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
                                     <label className="flex items-center space-x-2">
                                       <input
                                         type="checkbox"
@@ -948,6 +1091,39 @@ export default function AdminSubmissionReviewPage() {
                 })}
                          </CardContent>
            </Card>
+
+         {/* Section Navigation Buttons */}
+         {sections.length > 1 && (
+           <Card>
+             <CardContent className="pt-6">
+               <div className="flex items-center justify-between">
+                 <Button
+                   variant="outline"
+                   onClick={goToPreviousSection}
+                   disabled={isFirstSection}
+                   className="flex items-center space-x-2"
+                 >
+                   <ChevronLeft className="h-4 w-4" />
+                   <span>Previous Section</span>
+                 </Button>
+                 
+                 <div className="text-sm text-gray-500">
+                   Section {getCurrentSectionIndex() + 1} of {sections.length}
+                 </div>
+                 
+                 <Button
+                   variant="outline"
+                   onClick={goToNextSection}
+                   disabled={isLastSection}
+                   className="flex items-center space-x-2"
+                 >
+                   <span>Next Section</span>
+                   <ChevronRight className="h-4 w-4" />
+                 </Button>
+               </div>
+             </CardContent>
+           </Card>
+         )}
 
                  
       </div>

@@ -44,6 +44,42 @@ interface QuestionAssignmentModalProps {
   onUpdate: () => void
 }
 
+interface AssignedQuestionData {
+  groupQuestionId?: number
+  id?: number
+  groupId?: number
+  group?: {
+    id: number
+    groupName: string
+  }
+  groupName?: string
+  questionId: number
+  question?: {
+    questionText: string
+  }
+  questionText?: string
+  orderNumber: number
+  sectionTitle: string
+  subsection: string
+  createdAt: string
+  updatedAt: string
+}
+
+interface GroupData {
+  id: number
+  groupName: string
+  groupQuestions?: Array<{
+    id: number
+    questionId: number
+    question?: {
+      questionText: string
+    }
+    orderNumber: number
+    sectionTitle: string
+    subsection: string
+  }>
+}
+
 export default function QuestionAssignmentModal({
   category,
   isOpen,
@@ -81,7 +117,7 @@ export default function QuestionAssignmentModal({
       }
       
              // Transform the data to match our interface
-       const transformedQuestions = assignedQuestionsData.map((aq: any, index: number) => {
+       const transformedQuestions = assignedQuestionsData.map((aq: AssignedQuestionData, index: number) => {
          console.log('Processing assigned question:', aq)
          
          // The assigned questions API returns a different structure
@@ -121,8 +157,8 @@ export default function QuestionAssignmentModal({
        // Get all available questions to match with assigned questions
        const response = await api.get('/groups')
        const groups = response.data?.groups || []
-       const allGroupQuestions = groups.flatMap((group: any) => 
-         group.groupQuestions?.map((gq: any) => ({
+       const allGroupQuestions = groups.flatMap((group: GroupData) => 
+         group.groupQuestions?.map((gq) => ({
            groupQuestionId: gq.id,
            groupId: group.id,
            groupName: group.groupName,
@@ -136,7 +172,7 @@ export default function QuestionAssignmentModal({
 
        // Enrich assigned questions with details from available questions
        return questions.map(assignedQ => {
-         const matchingQuestion = allGroupQuestions.find(aq => aq.groupQuestionId === assignedQ.groupQuestionId)
+         const matchingQuestion = allGroupQuestions.find((aq: { groupQuestionId: number | string }) => aq.groupQuestionId === assignedQ.groupQuestionId)
          if (matchingQuestion) {
            return {
              ...assignedQ,
@@ -164,9 +200,9 @@ export default function QuestionAssignmentModal({
       const groups = response.data?.groups || []
       
       // Extract all group questions from all groups
-      const allGroupQuestions = groups.flatMap((group: any) => {
+      const allGroupQuestions = groups.flatMap((group: GroupData) => {
         console.log('Group:', group.groupName, 'GroupQuestions:', group.groupQuestions)
-                 return group.groupQuestions?.map((gq: any, qIndex: number) => {
+                 return group.groupQuestions?.map((gq, qIndex: number) => {
            const groupQuestionId = gq.id || `group-${group.id}-question-${qIndex}`
            return {
              groupQuestionId,
@@ -177,8 +213,8 @@ export default function QuestionAssignmentModal({
              orderNumber: gq.orderNumber,
              sectionTitle: gq.sectionTitle,
              subsection: gq.subsection,
-             createdAt: gq.createdAt,
-             updatedAt: gq.updatedAt
+             createdAt: new Date().toISOString(),
+             updatedAt: new Date().toISOString()
            }
          }) || []
       })
@@ -187,7 +223,7 @@ export default function QuestionAssignmentModal({
        
        // Check for duplicate groupQuestionId values
        const groupQuestionIds = allGroupQuestions.map(q => q.groupQuestionId)
-       const duplicateIds = groupQuestionIds.filter((id, index) => groupQuestionIds.indexOf(id) !== index)
+       const duplicateIds = groupQuestionIds.filter((id: number | string, index: number) => groupQuestionIds.indexOf(id) !== index)
        if (duplicateIds.length > 0) {
          console.warn('Duplicate groupQuestionId values found:', duplicateIds)
        }

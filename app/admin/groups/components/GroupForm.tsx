@@ -6,17 +6,25 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { useEffect } from 'react'
 
-export default function GroupForm({ open, onClose, onSubmit, defaultValues }: {
+interface GroupFormData {
+  groupName: string
+  description: string
+  id?: string
+}
+
+interface GroupFormProps {
   open: boolean
   onClose: () => void
-  onSubmit: (data: any) => void
-  defaultValues?: any
-}) {
-  const { register, handleSubmit, reset } = useForm({ defaultValues })
+  onSubmit: (data: GroupFormData) => void
+  defaultValues?: Partial<GroupFormData>
+}
+
+export default function GroupForm({ open, onClose, onSubmit, defaultValues }: GroupFormProps) {
+  const { register, handleSubmit, reset } = useForm<GroupFormData>({ defaultValues })
 
   useEffect(() => {
     reset(defaultValues)
-  }, [defaultValues])
+  }, [defaultValues, reset])
 
   return (
     <Dialog open={open} onOpenChange={onClose}>

@@ -1,12 +1,19 @@
 'use client'
 
-import { PencilIcon, TrashIcon, UserGroupIcon } from '@heroicons/react/24/outline'
+import { PencilIcon, TrashIcon } from '@heroicons/react/24/outline'
 import { Button } from '@/components/ui/button'
 import { Users, Shield } from 'lucide-react'
 
+interface Group {
+  id: number
+  groupName: string
+  description?: string
+  memberCount?: number
+}
+
 interface GroupTableProps {
-  groups: any[]
-  onEdit: (group: any) => void
+  groups: Group[]
+  onEdit: (group: Group) => void
   onDelete: (id: number) => void
   onView: (id: number) => void
 }

@@ -50,8 +50,9 @@ export default function LoginPage() {
         else if (role === "JURI") router.push("/jury");
         else router.push("/peserta");
       }
-    } catch (err: any) {
-      toast.error(err?.response?.data?.message || "Login failed");
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { message?: string } } }
+      toast.error(error?.response?.data?.message || "Login failed");
     } finally {
       setLoading(false);
     }

@@ -122,7 +122,7 @@ export default function NotificationsPage() {
               <div className="text-center py-8">
                 <Bell className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                 <p className="text-gray-500">No notifications yet</p>
-                <p className="text-sm text-gray-400">You'll be notified of important updates here</p>
+                <p className="text-sm text-gray-400">You&apos;ll be notified of important updates here</p>
               </div>
             ) : (
               <div className="space-y-4">

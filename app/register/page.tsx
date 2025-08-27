@@ -33,13 +33,14 @@ export default function RegisterPage() {
   const onSubmit = async (data: FormValues) => {
     setLoading(true)
     try {
-      const { user, message } = await registerUser(data)
+      const { message } = await registerUser(data)
       toast.success(message || 'Registration successful!')
   
       // Optional: auto-login or redirect
       router.push('/login')
-    } catch (err: any) {
-      toast.error(err?.response?.data?.message || 'Registration failed')
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { message?: string } } }
+      toast.error(error?.response?.data?.message || 'Registration failed')
     } finally {
       setLoading(false)
     }

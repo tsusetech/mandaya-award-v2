@@ -377,11 +377,11 @@ export default function AdminSubmissionsPage() {
                 </Button>
 
                 <Button
-                  variant={statusFilter === 'in_progress' ? 'default' : 'outline'}
+                  variant={statusFilter === 'draft' ? 'default' : 'outline'}
                   size="sm"
-                  onClick={() => handleStatusFilter('in_progress')}
+                  onClick={() => handleStatusFilter('draft')}
                 >
-                  In Progress
+                  Draft
                 </Button>
                 <Button
                   variant={statusFilter === 'submitted' ? 'default' : 'outline'}

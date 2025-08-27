@@ -2,11 +2,20 @@
 
 import { Button } from '@/components/ui/button'
 
-export function UserTable({ users, onEdit, onDelete }: {
-  users: any[]
-  onEdit: (user: any) => void
+interface User {
+  id: number
+  name: string
+  email: string
+  username: string
+}
+
+interface UserTableProps {
+  users: User[]
+  onEdit: (user: User) => void
   onDelete: (id: number) => void
-}) {
+}
+
+export function UserTable({ users, onEdit, onDelete }: UserTableProps) {
   return (
     <table className="w-full border mt-4">
       <thead>

@@ -1,19 +1,31 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { useRouter } from 'next/navigation'
+import { Users, Shield, FileText, Calendar, Award, Activity } from 'lucide-react'
+import AuthenticatedLayout from '@/components/AuthenticatedLayout'
 import { getProfile } from '@/lib/auth'
 import api from '@/lib/api'
-import { Users, UserPlus, Shield, Activity, Calendar, TrendingUp, FileText } from 'lucide-react'
-import AuthenticatedLayout from '@/components/AuthenticatedLayout'
 
 interface AdminStats {
   totalUsers: number
   totalGroups: number
   activeUsers: number
   recentActivity: number
+}
+
+interface UserProfile {
+  name: string
+  email: string
+}
+
+interface User {
+  id: number
+  name: string
+  email: string
+  isActive?: boolean
 }
 
 export default function AdminPage() {
@@ -24,7 +36,7 @@ export default function AdminPage() {
     activeUsers: 0,
     recentActivity: 0
   })
-  const [userProfile, setUserProfile] = useState<any>(null)
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -42,7 +54,7 @@ export default function AdminPage() {
         setStats({
           totalUsers: users.length,
           totalGroups: groups.length,
-          activeUsers: users.filter((user: any) => user.isActive !== false).length,
+          activeUsers: users.filter((user: User) => user.isActive !== false).length,
           recentActivity: Math.floor(Math.random() * 50) + 10 // Placeholder
         })
 
@@ -126,7 +138,7 @@ export default function AdminPage() {
           <Card className="hover:shadow-md transition-shadow">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-gray-600">Recent Activity</CardTitle>
-              <TrendingUp className="h-4 w-4 text-orange-600" />
+              <Award className="h-4 w-4 text-orange-600" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-gray-900">{stats.recentActivity}</div>
@@ -136,7 +148,7 @@ export default function AdminPage() {
         </div>
 
         {/* Quick Actions */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigateTo('/admin/users')}>
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
@@ -196,6 +208,21 @@ export default function AdminPage() {
               </Button>
             </CardContent>
           </Card>
+
+          <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigateTo('/admin/rankings')}>
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                <Award className="h-5 w-5 text-yellow-600" />
+                <span>Award Rankings</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-gray-600 text-sm">View current award rankings and standings</p>
+              <Button className="mt-4 w-full" variant="outline">
+                View Rankings
+              </Button>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Recent Activity */}
@@ -210,11 +237,11 @@ export default function AdminPage() {
                 <span className="text-gray-600">New user registered</span>
                 <span className="text-gray-400">2 minutes ago</span>
               </div>
-              <div className="flex items-center space-x-3 text-sm">
-                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                <span className="text-gray-600">Group "Developers" updated</span>
-                <span className="text-gray-400">1 hour ago</span>
-              </div>
+                              <div className="flex items-center space-x-3 text-sm">
+                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                  <span className="text-gray-600">Group &quot;Developers&quot; updated</span>
+                  <span className="text-gray-400">1 hour ago</span>
+                </div>
               <div className="flex items-center space-x-3 text-sm">
                 <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
                 <span className="text-gray-600">User permissions modified</span>
