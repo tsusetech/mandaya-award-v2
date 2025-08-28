@@ -6,7 +6,29 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
-import { ArrowLeft, Search, FileText, Clock, CheckCircle, AlertTriangle, Star, RefreshCw } from 'lucide-react'
+import { 
+  ArrowLeft, 
+  Search, 
+  FileText, 
+  Clock, 
+  CheckCircle, 
+  AlertTriangle, 
+  Star, 
+  RefreshCw,
+  TrendingUp,
+  Activity,
+  Zap,
+  Users,
+  BarChart3,
+  Eye,
+  Play,
+  Target,
+  Trophy,
+  Brain,
+  Filter,
+  Award,
+  MessageSquare
+} from 'lucide-react'
 import { toast } from 'sonner'
 import api from '@/lib/api'
 import AuthenticatedLayout from '@/components/AuthenticatedLayout'
@@ -115,18 +137,16 @@ export default function JuriReviewPage() {
     }
   }
 
-
-
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'completed':
-        return <Badge variant="default" className="bg-green-100 text-green-800">Completed</Badge>
+        return <Badge variant="default" className="bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300">Completed</Badge>
       case 'in_progress':
-        return <Badge variant="secondary" className="bg-blue-100 text-blue-800">In Progress</Badge>
+        return <Badge variant="secondary" className="bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300">In Progress</Badge>
       case 'pending':
-        return <Badge variant="outline" className="bg-yellow-100 text-yellow-800">Pending</Badge>
+        return <Badge variant="outline" className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-300">Pending</Badge>
       case 'approved':
-        return <Badge variant="default" className="bg-green-100 text-green-800">Approved by admin</Badge>
+        return <Badge variant="default" className="bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300">Approved by admin</Badge>
       default:
         return <Badge variant="outline">{status}</Badge>
     }
@@ -156,13 +176,15 @@ export default function JuriReviewPage() {
   if (loading) {
     return (
       <AuthenticatedLayout allowedRoles={['JURI', 'SUPERADMIN']}>
-        <div className="p-4 sm:p-6 space-y-6">
-          <div className="animate-pulse">
-            <div className="h-8 bg-gray-200 rounded w-48 mb-6"></div>
-            <div className="space-y-4">
-              {[1, 2, 3].map(i => (
-                <div key={i} className="h-32 bg-gray-200 rounded"></div>
-              ))}
+        <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
+          <div className="p-6 space-y-6">
+            <div className="animate-pulse">
+              <div className="h-8 bg-gray-200 rounded w-48 mb-6"></div>
+              <div className="space-y-4">
+                {[1, 2, 3].map(i => (
+                  <div key={i} className="h-32 bg-gray-200 rounded-lg"></div>
+                ))}
+              </div>
             </div>
           </div>
         </div>
@@ -172,161 +194,217 @@ export default function JuriReviewPage() {
 
   return (
     <AuthenticatedLayout allowedRoles={['JURI', 'SUPERADMIN']}>
-      <div className="p-4 sm:p-6 space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <Button 
-              variant="ghost" 
-              size="sm"
-              onClick={() => router.push('/jury')}
-              className="flex items-center space-x-2"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              <span>Back to Dashboard</span>
-            </Button>
-            <div>
-              <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Review Submissions</h1>
-              <p className="text-sm sm:text-base text-gray-600">Review and score assigned submissions</p>
-            </div>
-          </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => fetchReviews(searchTerm, statusFilter, 1, true)}
-            className="flex items-center space-x-2"
-          >
-            <RefreshCw className="h-4 w-4" />
-            <span>Refresh</span>
-          </Button>
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 relative overflow-hidden">
+        {/* Animated Background Elements */}
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute -top-40 -right-40 h-96 w-96 rounded-full bg-gradient-to-br from-yellow-500/5 to-yellow-600/5 blur-3xl animate-pulse"></div>
+          <div className="absolute -bottom-40 -left-40 h-96 w-96 rounded-full bg-gradient-to-tr from-yellow-400/5 to-yellow-500/5 blur-3xl animate-pulse delay-1000"></div>
+          <div className="absolute top-1/4 left-1/4 h-64 w-64 rounded-full bg-gradient-to-r from-yellow-500/3 to-yellow-600/3 blur-2xl animate-pulse delay-500"></div>
         </div>
 
-        {/* Search and Filters */}
-        <Card>
-          <CardContent className="pt-6">
-            <div className="space-y-4">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                <Input
-                  placeholder="Search by group name, user name, or email..."
-                  value={searchTerm}
-                  onChange={(e) => {
-                    const value = e.target.value
-                    setSearchTerm(value)
-                    
-                    // Clear existing timeout
-                    if (searchTimeout) {
-                      clearTimeout(searchTimeout)
-                    }
-                    
-                    // Set new timeout for debounced search
-                    const timeoutId = setTimeout(() => {
-                      fetchReviews(value, statusFilter, 1, false)
-                    }, 500)
-                    setSearchTimeout(timeoutId)
-                  }}
-                  className="pl-10"
-                />
+        {/* Header Section */}
+        <div className="relative bg-gradient-to-r from-yellow-500/10 via-yellow-600/10 to-yellow-500/10 border-b border-yellow-200/50 dark:border-yellow-800/50 overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-r from-yellow-500/5 to-yellow-600/5"></div>
+          <div className="absolute inset-0 bg-[url('data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'32\\' height=\\'32\\' viewBox=\\'0 0 32 32\\'><path fill=\\'%23EAB308\\' d=\\'M0 31h32v1H0zM31 0v32h1V0z\\'/></svg>')] opacity-5"></div>
+          <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-6">
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => router.push('/jury')}
+                  className="flex items-center space-x-2 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border border-yellow-200/50 dark:border-yellow-800/50 hover:bg-yellow-50 dark:hover:bg-yellow-900/20 transition-all duration-200"
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                  <span>Back to Dashboard</span>
+                </Button>
+                <div className="flex items-center space-x-4">
+                  <div className="flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-yellow-500 to-yellow-600 shadow-lg border-2 border-yellow-400/50 relative">
+                    <Award className="h-8 w-8 text-white" />
+                    <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white animate-pulse"></div>
+                  </div>
+                  <div>
+                    <h1 className="text-3xl font-bold bg-gradient-to-r from-yellow-600 via-yellow-500 to-yellow-400 bg-clip-text text-transparent">
+                      Review Submissions
+                    </h1>
+                    <p className="text-gray-600 dark:text-gray-300 mt-1">
+                      Review and score assigned submissions with expertise
+                    </p>
+                  </div>
+                </div>
               </div>
-              <div className="flex flex-wrap gap-2">
+              <div className="flex items-center space-x-3">
                 <Button
-                  variant={statusFilter === 'all' ? 'default' : 'outline'}
+                  variant="outline"
                   size="sm"
-                  onClick={() => {
-                    setStatusFilter('all')
-                    fetchReviews(searchTerm, 'all', 1, false)
-                  }}
+                  onClick={() => fetchReviews(searchTerm, statusFilter, 1, true)}
+                  className="flex items-center space-x-2 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border border-yellow-200/50 dark:border-yellow-800/50 hover:bg-yellow-50 dark:hover:bg-yellow-900/20 transition-all duration-200"
                 >
-                  All
+                  <RefreshCw className="h-4 w-4" />
+                  <span>Refresh</span>
                 </Button>
-                <Button
-                  variant={statusFilter === 'pending' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => {
-                    setStatusFilter('pending')
-                    fetchReviews(searchTerm, 'pending', 1, false)
-                  }}
-                >
-                  Pending
-                </Button>
-                <Button
-                  variant={statusFilter === 'in_progress' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => {
-                    setStatusFilter('in_progress')
-                    fetchReviews(searchTerm, 'in_progress', 1, false)
-                  }}
-                >
-                  In Progress
-                </Button>
-                <Button
-                  variant={statusFilter === 'completed' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => {
-                    setStatusFilter('completed')
-                    fetchReviews(searchTerm, 'completed', 1, false)
-                  }}
-                >
-                  Completed
-                </Button>
+                <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400 bg-white/50 dark:bg-gray-800/50 px-4 py-2 rounded-full backdrop-blur-sm border border-yellow-200/50 dark:border-yellow-800/50">
+                  <Star className="h-4 w-4 text-yellow-500" />
+                  <span className="font-medium">{reviews.length} Reviews</span>
+                </div>
               </div>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
-        {/* Reviews List */}
-        <div className="space-y-4">
-          {filteredReviews.length === 0 ? (
-            <Card>
-              <CardContent className="py-8">
-                <div className="text-center">
-                  <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <p className="text-gray-500">No reviews found</p>
-                  <p className="text-sm text-gray-400">
-                    {searchTerm || statusFilter !== 'all' 
-                      ? 'Try adjusting your search or filters' 
-                      : 'No submissions are available for review'
-                    }
-                  </p>
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          {/* Search and Filters */}
+          <Card className="border-0 shadow-2xl bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm relative overflow-hidden mb-8">
+            <div className="absolute inset-0 bg-gradient-to-r from-gray-500/5 to-gray-600/5"></div>
+            <CardContent className="relative z-10 pt-8">
+              <div className="space-y-6">
+                <div className="relative">
+                  <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                  <Input
+                    placeholder="Search by group name, user name, or email..."
+                    value={searchTerm}
+                    onChange={(e) => {
+                      const value = e.target.value
+                      setSearchTerm(value)
+                      
+                      // Clear existing timeout
+                      if (searchTimeout) {
+                        clearTimeout(searchTimeout)
+                      }
+                      
+                      // Set new timeout for debounced search
+                      const timeoutId = setTimeout(() => {
+                        fetchReviews(value, statusFilter, 1, false)
+                      }, 500)
+                      setSearchTimeout(timeoutId)
+                    }}
+                    className="pl-12 h-12 border-gray-300 focus:border-yellow-500 focus:ring-yellow-500/20 dark:border-gray-600 dark:bg-gray-800 dark:focus:border-yellow-400 transition-all duration-200"
+                  />
                 </div>
-              </CardContent>
-            </Card>
-          ) : (
-            filteredReviews.map((review) => (
-              <Card key={review.id} className="hover:shadow-md transition-shadow">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-4">
-                      <div className={`p-3 rounded-full ${getStatusIcon(review.status).props.className.includes('text-green') ? 'bg-green-100' : getStatusIcon(review.status).props.className.includes('text-blue') ? 'bg-blue-100' : 'bg-yellow-100'}`}>
-                        {getStatusIcon(review.status)}
-                      </div>
-                      <div className="flex-1">
-                        <h3 className="text-lg font-semibold text-gray-900">{review.groupName}</h3>
-                        <p className="text-sm text-gray-600">
-                          Submitted by {review.userName} ({review.userEmail})
-                        </p>
-                        <p className="text-sm text-gray-500">
-                          Submitted on {formatDate(review.submittedAt)}
-                        </p>
-                      </div>
+                <div className="flex flex-wrap items-center gap-3">
+                  <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
+                    <Filter className="h-4 w-4" />
+                    <span>Filter by status:</span>
+                  </div>
+                  <Button
+                    variant={statusFilter === 'all' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => {
+                      setStatusFilter('all')
+                      fetchReviews(searchTerm, 'all', 1, false)
+                    }}
+                    className="bg-gradient-to-r from-yellow-600 to-yellow-500 hover:from-yellow-700 hover:to-yellow-600 text-white border-0 shadow-lg shadow-yellow-500/25 hover:shadow-yellow-500/40 transition-all duration-200"
+                  >
+                    All
+                  </Button>
+                  <Button
+                    variant={statusFilter === 'pending' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => {
+                      setStatusFilter('pending')
+                      fetchReviews(searchTerm, 'pending', 1, false)
+                    }}
+                    className="border-yellow-200/50 dark:border-yellow-800/50 hover:bg-yellow-50 dark:hover:bg-yellow-900/20"
+                  >
+                    Pending
+                  </Button>
+                  <Button
+                    variant={statusFilter === 'in_progress' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => {
+                      setStatusFilter('in_progress')
+                      fetchReviews(searchTerm, 'in_progress', 1, false)
+                    }}
+                    className="border-yellow-200/50 dark:border-yellow-800/50 hover:bg-yellow-50 dark:hover:bg-yellow-900/20"
+                  >
+                    In Progress
+                  </Button>
+                  <Button
+                    variant={statusFilter === 'completed' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => {
+                      setStatusFilter('completed')
+                      fetchReviews(searchTerm, 'completed', 1, false)
+                    }}
+                    className="border-yellow-200/50 dark:border-yellow-800/50 hover:bg-yellow-50 dark:hover:bg-yellow-900/20"
+                  >
+                    Completed
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Reviews List */}
+          <div className="space-y-6">
+            {filteredReviews.length === 0 ? (
+              <Card className="border-0 shadow-2xl bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-r from-gray-500/5 to-gray-600/5"></div>
+                <CardContent className="relative z-10 py-16">
+                  <div className="text-center">
+                    <div className="w-32 h-32 mx-auto mb-8 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 to-gray-700 flex items-center justify-center">
+                      <FileText className="h-16 w-16 text-gray-400" />
                     </div>
-                    <div className="flex items-center space-x-4">
-                      {getStatusBadge(review.status)}
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => router.push(`/jury/review/${review.sessionId}`)}
-                        className="flex items-center space-x-2"
-                      >
-                        <FileText className="h-4 w-4" />
-                        <span>Review</span>
-                      </Button>
+                    <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">No reviews found</h3>
+                    <p className="text-gray-500 dark:text-gray-400 mb-6 text-lg">
+                      {searchTerm || statusFilter !== 'all' 
+                        ? 'Try adjusting your search or filters' 
+                        : 'No submissions are available for review'
+                      }
+                    </p>
+                    <div className="flex items-center justify-center space-x-2">
+                      <div className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse"></div>
+                      <div className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse delay-150"></div>
+                      <div className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse delay-300"></div>
                     </div>
                   </div>
                 </CardContent>
               </Card>
-            ))
-          )}
+            ) : (
+              filteredReviews.map((review) => (
+                <Card key={review.id} className="group hover:shadow-2xl transition-all duration-500 transform hover:scale-[1.02] border-0 shadow-xl bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm relative overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-r from-yellow-500/5 to-yellow-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                  <CardContent className="relative z-10 p-8">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-6">
+                        <div className={`p-4 rounded-2xl ${getStatusIcon(review.status).props.className.includes('text-green') ? 'bg-green-100 dark:bg-green-900/40' : getStatusIcon(review.status).props.className.includes('text-blue') ? 'bg-blue-100 dark:bg-blue-900/40' : 'bg-yellow-100 dark:bg-yellow-900/40'} group-hover:scale-110 transition-all duration-300`}>
+                          {getStatusIcon(review.status)}
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">{review.groupName}</h3>
+                          <div className="flex items-center space-x-4 text-sm text-gray-600 dark:text-gray-300 mb-2">
+                            <div className="flex items-center space-x-2">
+                              <Users className="h-4 w-4" />
+                              <span>Submitted by {review.userName}</span>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <MessageSquare className="h-4 w-4" />
+                              <span>{review.userEmail}</span>
+                            </div>
+                          </div>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">
+                            Submitted on {formatDate(review.submittedAt)}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-4">
+                        {getStatusBadge(review.status)}
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => router.push(`/jury/review/${review.sessionId}`)}
+                          className="flex items-center space-x-2 bg-gradient-to-r from-yellow-600 to-yellow-500 hover:from-yellow-700 hover:to-yellow-600 text-white border-0 shadow-lg shadow-yellow-500/25 hover:shadow-yellow-500/40 transition-all duration-200 transform hover:scale-105 px-6 py-3"
+                        >
+                          <Eye className="h-5 w-5" />
+                          <span className="font-semibold">Review</span>
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))
+            )}
+          </div>
         </div>
       </div>
     </AuthenticatedLayout>

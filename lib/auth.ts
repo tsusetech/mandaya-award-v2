@@ -10,8 +10,8 @@ export async function loginUser(email: string, password: string) {
       localStorage.setItem("accessToken", accessToken);
       localStorage.setItem("user", JSON.stringify(user));
   
-      // If user has a role, store it for redirection
-      const role = user.userRoles?.[0]?.name
+      // Handle different possible role structures
+      const role = user.userRoles?.[0]?.role?.name || user.userRoles?.[0]?.name || 'PESERTA';
       localStorage.setItem("role", role);
     }
   
@@ -30,7 +30,7 @@ export async function loginUser(email: string, password: string) {
     const { user, message } = res.data
   
     // Optional: store role
-    const role = user.userRoles?.[0]?.role?.name || 'PESERTA'
+    const role = user.userRoles?.[0]?.role?.name || user.userRoles?.[0]?.name || 'PESERTA'
     localStorage.setItem("role", role)
   
     return { user, message }

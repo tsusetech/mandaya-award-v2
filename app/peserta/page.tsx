@@ -4,9 +4,26 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { ArrowRight, Clock, CheckCircle, Users, ClipboardList, FileText } from 'lucide-react'
+import { 
+  ArrowRight, 
+  Clock, 
+  CheckCircle, 
+  Users, 
+  ClipboardList, 
+  FileText,
+  Award,
+  Target,
+  TrendingUp,
+  Activity,
+  Star,
+  Zap,
+  BookOpen,
+  UserCheck,
+  BarChart3
+} from 'lucide-react'
 import { toast } from 'sonner'
 import api from '@/lib/api'
+import AuthenticatedLayout from '@/components/AuthenticatedLayout'
 
 interface Group {
   id: number
@@ -18,8 +35,6 @@ interface Group {
     progressPercentage: number
   }
 }
-
-
 
 interface DashboardStats {
   totalGroups: number
@@ -43,7 +58,6 @@ export default function PesertaDashboard() {
     reviewedSubmissions: 0
   })
   const [groups, setGroups] = useState<Group[]>([])
-
   const [loading, setLoading] = useState(true)
 
   const fetchDashboardData = async () => {
@@ -70,7 +84,6 @@ export default function PesertaDashboard() {
         reviewedSubmissions: 0
       })
 
-
     } catch (err) {
       console.error('Error fetching dashboard data:', err)
       toast.error('Failed to load dashboard data')
@@ -83,210 +96,292 @@ export default function PesertaDashboard() {
     fetchDashboardData()
   }, [])
 
-
-
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <div className="bg-white shadow-sm border-b">
-          <div className="px-4 sm:px-6 py-4">
+      <AuthenticatedLayout allowedRoles={['PESERTA']}>
+        <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
+          <div className="p-6 space-y-6">
             <div className="animate-pulse">
-              <div className="h-8 bg-gray-200 rounded w-48"></div>
+              <div className="h-8 bg-gray-200 rounded w-48 mb-6"></div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                {[1, 2, 3, 4].map(i => (
+                  <div key={i} className="h-32 bg-gray-200 rounded-lg"></div>
+                ))}
+              </div>
             </div>
           </div>
         </div>
-        <div className="p-4 sm:p-6">
-          <div className="animate-pulse space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              {[1, 2, 3, 4].map(i => (
-                <div key={i} className="h-24 bg-gray-200 rounded"></div>
-              ))}
-            </div>
-            <div className="h-64 bg-gray-200 rounded"></div>
-          </div>
-        </div>
-      </div>
+      </AuthenticatedLayout>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white shadow-sm border-b">
-        <div className="px-4 sm:px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Participant Dashboard</h1>
-              <p className="text-sm sm:text-base text-gray-600">Manage your assessment groups and track their progress</p>
+    <AuthenticatedLayout allowedRoles={['PESERTA']}>
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 relative overflow-hidden">
+        {/* Animated Background Elements */}
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute -top-40 -right-40 h-96 w-96 rounded-full bg-gradient-to-br from-yellow-500/5 to-yellow-600/5 blur-3xl animate-pulse"></div>
+          <div className="absolute -bottom-40 -left-40 h-96 w-96 rounded-full bg-gradient-to-tr from-yellow-400/5 to-yellow-500/5 blur-3xl animate-pulse delay-1000"></div>
+          <div className="absolute top-1/4 left-1/4 h-64 w-64 rounded-full bg-gradient-to-r from-yellow-500/3 to-yellow-600/3 blur-2xl animate-pulse delay-500"></div>
+        </div>
+
+        {/* Header Section */}
+        <div className="relative bg-gradient-to-r from-yellow-500/10 via-yellow-600/10 to-yellow-500/10 border-b border-yellow-200/50 dark:border-yellow-800/50 overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-r from-yellow-500/5 to-yellow-600/5"></div>
+          <div className="absolute inset-0 bg-[url('data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'32\\' height=\\'32\\' viewBox=\\'0 0 32 32\\'><path fill=\\'%23EAB308\\' d=\\'M0 31h32v1H0zM31 0v32h1V0z\\'/></svg>')] opacity-5"></div>
+          <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-6">
+                <div className="flex items-center space-x-4">
+                  <div className="flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-to-br from-yellow-500 to-yellow-600 shadow-lg border-2 border-yellow-400/50 relative">
+                    <Award className="h-10 w-10 text-white" />
+                    <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-green-500 rounded-full border-2 border-white animate-pulse"></div>
+                  </div>
+                  <div>
+                    <h1 className="text-4xl font-bold bg-gradient-to-r from-yellow-600 via-yellow-500 to-yellow-400 bg-clip-text text-transparent">
+                      Participant Dashboard
+                    </h1>
+                    <p className="text-gray-600 dark:text-gray-300 mt-1">
+                      Manage your assessment groups and track their progress
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div className="flex items-center space-x-3">
+                <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400 bg-white/50 dark:bg-gray-800/50 px-4 py-2 rounded-full backdrop-blur-sm border border-yellow-200/50 dark:border-yellow-800/50">
+                  <Zap className="h-4 w-4 text-green-500" />
+                  <span className="font-medium">Active Participant</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <div className="p-4 sm:p-6 space-y-6">
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600">My Groups</CardTitle>
-              <Users className="h-4 w-4 text-blue-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.totalGroups}</div>
-              <p className="text-xs text-gray-500">Assigned groups</p>
-            </CardContent>
-          </Card>
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          {/* Statistics Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <Card className="group hover:shadow-2xl transition-all duration-500 transform hover:scale-[1.03] border-0 shadow-xl bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-blue-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 relative z-10">
+                <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">My Groups</CardTitle>
+                <div className="p-3 rounded-xl bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900/40 dark:to-blue-800/40 group-hover:from-blue-200 dark:group-hover:from-blue-900/60 group-hover:to-blue-300 dark:group-hover:to-blue-800/60 transition-all duration-300 transform group-hover:scale-110">
+                  <Users className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                </div>
+              </CardHeader>
+              <CardContent className="relative z-10">
+                <div className="text-4xl font-bold text-gray-900 dark:text-white mb-2">{stats.totalGroups}</div>
+                <div className="flex items-center space-x-2">
+                  <TrendingUp className="h-4 w-4 text-blue-500 animate-pulse" />
+                  <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Assigned groups</p>
+                </div>
+              </CardContent>
+            </Card>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600">Active Assessments</CardTitle>
-              <Clock className="h-4 w-4 text-orange-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.activeAssessments}</div>
-              <p className="text-xs text-gray-500">In progress</p>
-            </CardContent>
-          </Card>
+            <Card className="group hover:shadow-2xl transition-all duration-500 transform hover:scale-[1.03] border-0 shadow-xl bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-r from-orange-500/5 to-orange-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 relative z-10">
+                <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">Active Assessments</CardTitle>
+                <div className="p-3 rounded-xl bg-gradient-to-br from-orange-100 to-orange-200 dark:from-orange-900/40 dark:to-orange-800/40 group-hover:from-orange-200 dark:group-hover:from-orange-900/60 group-hover:to-orange-300 dark:group-hover:to-orange-800/60 transition-all duration-300 transform group-hover:scale-110">
+                  <Clock className="h-6 w-6 text-orange-600 dark:text-orange-400" />
+                </div>
+              </CardHeader>
+              <CardContent className="relative z-10">
+                <div className="text-4xl font-bold text-gray-900 dark:text-white mb-2">{stats.activeAssessments}</div>
+                <div className="flex items-center space-x-2">
+                  <Activity className="h-4 w-4 text-orange-500 animate-pulse" />
+                  <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">In progress</p>
+                </div>
+              </CardContent>
+            </Card>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600">Completed</CardTitle>
-              <CheckCircle className="h-4 w-4 text-green-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.completedAssessments}</div>
-              <p className="text-xs text-gray-500">Assessments done</p>
-            </CardContent>
-          </Card>
+            <Card className="group hover:shadow-2xl transition-all duration-500 transform hover:scale-[1.03] border-0 shadow-xl bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-r from-green-500/5 to-green-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 relative z-10">
+                <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">Completed</CardTitle>
+                <div className="p-3 rounded-xl bg-gradient-to-br from-green-100 to-green-200 dark:from-green-900/40 dark:to-green-800/40 group-hover:from-green-200 dark:group-hover:from-green-900/60 group-hover:to-green-300 dark:group-hover:to-green-800/60 transition-all duration-300 transform group-hover:scale-110">
+                  <CheckCircle className="h-6 w-6 text-green-600 dark:text-green-400" />
+                </div>
+              </CardHeader>
+              <CardContent className="relative z-10">
+                <div className="text-4xl font-bold text-gray-900 dark:text-white mb-2">{stats.completedAssessments}</div>
+                <div className="flex items-center space-x-2">
+                  <Star className="h-4 w-4 text-green-500 animate-pulse" />
+                  <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Assessments done</p>
+                </div>
+              </CardContent>
+            </Card>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600">Total Assessments</CardTitle>
-              <CheckCircle className="h-4 w-4 text-purple-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.totalGroups}</div>
-              <p className="text-xs text-gray-500">All assessments</p>
-            </CardContent>
-          </Card>
-        </div>
+            <Card className="group hover:shadow-2xl transition-all duration-500 transform hover:scale-[1.03] border-0 shadow-xl bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-r from-purple-500/5 to-purple-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 relative z-10">
+                <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Assessments</CardTitle>
+                <div className="p-3 rounded-xl bg-gradient-to-br from-purple-100 to-purple-200 dark:from-purple-900/40 dark:to-purple-800/40 group-hover:from-purple-200 dark:group-hover:from-purple-900/60 group-hover:to-purple-300 dark:group-hover:to-purple-800/60 transition-all duration-300 transform group-hover:scale-110">
+                  <Target className="h-6 w-6 text-purple-600 dark:text-purple-400" />
+                </div>
+              </CardHeader>
+              <CardContent className="relative z-10">
+                <div className="text-4xl font-bold text-gray-900 dark:text-white mb-2">{stats.totalGroups}</div>
+                <div className="flex items-center space-x-2">
+                  <BarChart3 className="h-4 w-4 text-purple-500 animate-pulse" />
+                  <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">All assessments</p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
 
-        {/* My Groups */}
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle>My Assessment Groups</CardTitle>
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => router.push('/peserta/groups')}
-                className="flex items-center space-x-2"
-              >
-                <span>View All</span>
-                <ArrowRight className="h-4 w-4" />
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent>
-            {groups.length === 0 ? (
-              <div className="text-center py-8">
-                <ClipboardList className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-500">No groups assigned yet</p>
-                <p className="text-sm text-gray-400">You will be notified when you are assigned to a group</p>
+          {/* My Groups Section */}
+          <Card className="border-0 shadow-2xl bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm relative overflow-hidden group hover:shadow-3xl transition-all duration-500 mb-8">
+            <div className="absolute inset-0 bg-gradient-to-r from-gray-500/5 to-gray-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+            <CardHeader className="relative z-10">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <div className="p-3 rounded-xl bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-900/40 dark:to-gray-800/40 group-hover:from-gray-200 dark:group-hover:from-gray-900/60 group-hover:to-gray-300 dark:group-hover:to-gray-800/60 transition-all duration-300 transform group-hover:scale-110">
+                    <BookOpen className="h-6 w-6 text-gray-600 dark:text-gray-400" />
+                  </div>
+                  <CardTitle className="text-xl font-bold text-gray-900 dark:text-white">My Assessment Groups</CardTitle>
+                </div>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => router.push('/peserta/groups')}
+                  className="flex items-center space-x-2 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border-yellow-200/50 dark:border-yellow-800/50 hover:bg-yellow-50 dark:hover:bg-yellow-900/20"
+                >
+                  <span>View All</span>
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
               </div>
-                                      ) : (
-               <div className="space-y-4">
-                 {Array.isArray(groups) ? groups.slice(0, 3).map((group) => (
-                   <div
-                     key={group.id}
-                     className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 cursor-pointer"
-                     onClick={() => router.push(`/peserta/assessment/${group.id}`)}
-                   >
-                     <div className="flex items-center space-x-4">
-                       <div className="text-blue-500">
-                         <Users className="h-4 w-4" />
-                       </div>
-                       <div>
-                         <p className="font-medium text-gray-900">{group.groupName}</p>
-                         {group.description && (
-                           <p className="text-sm text-gray-500">{group.description}</p>
-                         )}
-                         {group.responseSession && (
-                           <p className="text-sm text-gray-500">
-                             Progress: {group.responseSession.progressPercentage}% • 
-                             Status: {group.responseSession.status.replace('_', ' ')}
-                           </p>
-                         )}
-                       </div>
-                     </div>
-                     <Button
-                       variant="outline"
-                       size="sm"
-                       onClick={(e) => {
-                         e.stopPropagation()
-                         router.push(`/peserta/assessment/${group.id}`)
-                       }}
-                     >
-                       {group.responseSession ? 'Continue' : 'Start'}
-                     </Button>
-                   </div>
-                 )) : null}
-               </div>
-             )}
-          </CardContent>
-        </Card>
-
-
-
-        {/* Quick Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => router.push('/peserta/groups')}>
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <Users className="h-5 w-5 text-blue-600" />
-                <span>My Groups</span>
-              </CardTitle>
             </CardHeader>
-            <CardContent>
-              <p className="text-gray-600 text-sm">View and complete assessments</p>
-              <Button className="mt-4 w-full" variant="outline">
-                View Groups
-              </Button>
+            <CardContent className="relative z-10">
+              {groups.length === 0 ? (
+                <div className="text-center py-12">
+                  <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 to-gray-700 flex items-center justify-center">
+                    <ClipboardList className="h-12 w-12 text-gray-400" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">No groups assigned yet</h3>
+                  <p className="text-gray-500 dark:text-gray-400 mb-4">You will be notified when you are assigned to a group</p>
+                  <div className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse mx-auto"></div>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {Array.isArray(groups) ? groups.slice(0, 3).map((group) => (
+                    <div
+                      key={group.id}
+                      className="group/item flex items-center justify-between p-6 border border-gray-200 dark:border-gray-700 rounded-xl hover:bg-gradient-to-r hover:from-yellow-50 hover:to-orange-50 dark:hover:from-yellow-900/10 dark:hover:to-orange-900/10 cursor-pointer transition-all duration-300 transform hover:scale-[1.02]"
+                      onClick={() => router.push(`/peserta/assessment/${group.id}`)}
+                    >
+                      <div className="flex items-center space-x-4">
+                        <div className="p-3 rounded-xl bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900/40 dark:to-blue-800/40 group-hover/item:from-blue-200 dark:group-hover/item:from-blue-900/60 group-hover/item:to-blue-300 dark:group-hover/item:to-blue-800/60 transition-all duration-300 transform group-hover/item:scale-110">
+                          <Users className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                        </div>
+                        <div>
+                          <p className="font-semibold text-gray-900 dark:text-white text-lg">{group.groupName}</p>
+                          {group.description && (
+                            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{group.description}</p>
+                          )}
+                          {group.responseSession && (
+                            <div className="flex items-center space-x-4 mt-2">
+                              <div className="flex items-center space-x-2">
+                                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                                <span className="text-sm text-gray-600 dark:text-gray-300">
+                                  Progress: {group.responseSession.progressPercentage}%
+                                </span>
+                              </div>
+                              <div className="flex items-center space-x-2">
+                                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                                <span className="text-sm text-gray-600 dark:text-gray-300">
+                                  Status: {group.responseSession.status.replace('_', ' ')}
+                                </span>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          router.push(`/peserta/assessment/${group.id}`)
+                        }}
+                        className="bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border-yellow-200/50 dark:border-yellow-800/50 hover:bg-yellow-50 dark:hover:bg-yellow-900/20 transition-all duration-200"
+                      >
+                        {group.responseSession ? 'Continue' : 'Start'}
+                      </Button>
+                    </div>
+                  )) : null}
+                </div>
+              )}
             </CardContent>
           </Card>
 
-          <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => router.push('/peserta/submissions')}>
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <FileText className="h-5 w-5 text-green-600" />
-                <span>My Submissions</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-gray-600 text-sm">View and track your submissions</p>
-              <Button className="mt-4 w-full" variant="outline">
-                View Submissions
-              </Button>
-            </CardContent>
-          </Card>
+          {/* Quick Actions */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <Card className="group hover:shadow-2xl transition-all duration-500 transform hover:scale-[1.03] border-0 shadow-xl bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm relative overflow-hidden cursor-pointer" onClick={() => router.push('/peserta/groups')}>
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-blue-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <CardHeader className="relative z-10">
+                <div className="flex items-center space-x-3">
+                  <div className="p-3 rounded-xl bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900/40 dark:to-blue-800/40 group-hover:from-blue-200 dark:group-hover:from-blue-900/60 group-hover:to-blue-300 dark:group-hover:to-blue-800/60 transition-all duration-300 transform group-hover:scale-110">
+                    <Users className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                  </div>
+                  <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">My Groups</CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent className="relative z-10">
+                <p className="text-gray-600 dark:text-gray-300 mb-6 leading-relaxed">
+                  View and complete assessments for all your assigned groups with comprehensive tracking.
+                </p>
+                <Button className="w-full bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-all duration-200 transform hover:scale-105">
+                  <Users className="h-4 w-4 mr-2" />
+                  View Groups
+                </Button>
+              </CardContent>
+            </Card>
 
-          <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => router.push('/peserta/profile')}>
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <Clock className="h-5 w-5 text-purple-600" />
-                <span>Profile</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-gray-600 text-sm">Manage your profile</p>
-              <Button className="mt-4 w-full" variant="outline">
-                View Profile
-              </Button>
-            </CardContent>
-          </Card>
+            <Card className="group hover:shadow-2xl transition-all duration-500 transform hover:scale-[1.03] border-0 shadow-xl bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm relative overflow-hidden cursor-pointer" onClick={() => router.push('/peserta/submissions')}>
+              <div className="absolute inset-0 bg-gradient-to-r from-green-500/5 to-green-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <CardHeader className="relative z-10">
+                <div className="flex items-center space-x-3">
+                  <div className="p-3 rounded-xl bg-gradient-to-br from-green-100 to-green-200 dark:from-green-900/40 dark:to-green-800/40 group-hover:from-green-200 dark:group-hover:from-green-900/60 group-hover:to-green-300 dark:group-hover:to-green-800/60 transition-all duration-300 transform group-hover:scale-110">
+                    <FileText className="h-6 w-6 text-green-600 dark:text-green-400" />
+                  </div>
+                  <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">My Submissions</CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent className="relative z-10">
+                <p className="text-gray-600 dark:text-gray-300 mb-6 leading-relaxed">
+                  Track and review all your submitted assessments with detailed feedback and progress.
+                </p>
+                <Button className="w-full bg-gradient-to-r from-green-600 to-green-500 hover:from-green-700 hover:to-green-600 text-white shadow-lg shadow-green-500/25 hover:shadow-green-500/40 transition-all duration-200 transform hover:scale-105">
+                  <FileText className="h-4 w-4 mr-2" />
+                  View Submissions
+                </Button>
+              </CardContent>
+            </Card>
+
+            <Card className="group hover:shadow-2xl transition-all duration-500 transform hover:scale-[1.03] border-0 shadow-xl bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm relative overflow-hidden cursor-pointer" onClick={() => router.push('/peserta/profile')}>
+              <div className="absolute inset-0 bg-gradient-to-r from-purple-500/5 to-purple-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <CardHeader className="relative z-10">
+                <div className="flex items-center space-x-3">
+                  <div className="p-3 rounded-xl bg-gradient-to-br from-purple-100 to-purple-200 dark:from-purple-900/40 dark:to-purple-800/40 group-hover:from-purple-200 dark:group-hover:from-purple-900/60 group-hover:to-purple-300 dark:group-hover:to-purple-800/60 transition-all duration-300 transform group-hover:scale-110">
+                    <UserCheck className="h-6 w-6 text-purple-600 dark:text-purple-400" />
+                  </div>
+                  <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">Profile</CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent className="relative z-10">
+                <p className="text-gray-600 dark:text-gray-300 mb-6 leading-relaxed">
+                  Manage your personal profile, preferences, and account settings with ease.
+                </p>
+                <Button className="w-full bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-700 hover:to-purple-600 text-white shadow-lg shadow-purple-500/25 hover:shadow-purple-500/40 transition-all duration-200 transform hover:scale-105">
+                  <UserCheck className="h-4 w-4 mr-2" />
+                  View Profile
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
-    </div>
+    </AuthenticatedLayout>
   )
 }
 

@@ -5,7 +5,30 @@ import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { ArrowLeft, Search, FileText, Clock, CheckCircle, AlertTriangle, RefreshCw, MessageSquare, XCircle, Users, BarChart3, Brain, Target, Trophy } from 'lucide-react'
+import { 
+  ArrowLeft, 
+  Search, 
+  FileText, 
+  Clock, 
+  CheckCircle, 
+  AlertTriangle, 
+  RefreshCw, 
+  MessageSquare, 
+  XCircle, 
+  Users, 
+  BarChart3, 
+  Brain, 
+  Target, 
+  Trophy,
+  Award,
+  TrendingUp,
+  Activity,
+  Star,
+  Zap,
+  Filter,
+  Eye,
+  Play
+} from 'lucide-react'
 import { toast } from 'sonner'
 import api from '@/lib/api'
 import { getProfile } from '@/lib/auth'
@@ -257,19 +280,19 @@ export default function SubmissionsPage() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'in_progress':
-        return 'text-blue-500 bg-blue-50'
+        return 'text-blue-600 bg-blue-100 dark:bg-blue-900/40'
       case 'submitted':
-        return 'text-blue-500 bg-blue-50'
+        return 'text-blue-600 bg-blue-100 dark:bg-blue-900/40'
       case 'needs_revision':
-        return 'text-red-500 bg-red-50'
+        return 'text-red-600 bg-red-100 dark:bg-red-900/40'
       case 'resubmitted':
-        return 'text-blue-500 bg-blue-50'
+        return 'text-blue-600 bg-blue-100 dark:bg-blue-900/40'
       case 'approved':
-        return 'text-green-500 bg-green-50'
+        return 'text-green-600 bg-green-100 dark:bg-green-900/40'
       case 'completed':
-        return 'text-green-500 bg-green-50'
+        return 'text-green-600 bg-green-100 dark:bg-green-900/40'
       default:
-        return 'text-gray-500 bg-gray-50'
+        return 'text-gray-600 bg-gray-100 dark:bg-gray-900/40'
     }
   }
 
@@ -294,80 +317,107 @@ export default function SubmissionsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <div className="bg-white shadow-sm border-b">
-          <div className="px-6 py-4">
+      <AuthenticatedLayout allowedRoles={['PESERTA', 'SUPERADMIN']}>
+        <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
+          <div className="p-6 space-y-6">
             <div className="animate-pulse">
-              <div className="h-8 bg-gray-200 rounded w-48"></div>
+              <div className="h-8 bg-gray-200 rounded w-48 mb-6"></div>
+              <div className="space-y-4">
+                <div className="h-12 bg-gray-200 rounded"></div>
+                {[1, 2, 3].map(i => (
+                  <div key={i} className="h-32 bg-gray-200 rounded-lg"></div>
+                ))}
+              </div>
             </div>
           </div>
         </div>
-        <div className="p-6">
-          <div className="animate-pulse space-y-4">
-            <div className="h-12 bg-gray-200 rounded"></div>
-            <div className="space-y-3">
-              {[1, 2, 3].map(i => (
-                <div key={i} className="h-24 bg-gray-200 rounded"></div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
+      </AuthenticatedLayout>
     )
   }
 
   return (
     <AuthenticatedLayout allowedRoles={['PESERTA', 'SUPERADMIN']}>
-      <div className="min-h-screen bg-gray-50">
-        {/* Header */}
-        <div className="bg-white shadow-sm border-b">
-          <div className="px-4 sm:px-6 py-4">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
-              <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 relative overflow-hidden">
+        {/* Animated Background Elements */}
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute -top-40 -right-40 h-96 w-96 rounded-full bg-gradient-to-br from-yellow-500/5 to-yellow-600/5 blur-3xl animate-pulse"></div>
+          <div className="absolute -bottom-40 -left-40 h-96 w-96 rounded-full bg-gradient-to-tr from-yellow-400/5 to-yellow-500/5 blur-3xl animate-pulse delay-1000"></div>
+          <div className="absolute top-1/4 left-1/4 h-64 w-64 rounded-full bg-gradient-to-r from-yellow-500/3 to-yellow-600/3 blur-2xl animate-pulse delay-500"></div>
+        </div>
+
+        {/* Header Section */}
+        <div className="relative bg-gradient-to-r from-yellow-500/10 via-yellow-600/10 to-yellow-500/10 border-b border-yellow-200/50 dark:border-yellow-800/50 overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-r from-yellow-500/5 to-yellow-600/5"></div>
+          <div className="absolute inset-0 bg-[url('data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'32\\' height=\\'32\\' viewBox=\\'0 0 32 32\\'><path fill=\\'%23EAB308\\' d=\\'M0 31h32v1H0zM31 0v32h1V0z\\'/></svg>')] opacity-5"></div>
+          <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-6">
                 <Button 
                   variant="ghost" 
                   size="sm"
                   onClick={() => router.push('/peserta')}
-                  className="flex items-center space-x-2 w-fit"
+                  className="flex items-center space-x-2 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border border-yellow-200/50 dark:border-yellow-800/50 hover:bg-yellow-50 dark:hover:bg-yellow-900/20 transition-all duration-200"
                 >
                   <ArrowLeft className="h-4 w-4" />
                   <span>Back to Dashboard</span>
                 </Button>
-                <div>
-                  <h1 className="text-xl sm:text-2xl font-bold text-gray-900">My Submissions</h1>
-                  <p className="text-sm sm:text-base text-gray-600">View and track all your submissions</p>
+                <div className="flex items-center space-x-4">
+                  <div className="flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-yellow-500 to-yellow-600 shadow-lg border-2 border-yellow-400/50 relative">
+                    <FileText className="h-8 w-8 text-white" />
+                    <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white animate-pulse"></div>
+                  </div>
+                  <div>
+                    <h1 className="text-3xl font-bold bg-gradient-to-r from-yellow-600 via-yellow-500 to-yellow-400 bg-clip-text text-transparent">
+                      My Submissions
+                    </h1>
+                    <p className="text-gray-600 dark:text-gray-300 mt-1">
+                      View and track all your submissions
+                    </p>
+                  </div>
                 </div>
               </div>
-              <Button 
-                onClick={() => router.push('/peserta/groups')}
-                className="flex items-center space-x-2 w-full sm:w-auto"
-              >
-                <FileText className="h-4 w-4" />
-                <span>Start Assessment</span>
-              </Button>
+              <div className="flex items-center space-x-3">
+                <Button 
+                  onClick={() => router.push('/peserta/groups')}
+                  className="flex items-center space-x-2 bg-gradient-to-r from-yellow-600 to-yellow-500 hover:from-yellow-700 hover:to-yellow-600 text-white shadow-lg shadow-yellow-500/25 hover:shadow-yellow-500/40 transition-all duration-200 transform hover:scale-105"
+                >
+                  <Play className="h-4 w-4" />
+                  <span>Start Assessment</span>
+                </Button>
+                <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400 bg-white/50 dark:bg-gray-800/50 px-4 py-2 rounded-full backdrop-blur-sm border border-yellow-200/50 dark:border-yellow-800/50">
+                  <Zap className="h-4 w-4 text-green-500" />
+                  <span className="font-medium">{submissions.length} Submissions</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
-        <div className="p-4 sm:p-6 space-y-6">
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Search and Filters */}
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex flex-col space-y-4">
+          <Card className="border-0 shadow-2xl bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm relative overflow-hidden mb-8">
+            <div className="absolute inset-0 bg-gradient-to-r from-gray-500/5 to-gray-600/5"></div>
+            <CardContent className="relative z-10 pt-8">
+              <div className="flex flex-col space-y-6">
                 <div className="relative flex-1">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                  <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
                   <Input
-                    placeholder="Search submissions..."
+                    placeholder="Search submissions by group name..."
                     value={searchTerm}
                     onChange={(e) => handleSearch(e.target.value)}
-                    className="pl-10"
+                    className="pl-12 h-12 border-gray-300 focus:border-yellow-500 focus:ring-yellow-500/20 dark:border-gray-600 dark:bg-gray-800 dark:focus:border-yellow-400 transition-all duration-200"
                   />
                 </div>
-                <div className="flex flex-wrap items-center gap-2">
+                <div className="flex flex-wrap items-center gap-3">
+                  <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
+                    <Filter className="h-4 w-4" />
+                    <span>Filter by status:</span>
+                  </div>
                   <Button
                     variant={statusFilter === 'all' ? 'default' : 'outline'}
                     size="sm"
                     onClick={() => handleStatusFilter('all')}
+                    className="bg-gradient-to-r from-yellow-600 to-yellow-500 hover:from-yellow-700 hover:to-yellow-600 text-white border-0 shadow-lg shadow-yellow-500/25 hover:shadow-yellow-500/40 transition-all duration-200"
                   >
                     All
                   </Button>
@@ -375,6 +425,7 @@ export default function SubmissionsPage() {
                     variant={statusFilter === 'draft' ? 'default' : 'outline'}
                     size="sm"
                     onClick={() => handleStatusFilter('draft')}
+                    className="border-yellow-200/50 dark:border-yellow-800/50 hover:bg-yellow-50 dark:hover:bg-yellow-900/20"
                   >
                     Draft
                   </Button>
@@ -382,6 +433,7 @@ export default function SubmissionsPage() {
                     variant={statusFilter === 'submitted' ? 'default' : 'outline'}
                     size="sm"
                     onClick={() => handleStatusFilter('submitted')}
+                    className="border-yellow-200/50 dark:border-yellow-800/50 hover:bg-yellow-50 dark:hover:bg-yellow-900/20"
                   >
                     Submitted
                   </Button>
@@ -389,6 +441,7 @@ export default function SubmissionsPage() {
                     variant={statusFilter === 'needs_revision' ? 'default' : 'outline'}
                     size="sm"
                     onClick={() => handleStatusFilter('needs_revision')}
+                    className="border-yellow-200/50 dark:border-yellow-800/50 hover:bg-yellow-50 dark:hover:bg-yellow-900/20"
                   >
                     Needs Revision
                   </Button>
@@ -396,6 +449,7 @@ export default function SubmissionsPage() {
                     variant={statusFilter === 'resubmitted' ? 'default' : 'outline'}
                     size="sm"
                     onClick={() => handleStatusFilter('resubmitted')}
+                    className="border-yellow-200/50 dark:border-yellow-800/50 hover:bg-yellow-50 dark:hover:bg-yellow-900/20"
                   >
                     Resubmitted
                   </Button>
@@ -403,13 +457,15 @@ export default function SubmissionsPage() {
                     variant={statusFilter === 'approved' ? 'default' : 'outline'}
                     size="sm"
                     onClick={() => handleStatusFilter('approved')}
+                    className="border-yellow-200/50 dark:border-yellow-800/50 hover:bg-yellow-50 dark:hover:bg-yellow-900/20"
                   >
-                    Approve to Jury
+                    Approved
                   </Button>
                   <Button
                     variant={statusFilter === 'completed' ? 'default' : 'outline'}
                     size="sm"
                     onClick={() => handleStatusFilter('completed')}
+                    className="border-yellow-200/50 dark:border-yellow-800/50 hover:bg-yellow-50 dark:hover:bg-yellow-900/20"
                   >
                     Completed
                   </Button>
@@ -419,65 +475,91 @@ export default function SubmissionsPage() {
           </Card>
 
           {/* Submissions List */}
-          <div className="space-y-4">
+          <div className="space-y-6">
             {filteredSubmissions.length === 0 ? (
-              <Card>
-                <CardContent className="py-8">
+              <Card className="border-0 shadow-2xl bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-r from-gray-500/5 to-gray-600/5"></div>
+                <CardContent className="relative z-10 py-16">
                   <div className="text-center">
-                    <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                    <p className="text-gray-500">No submissions found</p>
-                    <p className="text-sm text-gray-400">
+                    <div className="w-32 h-32 mx-auto mb-8 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 to-gray-700 flex items-center justify-center">
+                      <FileText className="h-16 w-16 text-gray-400" />
+                    </div>
+                    <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">No submissions found</h3>
+                    <p className="text-gray-500 dark:text-gray-400 mb-6 text-lg">
                       {searchTerm || statusFilter !== 'all'
                         ? 'Try adjusting your filters'
                         : 'Create your first submission to get started'}
                     </p>
+                    <div className="flex items-center justify-center space-x-2">
+                      <div className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse"></div>
+                      <div className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse delay-150"></div>
+                      <div className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse delay-300"></div>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
             ) : (
               filteredSubmissions.map((submission) => (
-                <Card key={submission.id} className="hover:shadow-md transition-shadow">
-                  <CardContent className="p-6">
-                    <div className="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
+                <Card key={submission.id} className="group hover:shadow-2xl transition-all duration-500 transform hover:scale-[1.02] border-0 shadow-xl bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm relative overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-r from-yellow-500/5 to-yellow-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                  <CardContent className="relative z-10 p-8">
+                    <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-6 lg:space-y-0">
                       <div className="flex-1">
-                        <div className="flex items-center space-x-3">
-                          <div className={`p-2 rounded-lg ${getStatusColor(submission.combinedStatus)}`}>
+                        <div className="flex items-center space-x-4">
+                          <div className={`p-4 rounded-2xl ${getStatusColor(submission.combinedStatus)} group-hover:scale-110 transition-all duration-300`}>
                             {getStatusIcon(submission.combinedStatus)}
                           </div>
                           <div>
-                            <h3 className="text-lg font-semibold text-gray-900">
+                            <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
                               {submission.groupName}
                             </h3>
-                            <p className="text-sm text-gray-500">
+                            <p className="text-gray-500 dark:text-gray-400 mt-1">
                               Submitted on {new Date(submission.submittedAt).toLocaleDateString()}
                             </p>
                           </div>
                         </div>
-                        <div className="mt-2 flex items-center space-x-4">
-                          <span className="text-sm text-gray-500">
-                            Progress: {submission.progressPercentage}%
-                          </span>
-                          {submission.revisionCount > 0 && (
-                            <span className="text-sm text-gray-500">
-                              Revisions: {submission.revisionCount}
+                        <div className="mt-4 flex items-center space-x-6">
+                          <div className="flex items-center space-x-2">
+                            <BarChart3 className="h-4 w-4 text-blue-500" />
+                            <span className="text-sm text-gray-600 dark:text-gray-300 font-medium">
+                              Progress: {submission.progressPercentage}%
                             </span>
+                          </div>
+                          {submission.revisionCount > 0 && (
+                            <div className="flex items-center space-x-2">
+                              <RefreshCw className="h-4 w-4 text-orange-500" />
+                              <span className="text-sm text-gray-600 dark:text-gray-300 font-medium">
+                                Revisions: {submission.revisionCount}
+                              </span>
+                            </div>
                           )}
                         </div>
                         {submission.feedback && (
-                          <div className="mt-3 p-3 bg-orange-50 rounded-lg">
-                            <div className="flex items-center space-x-2">
-                              <MessageSquare className="h-4 w-4 text-orange-500" />
-                              <span className="text-sm font-medium text-orange-700">Feedback:</span>
+                          <div className="mt-4 p-4 bg-gradient-to-r from-orange-50 to-red-50 dark:from-orange-900/20 dark:to-red-900/20 rounded-xl border border-orange-200/50 dark:border-orange-800/50">
+                            <div className="flex items-center space-x-2 mb-2">
+                              <MessageSquare className="h-5 w-5 text-orange-500" />
+                              <span className="text-sm font-semibold text-orange-700 dark:text-orange-300">Feedback:</span>
                             </div>
-                            <p className="text-sm text-orange-600 mt-1">{submission.feedback}</p>
+                            <p className="text-sm text-orange-600 dark:text-orange-400">{submission.feedback}</p>
                           </div>
                         )}
                       </div>
-                      <div className="flex items-center space-x-2">
+                      <div className="flex items-center space-x-3">
                         <Button
                           onClick={() => router.push(`/peserta/assessment/${submission.groupId}`)}
+                          className="flex items-center space-x-2 bg-gradient-to-r from-yellow-600 to-yellow-500 hover:from-yellow-700 hover:to-yellow-600 text-white shadow-lg shadow-yellow-500/25 hover:shadow-yellow-500/40 transition-all duration-200 transform hover:scale-105 px-6 py-3"
                         >
-                          {submission.combinedStatus === 'draft' ? 'Start Assessment' : 'Continue Assessment'}
+                          {submission.combinedStatus === 'draft' ? (
+                            <>
+                              <Play className="h-5 w-5" />
+                              <span className="font-semibold">Start Assessment</span>
+                            </>
+                          ) : (
+                            <>
+                              <Eye className="h-5 w-5" />
+                              <span className="font-semibold">Continue Assessment</span>
+                            </>
+                          )}
                         </Button>
                       </div>
                     </div>
