@@ -1,4 +1,7 @@
-import type { NextConfig } from "next";
+import createNextIntlPlugin from 'next-intl/plugin'
+import type { NextConfig } from "next"
+
+const withNextIntl = createNextIntlPlugin()
 
 const nextConfig: NextConfig = {
   /* config options here */
@@ -14,6 +17,6 @@ const nextConfig: NextConfig = {
     // your project has ESLint errors.
     ignoreDuringBuilds: true,
   },
-};
+}
 
-export default nextConfig;
+export default withNextIntl(nextConfig)
