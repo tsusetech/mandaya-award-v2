@@ -9,7 +9,8 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useState } from "react";
 import Link from "next/link";
-import { Eye, EyeOff, Loader2, Mail, Lock } from "lucide-react";
+import { Eye, EyeOff, Loader2, Mail, Lock, Award } from "lucide-react";
+import Image from "next/image";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -59,56 +60,109 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="relative min-h-screen w-full bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-zinc-50 via-white to-zinc-100 dark:from-zinc-900 dark:via-zinc-950 dark:to-black">
-      {/* subtle grid */}
-      <div className="pointer-events-none absolute inset-0 bg-[url('data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'32\\' height=\\'32\\' viewBox=\\'0 0 32 32\\'><path fill=\\'%23e5e7eb\\' d=\\'M0 31h32v1H0zM31 0v32h1V0z\\'/></svg>')] opacity-40 dark:opacity-10" />
+    <div className="relative min-h-screen w-full bg-gradient-to-br from-gray-900 via-black to-gray-900 overflow-hidden">
+      {/* Animated background elements */}
+      <div className="absolute inset-0">
+        <div className="absolute -top-40 -right-40 h-96 w-96 rounded-full bg-gradient-to-br from-yellow-500/10 to-yellow-600/10 blur-3xl animate-pulse"></div>
+        <div className="absolute -bottom-40 -left-40 h-96 w-96 rounded-full bg-gradient-to-tr from-yellow-400/10 to-yellow-500/10 blur-3xl animate-pulse delay-1000"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 h-64 w-64 rounded-full bg-gradient-to-r from-yellow-500/5 to-yellow-600/5 blur-2xl animate-pulse delay-500"></div>
+      </div>
+
+      {/* Subtle pattern overlay */}
+      <div className="absolute inset-0 bg-[url('data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'32\\' height=\\'32\\' viewBox=\\'0 0 32 32\\'><path fill=\\'%23FFD700\\' d=\\'M0 31h32v1H0zM31 0v32h1V0z\\'/></svg>')] opacity-3" />
 
       <div className="relative z-10 mx-auto flex min-h-screen max-w-6xl items-center justify-center px-4">
-        <Card className="w-full max-w-md border-zinc-200/70 shadow-2xl shadow-zinc-200/40 backdrop-blur-sm dark:border-zinc-800/80 dark:shadow-black/30">
-          <CardHeader className="space-y-1">
-            <CardTitle className="text-2xl">Welcome back</CardTitle>
-            <CardDescription>Sign in to your account</CardDescription>
-          </CardHeader>
-
-          <CardContent>
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-5" noValidate>
-              {/* Email */}
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+        <Card className="w-full max-w-lg border-0 shadow-2xl shadow-black/50 backdrop-blur-sm bg-white/95 dark:bg-gray-900/95 overflow-hidden">
+          {/* Header with Logo and Brand */}
+          <div className="relative bg-gradient-to-r from-yellow-500/10 to-yellow-600/10 p-8 text-center">
+            <div className="absolute inset-0 bg-gradient-to-r from-yellow-500/5 to-yellow-600/5"></div>
+            <div className="relative z-10">
+              {/* Logo Container */}
+              <div className="flex items-center justify-center mb-6">
                 <div className="relative">
-                  <Mail className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
+                  <div className="absolute inset-0 bg-gradient-to-r from-yellow-400 to-yellow-600 rounded-full blur-lg opacity-50 animate-pulse"></div>
+                  <div className="relative flex items-center justify-center w-24 h-24 rounded-full bg-gradient-to-br from-yellow-500 to-yellow-600 shadow-2xl border-4 border-yellow-400/50">
+                    <Image
+                      src="/logo.png"
+                      alt="Mandaya Award Logo"
+                      width={48}
+                      height={48}
+                      className="rounded-full drop-shadow-lg"
+                    />
+                  </div>
+                </div>
+              </div>
+              
+              {/* Brand Text */}
+              <div className="space-y-2">
+                <h1 className="text-4xl font-bold bg-gradient-to-r from-yellow-600 via-yellow-500 to-yellow-400 bg-clip-text text-transparent drop-shadow-sm">
+                  Mandaya Award
+                </h1>
+                <div className="flex items-center justify-center gap-2 text-gray-600 dark:text-gray-300">
+                  <Award className="h-4 w-4 text-yellow-500" />
+                  <p className="text-sm font-medium">Excellence Recognition Platform</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <CardContent className="p-8">
+            {/* Welcome Section */}
+            <div className="text-center mb-8">
+              <CardTitle className="text-2xl font-semibold text-gray-900 dark:text-white mb-2">
+                Welcome back
+              </CardTitle>
+              <CardDescription className="text-gray-600 dark:text-gray-400">
+                Sign in to your account to continue
+              </CardDescription>
+            </div>
+
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6" noValidate>
+              {/* Email */}
+              <div className="space-y-3">
+                <Label htmlFor="email" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Email address
+                </Label>
+                <div className="relative group">
+                  <Mail className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 group-focus-within:text-yellow-500 transition-colors" />
                   <Input
                     id="email"
                     type="email"
-                    placeholder="you@example.com"
-                    className="pl-9"
+                    placeholder="Enter your email address"
+                    className="pl-12 h-12 border-gray-300 focus:border-yellow-500 focus:ring-yellow-500/20 dark:border-gray-600 dark:bg-gray-800 dark:focus:border-yellow-400 transition-all duration-200"
                     aria-invalid={!!errors.email}
                     aria-describedby={errors.email ? "email-error" : undefined}
                     {...register("email")}
                   />
                 </div>
                 {errors.email && (
-                  <p id="email-error" className="text-sm text-red-600">
+                  <p id="email-error" className="text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
+                    <span className="w-1 h-1 bg-red-500 rounded-full"></span>
                     {errors.email.message}
                   </p>
                 )}
               </div>
 
               {/* Password */}
-              <div className="space-y-2">
+              <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <Label htmlFor="password">Password</Label>
-                  <Link href="/forgot-password" className="text-sm text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-200">
+                  <Label htmlFor="password" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Password
+                  </Label>
+                  <Link 
+                    href="/forgot-password" 
+                    className="text-sm text-yellow-600 hover:text-yellow-700 dark:text-yellow-400 dark:hover:text-yellow-300 font-medium transition-colors hover:underline"
+                  >
                     Forgot password?
                   </Link>
                 </div>
-                <div className="relative">
-                  <Lock className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
+                <div className="relative group">
+                  <Lock className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 group-focus-within:text-yellow-500 transition-colors" />
                   <Input
                     id="password"
                     type={showPw ? "text" : "password"}
-                    placeholder="••••••••"
-                    className="pl-9 pr-10"
+                    placeholder="Enter your password"
+                    className="pl-12 pr-12 h-12 border-gray-300 focus:border-yellow-500 focus:ring-yellow-500/20 dark:border-gray-600 dark:bg-gray-800 dark:focus:border-yellow-400 transition-all duration-200"
                     aria-invalid={!!errors.password}
                     aria-describedby={errors.password ? "password-error" : undefined}
                     {...register("password")}
@@ -116,62 +170,36 @@ export default function LoginPage() {
                   <button
                     type="button"
                     onClick={() => setShowPw((s) => !s)}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-2 text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 rounded p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
                     aria-label={showPw ? "Hide password" : "Show password"}
                   >
-                    {showPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    {showPw ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                   </button>
                 </div>
                 {errors.password && (
-                  <p id="password-error" className="text-sm text-red-600">
+                  <p id="password-error" className="text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
+                    <span className="w-1 h-1 bg-red-500 rounded-full"></span>
                     {errors.password.message}
                   </p>
                 )}
               </div>
 
-              {/* Remember me (optional) */}
-              {/* <div className="flex items-center gap-2">
-                <Checkbox id="remember" />
-                <Label htmlFor="remember" className="font-normal">Remember me</Label>
-              </div> */}
-
+              {/* Sign In Button */}
               <Button
                 type="submit"
                 disabled={loading}
-                className="w-full"
+                className="w-full h-12 bg-gradient-to-r from-yellow-600 to-yellow-500 hover:from-yellow-700 hover:to-yellow-600 text-white font-semibold shadow-lg shadow-yellow-500/25 hover:shadow-yellow-500/40 transition-all duration-300 transform hover:scale-[1.02]"
               >
                 {loading ? (
-                  <span className="inline-flex items-center gap-2">
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    Logging in…
+                  <span className="inline-flex items-center gap-3">
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                    Signing in...
                   </span>
                 ) : (
-                  "Sign in"
+                  "Sign in to your account"
                 )}
               </Button>
-
-              {/* Divider */}
-              {/* <div className="relative py-1">
-                <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t" />
-                </div>
-                <div className="relative flex justify-center">
-                  <span className="bg-background px-2 text-xs text-muted-foreground">Or continue with</span>
-                </div>
-              </div>
-
-              <Button type="button" variant="outline" className="w-full">
-                <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24"><path fill="currentColor" d="M21.35 11.1h-9.18v2.96h5.28c-.23 1.5-1.78 4.39-5.28 4.39-3.18 0-5.78-2.63-5.78-5.86s2.6-5.86 5.78-5.86c1.81 0 3.02.77 3.71 1.44l2.53-2.44C16.94 3.8 15.01 2.9 12.17 2.9 7.38 2.9 3.5 6.78 3.5 11.57S7.38 20.24 12.17 20.24c6.57 0 8.11-5.76 7.53-9.14Z"/></svg>
-                Google
-              </Button> */}
             </form>
-
-            <p className="mt-6 text-center text-sm text-zinc-600 dark:text-zinc-400">
-              Don’t have an account?{" "}
-              <Link href="/register" className="font-medium text-zinc-900 underline decoration-zinc-300 underline-offset-4 hover:decoration-zinc-900 dark:text-zinc-100 dark:hover:text-white">
-                Create one
-              </Link>
-            </p>
           </CardContent>
         </Card>
       </div>

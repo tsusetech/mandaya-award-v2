@@ -1,0 +1,21 @@
+<svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Outer circle -->
+  <circle cx="24" cy="24" r="22" stroke="currentColor" stroke-width="2" fill="none"/>
+  
+  <!-- Inner mandala pattern -->
+  <circle cx="24" cy="24" r="16" stroke="currentColor" stroke-width="1.5" fill="none" opacity="0.7"/>
+  <circle cx="24" cy="24" r="10" stroke="currentColor" stroke-width="1" fill="none" opacity="0.5"/>
+  
+  <!-- Decorative elements -->
+  <path d="M24 2 L24 6 M24 42 L24 46 M2 24 L6 24 M42 24 L46 24" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+  <path d="M8 8 L12 12 M36 36 L40 40 M8 40 L12 36 M36 12 L40 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity="0.8"/>
+  
+  <!-- Center dot -->
+  <circle cx="24" cy="24" r="3" fill="currentColor"/>
+  
+  <!-- Small decorative dots -->
+  <circle cx="24" cy="8" r="1.5" fill="currentColor" opacity="0.6"/>
+  <circle cx="24" cy="40" r="1.5" fill="currentColor" opacity="0.6"/>
+  <circle cx="8" cy="24" r="1.5" fill="currentColor" opacity="0.6"/>
+  <circle cx="40" cy="24" r="1.5" fill="currentColor" opacity="0.6"/>
+</svg>
