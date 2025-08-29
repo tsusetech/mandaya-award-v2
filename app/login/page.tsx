@@ -14,8 +14,8 @@ import { toast } from 'sonner'
 import { loginUser } from '@/lib/auth'
 
 const loginSchema = z.object({
-  email: z.string().email('Invalid email address'),
-  password: z.string().min(1, 'Password is required'),
+  email: z.string().email('Alamat email tidak valid'),
+  password: z.string().min(1, 'Password wajib diisi'),
 })
 
 type LoginForm = z.infer<typeof loginSchema>
@@ -39,7 +39,7 @@ export default function LoginPage() {
       console.log('Attempting login with:', { email: data.email })
       const { user } = await loginUser(data.email, data.password)
       console.log('Login successful, user:', user)
-      toast.success('Login successful')
+      toast.success('Login berhasil')
 
       // Redirect based on user role - handle different possible role structures
       const role = user.userRoles?.[0]?.role?.name || user.userRoles?.[0]?.name || 'PESERTA'
@@ -58,7 +58,7 @@ export default function LoginPage() {
         status: error.response?.status,
         statusText: error.response?.statusText
       })
-      toast.error(error.response?.data?.message || 'Invalid credentials')
+      toast.error(error.response?.data?.message || 'Kredensial tidak valid')
     } finally {
       setIsLoading(false)
     }
@@ -96,7 +96,7 @@ export default function LoginPage() {
               </h1>
               <CardDescription className="text-lg text-gray-600 dark:text-gray-300 flex items-center justify-center space-x-2">
                 <Award className="h-5 w-5 text-yellow-500" />
-                <span>Sign in to your account</span>
+                <span>Masuk ke akun Anda</span>
               </CardDescription>
             </div>
           </CardHeader>
@@ -115,7 +115,7 @@ export default function LoginPage() {
                     type="email"
                     {...register('email')}
                     className="pl-12 h-12 border-gray-300 focus:border-yellow-500 focus:ring-yellow-500/20 dark:border-gray-600 dark:bg-gray-800 dark:focus:border-yellow-400 transition-all duration-200"
-                    placeholder="Enter your email"
+                    placeholder="Masukkan email Anda"
                   />
                   {errors.email && (
                     <div className="absolute -bottom-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></div>
@@ -129,7 +129,7 @@ export default function LoginPage() {
               {/* Password Field */}
               <div className="space-y-2">
                 <Label htmlFor="password" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Password
+                  Kata Sandi
                 </Label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
@@ -138,7 +138,7 @@ export default function LoginPage() {
                     type={showPassword ? 'text' : 'password'}
                     {...register('password')}
                     className="pl-12 h-12 border-gray-300 focus:border-yellow-500 focus:ring-yellow-500/20 dark:border-gray-600 dark:bg-gray-800 dark:focus:border-yellow-400 transition-all duration-200"
-                    placeholder="Enter your password"
+                    placeholder="Masukkan kata sandi Anda"
                   />
                   <button
                     type="button"
@@ -162,7 +162,7 @@ export default function LoginPage() {
                 disabled={isLoading}
                 className="w-full h-12 bg-gradient-to-r from-yellow-600 to-yellow-500 hover:from-yellow-700 hover:to-yellow-600 text-white font-semibold shadow-lg shadow-yellow-500/25 hover:shadow-yellow-500/40 transition-all duration-200 transform hover:scale-[1.02]"
               >
-                {isLoading ? 'Signing in...' : 'Sign In'}
+                {isLoading ? 'Sedang masuk...' : 'Masuk'}
               </Button>
             </form>
           </CardContent>

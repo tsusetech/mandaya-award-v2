@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ArrowLeft, Search, Plus, Shield, Users, Activity, TrendingUp, UserCheck, Filter, Download, Users2 } from 'lucide-react'
 import api from '@/lib/api'
 import { toast } from 'sonner'
+import AuthenticatedLayout from '@/components/AuthenticatedLayout'
 
 interface Group {
   id: number
@@ -75,7 +76,7 @@ export default function AdminGroupsPage() {
         averageGroupSize: groupsWithMembers.length > 0 ? Math.round(totalMembers / groupsWithMembers.length) : 0
       })
     } catch (err) {
-      toast.error('Failed to fetch groups')
+      toast.error('Gagal memuat kelompok')
       console.error('Error fetching groups:', err)
     } finally {
       setLoading(false)
@@ -109,10 +110,10 @@ export default function AdminGroupsPage() {
   const handleDelete = async (id: number) => {
     try {
       await api.delete(`/groups/${id}`)
-      toast.success('Group deleted successfully')
+      toast.success('Kelompok berhasil dihapus')
       fetchGroups()
     } catch (err) {
-      toast.error('Failed to delete group')
+      toast.error('Gagal menghapus kelompok')
       console.error('Error deleting group:', err)
     }
   }
@@ -126,16 +127,16 @@ export default function AdminGroupsPage() {
     
       if (selectedGroup) {
         await api.put(`/groups/${selectedGroup.id}`, payload)
-        toast.success('Group updated successfully')
+        toast.success('Kelompok berhasil diperbarui')
       } else {
         await api.post('/groups', payload)
-        toast.success('Group created successfully')
+        toast.success('Kelompok berhasil dibuat')
       }
     
       setFormOpen(false)
       fetchGroups()
     } catch (err) {
-      toast.error('Failed to save group')
+      toast.error('Gagal menyimpan kelompok')
       console.error('Error saving group:', err)
     }
   }
@@ -150,29 +151,32 @@ export default function AdminGroupsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
-        <div className="p-6 space-y-6">
-          <div className="animate-pulse">
-            <div className="h-8 bg-gray-200 rounded w-48 mb-6"></div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-              {[1, 2, 3].map(i => (
-                <div key={i} className="h-32 bg-gray-200 rounded-lg"></div>
-              ))}
+      <AuthenticatedLayout allowedRoles={['ADMIN', 'SUPERADMIN']}>
+        <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
+          <div className="p-6 space-y-6">
+            <div className="animate-pulse">
+              <div className="h-8 bg-gray-200 rounded w-48 mb-6"></div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                {[1, 2, 3].map(i => (
+                  <div key={i} className="h-32 bg-gray-200 rounded-lg"></div>
+                ))}
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      </AuthenticatedLayout>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 relative overflow-hidden">
-      {/* Animated Background Elements */}
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute -top-40 -right-40 h-96 w-96 rounded-full bg-gradient-to-br from-green-500/5 to-green-600/5 blur-3xl animate-pulse"></div>
-        <div className="absolute -bottom-40 -left-40 h-96 w-96 rounded-full bg-gradient-to-tr from-green-400/5 to-green-500/5 blur-3xl animate-pulse delay-1000"></div>
-        <div className="absolute top-1/4 left-1/4 h-64 w-64 rounded-full bg-gradient-to-r from-green-500/3 to-green-600/3 blur-2xl animate-pulse delay-500"></div>
-      </div>
+    <AuthenticatedLayout allowedRoles={['ADMIN', 'SUPERADMIN']}>
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 relative overflow-hidden">
+        {/* Animated Background Elements */}
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute -top-40 -right-40 h-96 w-96 rounded-full bg-gradient-to-br from-green-500/5 to-green-600/5 blur-3xl animate-pulse"></div>
+          <div className="absolute -bottom-40 -left-40 h-96 w-96 rounded-full bg-gradient-to-tr from-green-400/5 to-green-500/5 blur-3xl animate-pulse delay-1000"></div>
+          <div className="absolute top-1/4 left-1/4 h-64 w-64 rounded-full bg-gradient-to-r from-green-500/3 to-green-600/3 blur-2xl animate-pulse delay-500"></div>
+        </div>
 
       {/* Header Section */}
       <div className="relative bg-gradient-to-r from-green-500/10 via-green-600/10 to-green-500/10 border-b border-green-200/50 dark:border-green-800/50 overflow-hidden">
@@ -188,7 +192,7 @@ export default function AdminGroupsPage() {
                 className="flex items-center space-x-2 bg-white/20 hover:bg-white/30 text-gray-900 dark:text-white backdrop-blur-sm border border-white/20"
               >
                 <ArrowLeft className="h-4 w-4" />
-                <span>Back to Dashboard</span>
+                <span>Kembali ke Beranda</span>
               </Button>
               <div className="flex items-center space-x-4">
                 <div className="flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-green-500 to-green-600 shadow-lg border-2 border-green-400/50">
@@ -196,10 +200,10 @@ export default function AdminGroupsPage() {
                 </div>
                 <div>
                   <h1 className="text-3xl font-bold bg-gradient-to-r from-green-600 via-green-500 to-green-400 bg-clip-text text-transparent">
-                    Group Management
+                    Manajemen Kelompok
                   </h1>
                   <p className="text-gray-600 dark:text-gray-300 mt-1">
-                    Create and manage user groups for organized collaboration
+                    Buat dan kelola kelompok pengguna untuk kolaborasi yang terorganisir
                   </p>
                 </div>
               </div>
@@ -209,7 +213,7 @@ export default function AdminGroupsPage() {
               className="flex items-center space-x-2 bg-gradient-to-r from-green-600 to-green-500 hover:from-green-700 hover:to-green-600 text-white shadow-lg shadow-green-500/25 hover:shadow-green-500/40 transition-all duration-200"
             >
               <Plus className="h-4 w-4" />
-              <span>Add Group</span>
+              <span>Tambah Kelompok</span>
             </Button>
           </div>
         </div>
@@ -221,7 +225,7 @@ export default function AdminGroupsPage() {
           <Card className="group hover:shadow-2xl transition-all duration-500 transform hover:scale-[1.03] border-0 shadow-xl bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm relative overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-r from-green-500/5 to-green-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 relative z-10">
-              <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Groups</CardTitle>
+              <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Kelompok</CardTitle>
               <div className="p-3 rounded-xl bg-gradient-to-br from-green-100 to-green-200 dark:from-green-900/40 dark:to-green-800/40 group-hover:from-green-200 dark:group-hover:from-green-900/60 group-hover:to-green-300 dark:group-hover:to-green-800/60 transition-all duration-300 transform group-hover:scale-110">
                 <Shield className="h-6 w-6 text-green-600 dark:text-green-400" />
               </div>
@@ -230,7 +234,7 @@ export default function AdminGroupsPage() {
               <div className="text-4xl font-bold text-gray-900 dark:text-white mb-2">{stats.totalGroups}</div>
               <div className="flex items-center space-x-2">
                 <TrendingUp className="h-4 w-4 text-green-500 animate-pulse" />
-                <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Active groups</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Kelompok aktif</p>
               </div>
             </CardContent>
           </Card>
@@ -238,7 +242,7 @@ export default function AdminGroupsPage() {
           <Card className="group hover:shadow-2xl transition-all duration-500 transform hover:scale-[1.03] border-0 shadow-xl bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm relative overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-blue-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 relative z-10">
-              <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Members</CardTitle>
+              <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Anggota</CardTitle>
               <div className="p-3 rounded-xl bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900/40 dark:to-blue-800/40 group-hover:from-blue-200 dark:group-hover:from-blue-900/60 group-hover:to-blue-300 dark:group-hover:to-blue-800/60 transition-all duration-300 transform group-hover:scale-110">
                 <Users className="h-6 w-6 text-blue-600 dark:text-blue-400" />
               </div>
@@ -247,7 +251,7 @@ export default function AdminGroupsPage() {
               <div className="text-4xl font-bold text-gray-900 dark:text-white mb-2">{stats.totalMembers}</div>
               <div className="flex items-center space-x-2">
                 <UserCheck className="h-4 w-4 text-blue-500 animate-pulse" />
-                <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Across all groups</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Di semua kelompok</p>
               </div>
             </CardContent>
           </Card>
@@ -255,7 +259,7 @@ export default function AdminGroupsPage() {
           <Card className="group hover:shadow-2xl transition-all duration-500 transform hover:scale-[1.03] border-0 shadow-xl bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm relative overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-r from-purple-500/5 to-purple-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 relative z-10">
-              <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">Avg Group Size</CardTitle>
+              <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">Rata-rata Ukuran Kelompok</CardTitle>
               <div className="p-3 rounded-xl bg-gradient-to-br from-purple-100 to-purple-200 dark:from-purple-900/40 dark:to-purple-800/40 group-hover:from-purple-200 dark:group-hover:from-purple-900/60 group-hover:to-purple-300 dark:group-hover:to-purple-800/60 transition-all duration-300 transform group-hover:scale-110">
                 <Users2 className="h-6 w-6 text-purple-600 dark:text-purple-400" />
               </div>
@@ -264,7 +268,7 @@ export default function AdminGroupsPage() {
               <div className="text-4xl font-bold text-gray-900 dark:text-white mb-2">{stats.averageGroupSize}</div>
               <div className="flex items-center space-x-2">
                 <Activity className="h-4 w-4 text-purple-500 animate-pulse" />
-                <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Members per group</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Anggota per kelompok</p>
               </div>
             </CardContent>
           </Card>
@@ -279,7 +283,7 @@ export default function AdminGroupsPage() {
                 <div className="relative flex-1 max-w-md">
                   <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
                   <Input
-                    placeholder="Search groups by name or description..."
+                    placeholder="Cari kelompok berdasarkan nama atau deskripsi..."
                     value={searchTerm}
                     onChange={(e) => handleSearch(e.target.value)}
                     className="pl-12 h-12 border-gray-300 focus:border-green-500 focus:ring-green-500/20 dark:border-gray-600 dark:bg-gray-800 dark:focus:border-green-400 transition-all duration-200"
@@ -287,15 +291,15 @@ export default function AdminGroupsPage() {
                 </div>
                 <Button variant="outline" className="flex items-center space-x-2 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm">
                   <Filter className="h-4 w-4" />
-                  <span>Filters</span>
+                  <span>Filter</span>
                 </Button>
                 <Button variant="outline" className="flex items-center space-x-2 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm">
                   <Download className="h-4 w-4" />
-                  <span>Export</span>
+                  <span>Ekspor</span>
                 </Button>
               </div>
               <div className="text-sm text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 px-3 py-2 rounded-full">
-                Showing <span className="font-semibold text-gray-900 dark:text-white">{filteredGroups.length}</span> of <span className="font-semibold text-gray-900 dark:text-white">{groups.length}</span> groups
+                Menampilkan <span className="font-semibold text-gray-900 dark:text-white">{filteredGroups.length}</span> dari <span className="font-semibold text-gray-900 dark:text-white">{groups.length}</span> kelompok
               </div>
             </div>
           </CardContent>
@@ -309,10 +313,10 @@ export default function AdminGroupsPage() {
               <div className="p-2 rounded-lg bg-gradient-to-br from-green-100 to-green-200 dark:from-green-900/40 dark:to-green-800/40">
                 <Shield className="h-5 w-5 text-green-600 dark:text-green-400" />
               </div>
-              <span className="text-gray-900 dark:text-white font-bold">Groups</span>
+              <span className="text-gray-900 dark:text-white font-bold">Kelompok</span>
               <div className="flex items-center space-x-1">
                 <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                <span className="text-sm text-green-600 dark:text-green-400 font-medium">Live</span>
+                <span className="text-sm text-green-600 dark:text-green-400 font-medium">Aktif</span>
               </div>
             </CardTitle>
           </CardHeader>
@@ -338,6 +342,7 @@ export default function AdminGroupsPage() {
           id: selectedGroup.id.toString()
         } : undefined}
       />
-    </div>
+      </div>
+    </AuthenticatedLayout>
   )
 }

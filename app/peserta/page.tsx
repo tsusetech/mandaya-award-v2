@@ -86,7 +86,7 @@ export default function PesertaDashboard() {
 
     } catch (err) {
       console.error('Error fetching dashboard data:', err)
-      toast.error('Failed to load dashboard data')
+      toast.error('Gagal memuat data beranda')
     } finally {
       setLoading(false)
     }
@@ -139,10 +139,10 @@ export default function PesertaDashboard() {
                   </div>
                   <div>
                     <h1 className="text-4xl font-bold bg-gradient-to-r from-yellow-600 via-yellow-500 to-yellow-400 bg-clip-text text-transparent">
-                      Participant Dashboard
+                      Beranda Peserta
                     </h1>
                     <p className="text-gray-600 dark:text-gray-300 mt-1">
-                      Manage your assessment groups and track their progress
+                      Kelola kelompok penilaian Anda dan pantau kemajuannya
                     </p>
                   </div>
                 </div>
@@ -150,7 +150,7 @@ export default function PesertaDashboard() {
               <div className="flex items-center space-x-3">
                 <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400 bg-white/50 dark:bg-gray-800/50 px-4 py-2 rounded-full backdrop-blur-sm border border-yellow-200/50 dark:border-yellow-800/50">
                   <Zap className="h-4 w-4 text-green-500" />
-                  <span className="font-medium">Active Participant</span>
+                  <span className="font-medium">Peserta Aktif</span>
                 </div>
               </div>
             </div>
@@ -163,7 +163,7 @@ export default function PesertaDashboard() {
             <Card className="group hover:shadow-2xl transition-all duration-500 transform hover:scale-[1.03] border-0 shadow-xl bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm relative overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-blue-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 relative z-10">
-                <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">My Groups</CardTitle>
+                <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">Kelompok Saya</CardTitle>
                 <div className="p-3 rounded-xl bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900/40 dark:to-blue-800/40 group-hover:from-blue-200 dark:group-hover:from-blue-900/60 group-hover:to-blue-300 dark:group-hover:to-blue-800/60 transition-all duration-300 transform group-hover:scale-110">
                   <Users className="h-6 w-6 text-blue-600 dark:text-blue-400" />
                 </div>
@@ -172,7 +172,7 @@ export default function PesertaDashboard() {
                 <div className="text-4xl font-bold text-gray-900 dark:text-white mb-2">{stats.totalGroups}</div>
                 <div className="flex items-center space-x-2">
                   <TrendingUp className="h-4 w-4 text-blue-500 animate-pulse" />
-                  <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Assigned groups</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Kelompok yang ditugaskan</p>
                 </div>
               </CardContent>
             </Card>
@@ -180,7 +180,7 @@ export default function PesertaDashboard() {
             <Card className="group hover:shadow-2xl transition-all duration-500 transform hover:scale-[1.03] border-0 shadow-xl bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm relative overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-r from-orange-500/5 to-orange-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 relative z-10">
-                <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">Active Assessments</CardTitle>
+                <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">Penilaian Aktif</CardTitle>
                 <div className="p-3 rounded-xl bg-gradient-to-br from-orange-100 to-orange-200 dark:from-orange-900/40 dark:to-orange-800/40 group-hover:from-orange-200 dark:group-hover:from-orange-900/60 group-hover:to-orange-300 dark:group-hover:to-orange-800/60 transition-all duration-300 transform group-hover:scale-110">
                   <Clock className="h-6 w-6 text-orange-600 dark:text-orange-400" />
                 </div>
@@ -189,7 +189,7 @@ export default function PesertaDashboard() {
                 <div className="text-4xl font-bold text-gray-900 dark:text-white mb-2">{stats.activeAssessments}</div>
                 <div className="flex items-center space-x-2">
                   <Activity className="h-4 w-4 text-orange-500 animate-pulse" />
-                  <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">In progress</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Sedang berlangsung</p>
                 </div>
               </CardContent>
             </Card>
@@ -197,7 +197,7 @@ export default function PesertaDashboard() {
             <Card className="group hover:shadow-2xl transition-all duration-500 transform hover:scale-[1.03] border-0 shadow-xl bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm relative overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-r from-green-500/5 to-green-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 relative z-10">
-                <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">Completed</CardTitle>
+                <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">Selesai</CardTitle>
                 <div className="p-3 rounded-xl bg-gradient-to-br from-green-100 to-green-200 dark:from-green-900/40 dark:to-green-800/40 group-hover:from-green-200 dark:group-hover:from-green-900/60 group-hover:to-green-300 dark:group-hover:to-green-800/60 transition-all duration-300 transform group-hover:scale-110">
                   <CheckCircle className="h-6 w-6 text-green-600 dark:text-green-400" />
                 </div>
@@ -206,7 +206,7 @@ export default function PesertaDashboard() {
                 <div className="text-4xl font-bold text-gray-900 dark:text-white mb-2">{stats.completedAssessments}</div>
                 <div className="flex items-center space-x-2">
                   <Star className="h-4 w-4 text-green-500 animate-pulse" />
-                  <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Assessments done</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Penilaian selesai</p>
                 </div>
               </CardContent>
             </Card>
@@ -214,7 +214,7 @@ export default function PesertaDashboard() {
             <Card className="group hover:shadow-2xl transition-all duration-500 transform hover:scale-[1.03] border-0 shadow-xl bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm relative overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-r from-purple-500/5 to-purple-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 relative z-10">
-                <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Assessments</CardTitle>
+                <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Penilaian</CardTitle>
                 <div className="p-3 rounded-xl bg-gradient-to-br from-purple-100 to-purple-200 dark:from-purple-900/40 dark:to-purple-800/40 group-hover:from-purple-200 dark:group-hover:from-purple-900/60 group-hover:to-purple-300 dark:group-hover:to-purple-800/60 transition-all duration-300 transform group-hover:scale-110">
                   <Target className="h-6 w-6 text-purple-600 dark:text-purple-400" />
                 </div>
@@ -223,7 +223,7 @@ export default function PesertaDashboard() {
                 <div className="text-4xl font-bold text-gray-900 dark:text-white mb-2">{stats.totalGroups}</div>
                 <div className="flex items-center space-x-2">
                   <BarChart3 className="h-4 w-4 text-purple-500 animate-pulse" />
-                  <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">All assessments</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Semua penilaian</p>
                 </div>
               </CardContent>
             </Card>
@@ -238,7 +238,7 @@ export default function PesertaDashboard() {
                   <div className="p-3 rounded-xl bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-900/40 dark:to-gray-800/40 group-hover:from-gray-200 dark:group-hover:from-gray-900/60 group-hover:to-gray-300 dark:group-hover:to-gray-800/60 transition-all duration-300 transform group-hover:scale-110">
                     <BookOpen className="h-6 w-6 text-gray-600 dark:text-gray-400" />
                   </div>
-                  <CardTitle className="text-xl font-bold text-gray-900 dark:text-white">My Assessment Groups</CardTitle>
+                  <CardTitle className="text-xl font-bold text-gray-900 dark:text-white">Kelompok Penilaian Saya</CardTitle>
                 </div>
                 <Button 
                   variant="outline" 
@@ -246,7 +246,7 @@ export default function PesertaDashboard() {
                   onClick={() => router.push('/peserta/groups')}
                   className="flex items-center space-x-2 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border-yellow-200/50 dark:border-yellow-800/50 hover:bg-yellow-50 dark:hover:bg-yellow-900/20"
                 >
-                  <span>View All</span>
+                  <span>Lihat Semua</span>
                   <ArrowRight className="h-4 w-4" />
                 </Button>
               </div>
@@ -257,8 +257,8 @@ export default function PesertaDashboard() {
                   <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 to-gray-700 flex items-center justify-center">
                     <ClipboardList className="h-12 w-12 text-gray-400" />
                   </div>
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">No groups assigned yet</h3>
-                  <p className="text-gray-500 dark:text-gray-400 mb-4">You will be notified when you are assigned to a group</p>
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Belum ada kelompok yang ditugaskan</h3>
+                  <p className="text-gray-500 dark:text-gray-400 mb-4">Anda akan diberitahu ketika ditugaskan ke sebuah kelompok</p>
                   <div className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse mx-auto"></div>
                 </div>
               ) : (
@@ -283,7 +283,7 @@ export default function PesertaDashboard() {
                               <div className="flex items-center space-x-2">
                                 <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
                                 <span className="text-sm text-gray-600 dark:text-gray-300">
-                                  Progress: {group.responseSession.progressPercentage}%
+                                  Kemajuan: {group.responseSession.progressPercentage}%
                                 </span>
                               </div>
                               <div className="flex items-center space-x-2">
@@ -305,7 +305,7 @@ export default function PesertaDashboard() {
                         }}
                         className="bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border-yellow-200/50 dark:border-yellow-800/50 hover:bg-yellow-50 dark:hover:bg-yellow-900/20 transition-all duration-200"
                       >
-                        {group.responseSession ? 'Continue' : 'Start'}
+                        {group.responseSession ? 'Lanjutkan' : 'Mulai'}
                       </Button>
                     </div>
                   )) : null}
@@ -323,16 +323,16 @@ export default function PesertaDashboard() {
                   <div className="p-3 rounded-xl bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900/40 dark:to-blue-800/40 group-hover:from-blue-200 dark:group-hover:from-blue-900/60 group-hover:to-blue-300 dark:group-hover:to-blue-800/60 transition-all duration-300 transform group-hover:scale-110">
                     <Users className="h-6 w-6 text-blue-600 dark:text-blue-400" />
                   </div>
-                  <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">My Groups</CardTitle>
+                  <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">Kelompok Saya</CardTitle>
                 </div>
               </CardHeader>
               <CardContent className="relative z-10">
                 <p className="text-gray-600 dark:text-gray-300 mb-6 leading-relaxed">
-                  View and complete assessments for all your assigned groups with comprehensive tracking.
+                  Lihat dan selesaikan penilaian untuk semua kelompok yang ditugaskan dengan pelacakan yang komprehensif.
                 </p>
                 <Button className="w-full bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-all duration-200 transform hover:scale-105">
                   <Users className="h-4 w-4 mr-2" />
-                  View Groups
+                  Lihat Kelompok
                 </Button>
               </CardContent>
             </Card>
@@ -344,16 +344,16 @@ export default function PesertaDashboard() {
                   <div className="p-3 rounded-xl bg-gradient-to-br from-green-100 to-green-200 dark:from-green-900/40 dark:to-green-800/40 group-hover:from-green-200 dark:group-hover:from-green-900/60 group-hover:to-green-300 dark:group-hover:to-green-800/60 transition-all duration-300 transform group-hover:scale-110">
                     <FileText className="h-6 w-6 text-green-600 dark:text-green-400" />
                   </div>
-                  <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">My Submissions</CardTitle>
+                  <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">Pengajuan Saya</CardTitle>
                 </div>
               </CardHeader>
               <CardContent className="relative z-10">
                 <p className="text-gray-600 dark:text-gray-300 mb-6 leading-relaxed">
-                  Track and review all your submitted assessments with detailed feedback and progress.
+                  Pantau dan tinjau semua penilaian yang telah diajukan dengan umpan balik dan kemajuan yang detail.
                 </p>
                 <Button className="w-full bg-gradient-to-r from-green-600 to-green-500 hover:from-green-700 hover:to-green-600 text-white shadow-lg shadow-green-500/25 hover:shadow-green-500/40 transition-all duration-200 transform hover:scale-105">
                   <FileText className="h-4 w-4 mr-2" />
-                  View Submissions
+                  Lihat Pengajuan
                 </Button>
               </CardContent>
             </Card>
@@ -365,16 +365,16 @@ export default function PesertaDashboard() {
                   <div className="p-3 rounded-xl bg-gradient-to-br from-purple-100 to-purple-200 dark:from-purple-900/40 dark:to-purple-800/40 group-hover:from-purple-200 dark:group-hover:from-purple-900/60 group-hover:to-purple-300 dark:group-hover:to-purple-800/60 transition-all duration-300 transform group-hover:scale-110">
                     <UserCheck className="h-6 w-6 text-purple-600 dark:text-purple-400" />
                   </div>
-                  <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">Profile</CardTitle>
+                  <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">Profil</CardTitle>
                 </div>
               </CardHeader>
               <CardContent className="relative z-10">
                 <p className="text-gray-600 dark:text-gray-300 mb-6 leading-relaxed">
-                  Manage your personal profile, preferences, and account settings with ease.
+                  Kelola profil pribadi, preferensi, dan pengaturan akun Anda dengan mudah.
                 </p>
                 <Button className="w-full bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-700 hover:to-purple-600 text-white shadow-lg shadow-purple-500/25 hover:shadow-purple-500/40 transition-all duration-200 transform hover:scale-105">
                   <UserCheck className="h-4 w-4 mr-2" />
-                  View Profile
+                  Lihat Profil
                 </Button>
               </CardContent>
             </Card>

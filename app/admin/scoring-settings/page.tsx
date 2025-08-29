@@ -102,7 +102,7 @@ export default function ScoringSettingsPage() {
     } catch (error: unknown) {
       const err = error as ApiError
       console.error('Failed to fetch categories:', err)
-      toast.error('Failed to load question categories')
+      toast.error('Gagal memuat kategori pertanyaan')
       setCategories([]) // Set empty array on error
     } finally {
       setLoading(false)
@@ -112,16 +112,16 @@ export default function ScoringSettingsPage() {
   const handleCreate = async () => {
     try {
       await api.post('/question-categories', formData)
-      toast.success('Question category created successfully')
+      toast.success('Kategori pertanyaan berhasil dibuat')
       setIsCreateDialogOpen(false)
       resetForm()
       fetchCategories()
     } catch (error: unknown) {
       const err = error as ApiError
       if (err.response?.status === 409) {
-        toast.error('Question category name already exists')
+        toast.error('Nama kategori pertanyaan sudah ada')
       } else {
-        toast.error('Failed to create question category')
+        toast.error('Gagal membuat kategori pertanyaan')
       }
     }
   }
@@ -131,7 +131,7 @@ export default function ScoringSettingsPage() {
 
     try {
       await api.patch(`/question-categories/${editingCategory.id}`, formData)
-      toast.success('Question category updated successfully')
+      toast.success('Kategori pertanyaan berhasil diperbarui')
       setIsEditDialogOpen(false)
       setEditingCategory(null)
       resetForm()
@@ -139,26 +139,26 @@ export default function ScoringSettingsPage() {
     } catch (error: unknown) {
       const err = error as ApiError
       if (err.response?.status === 409) {
-        toast.error('Question category name already exists')
+        toast.error('Nama kategori pertanyaan sudah ada')
       } else {
-        toast.error('Failed to update question category')
+        toast.error('Gagal memperbarui kategori pertanyaan')
       }
     }
   }
 
   const handleDelete = async (id: number) => {
-    if (!confirm('Are you sure you want to delete this question category?')) return
+    if (!confirm('Apakah Anda yakin ingin menghapus kategori pertanyaan ini?')) return
 
     try {
       await api.delete(`/question-categories/${id}`)
-      toast.success('Question category deleted successfully')
+      toast.success('Kategori pertanyaan berhasil dihapus')
       fetchCategories()
     } catch (error: unknown) {
       const err = error as ApiError
       if (err.response?.status === 409) {
-        toast.error('Cannot delete category as it is being used in group questions')
+        toast.error('Tidak dapat menghapus kategori karena sedang digunakan dalam pertanyaan kelompok')
       } else {
-        toast.error('Failed to delete question category')
+        toast.error('Gagal menghapus kategori pertanyaan')
       }
     }
   }
@@ -214,6 +214,17 @@ export default function ScoringSettingsPage() {
     return icons[scoreType as keyof typeof icons] || '🔢'
   }
 
+  const getScoreTypeLabel = (scoreType: string) => {
+    const labels = {
+      number: 'Angka',
+      percentage: 'Persentase',
+      currency: 'Mata Uang',
+      rating: 'Peringkat',
+      boolean: 'Boolean'
+    }
+    return labels[scoreType as keyof typeof labels] || scoreType
+  }
+
   const filteredCategories = Array.isArray(categories) ? categories.filter(category => 
     scoreTypeFilter === 'all' || category.scoreType === scoreTypeFilter
   ) : []
@@ -261,7 +272,7 @@ export default function ScoringSettingsPage() {
                   className="flex items-center space-x-2 bg-white/20 hover:bg-white/30 text-gray-900 dark:text-white backdrop-blur-sm border border-white/20"
                 >
                   <ArrowLeft className="h-4 w-4" />
-                  <span>Back to Dashboard</span>
+                  <span>Kembali ke Beranda</span>
                 </Button>
                 <div className="flex items-center space-x-4">
                   <div className="flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-500 to-purple-600 shadow-lg border-2 border-purple-400/50">
@@ -269,10 +280,10 @@ export default function ScoringSettingsPage() {
                   </div>
                   <div>
                     <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 via-purple-500 to-purple-400 bg-clip-text text-transparent">
-                      Scoring Settings
+                      Pengaturan Penilaian
                     </h1>
                     <p className="text-gray-600 dark:text-gray-300 mt-1">
-                      Manage question categories and scoring criteria with advanced configuration
+                                             Kelola kategori pertanyaan dan kriteria penilaian dengan konfigurasi lanjutan
                     </p>
                   </div>
                 </div>
@@ -286,11 +297,11 @@ export default function ScoringSettingsPage() {
                     onChange={(e) => setScoreTypeFilter(e.target.value)}
                     className="bg-transparent border-none outline-none text-sm"
                   >
-                    <option value="all">All Types</option>
-                    <option value="number">Number</option>
-                    <option value="percentage">Percentage</option>
-                    <option value="currency">Currency</option>
-                    <option value="rating">Rating</option>
+                    <option value="all">Semua Tipe</option>
+                    <option value="number">Angka</option>
+                    <option value="percentage">Persentase</option>
+                    <option value="currency">Mata Uang</option>
+                    <option value="rating">Peringkat</option>
                     <option value="boolean">Boolean</option>
                   </select>
                 </div>
@@ -298,34 +309,34 @@ export default function ScoringSettingsPage() {
                   <DialogTrigger asChild>
                     <Button className="flex items-center space-x-2 bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-700 hover:to-purple-600 text-white shadow-lg shadow-purple-500/25 hover:shadow-purple-500/40 transition-all duration-200">
                       <Plus className="h-4 w-4" />
-                      <span>Add Category</span>
+                      <span>Tambah Kategori</span>
                     </Button>
                   </DialogTrigger>
                   <DialogContent className="sm:max-w-[425px]">
                     <DialogHeader>
-                      <DialogTitle>Create Question Category</DialogTitle>
+                      <DialogTitle>Buat Kategori Pertanyaan</DialogTitle>
                     </DialogHeader>
                     <div className="grid gap-4 py-4">
                       <div className="grid gap-2">
-                        <Label htmlFor="name">Name</Label>
+                        <Label htmlFor="name">Nama</Label>
                         <Input
                           id="name"
                           value={formData.name}
                           onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                          placeholder="Enter category name"
+                          placeholder="Masukkan nama kategori"
                         />
                       </div>
                       <div className="grid gap-2">
-                        <Label htmlFor="description">Description</Label>
+                        <Label htmlFor="description">Deskripsi</Label>
                         <Textarea
                           id="description"
                           value={formData.description}
                           onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                          placeholder="Enter category description"
+                          placeholder="Masukkan deskripsi kategori"
                         />
                       </div>
                       <div className="grid gap-2">
-                        <Label htmlFor="weight">Weight</Label>
+                        <Label htmlFor="weight">Bobot</Label>
                         <Input
                           id="weight"
                           type="number"
@@ -337,7 +348,7 @@ export default function ScoringSettingsPage() {
                       </div>
                       <div className="grid grid-cols-2 gap-4">
                         <div className="grid gap-2">
-                          <Label htmlFor="minValue">Min Value</Label>
+                          <Label htmlFor="minValue">Nilai Minimum</Label>
                           <Input
                             id="minValue"
                             type="number"
@@ -347,7 +358,7 @@ export default function ScoringSettingsPage() {
                           />
                         </div>
                         <div className="grid gap-2">
-                          <Label htmlFor="maxValue">Max Value</Label>
+                          <Label htmlFor="maxValue">Nilai Maksimum</Label>
                           <Input
                             id="maxValue"
                             type="number"
@@ -358,26 +369,26 @@ export default function ScoringSettingsPage() {
                         </div>
                       </div>
                       <div className="grid gap-2">
-                        <Label htmlFor="scoreType">Score Type</Label>
+                        <Label htmlFor="scoreType">Tipe Skor</Label>
                         <select
                           id="scoreType"
                           value={formData.scoreType}
                           onChange={(e) => setFormData({ ...formData, scoreType: e.target.value as any })}
                           className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                         >
-                          <option value="number">Number</option>
-                          <option value="percentage">Percentage</option>
-                          <option value="currency">Currency</option>
-                          <option value="rating">Rating</option>
+                          <option value="number">Angka</option>
+                          <option value="percentage">Persentase</option>
+                          <option value="currency">Mata Uang</option>
+                          <option value="rating">Peringkat</option>
                           <option value="boolean">Boolean</option>
                         </select>
                       </div>
                     </div>
                     <div className="flex justify-end space-x-2">
                       <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
-                        Cancel
+                        Batal
                       </Button>
-                      <Button onClick={handleCreate}>Create</Button>
+                      <Button onClick={handleCreate}>Buat</Button>
                     </div>
                   </DialogContent>
                 </Dialog>
@@ -392,7 +403,7 @@ export default function ScoringSettingsPage() {
             <Card className="group hover:shadow-2xl transition-all duration-500 transform hover:scale-[1.03] border-0 shadow-xl bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm relative overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-r from-purple-500/5 to-purple-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 relative z-10">
-                <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Categories</CardTitle>
+                <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Kategori</CardTitle>
                 <div className="p-3 rounded-xl bg-gradient-to-br from-purple-100 to-purple-200 dark:from-purple-900/40 dark:to-purple-800/40 group-hover:from-purple-200 dark:group-hover:from-purple-900/60 group-hover:to-purple-300 dark:group-hover:to-purple-800/60 transition-all duration-300 transform group-hover:scale-110">
                   <Settings className="h-6 w-6 text-purple-600 dark:text-purple-400" />
                 </div>
@@ -401,7 +412,7 @@ export default function ScoringSettingsPage() {
                 <div className="text-4xl font-bold text-gray-900 dark:text-white mb-2">{Array.isArray(categories) ? categories.length : 0}</div>
                 <div className="flex items-center space-x-2">
                   <TrendingUp className="h-4 w-4 text-green-500 animate-pulse" />
-                  <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Question categories</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Kategori pertanyaan</p>
                 </div>
               </CardContent>
             </Card>
@@ -409,7 +420,7 @@ export default function ScoringSettingsPage() {
             <Card className="group hover:shadow-2xl transition-all duration-500 transform hover:scale-[1.03] border-0 shadow-xl bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm relative overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-blue-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 relative z-10">
-                <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">Number Type</CardTitle>
+                <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">Tipe Angka</CardTitle>
                 <div className="p-3 rounded-xl bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900/40 dark:to-blue-800/40 group-hover:from-blue-200 dark:group-hover:from-blue-900/60 group-hover:to-blue-300 dark:group-hover:to-blue-800/60 transition-all duration-300 transform group-hover:scale-110">
                   <span className="text-lg">🔢</span>
                 </div>
@@ -420,7 +431,7 @@ export default function ScoringSettingsPage() {
                 </div>
                 <div className="flex items-center space-x-2">
                   <BarChart3 className="h-4 w-4 text-blue-500 animate-pulse" />
-                  <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Categories</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Kategori</p>
                 </div>
               </CardContent>
             </Card>
@@ -428,7 +439,7 @@ export default function ScoringSettingsPage() {
             <Card className="group hover:shadow-2xl transition-all duration-500 transform hover:scale-[1.03] border-0 shadow-xl bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm relative overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-r from-green-500/5 to-green-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 relative z-10">
-                <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">Percentage Type</CardTitle>
+                <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">Tipe Persentase</CardTitle>
                 <div className="p-3 rounded-xl bg-gradient-to-br from-green-100 to-green-200 dark:from-green-900/40 dark:to-green-800/40 group-hover:from-green-200 dark:group-hover:from-green-900/60 group-hover:to-green-300 dark:group-hover:to-green-800/60 transition-all duration-300 transform group-hover:scale-110">
                   <span className="text-lg">📊</span>
                 </div>
@@ -439,7 +450,7 @@ export default function ScoringSettingsPage() {
                 </div>
                 <div className="flex items-center space-x-2">
                   <Calculator className="h-4 w-4 text-green-500 animate-pulse" />
-                  <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Categories</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Kategori</p>
                 </div>
               </CardContent>
             </Card>
@@ -447,7 +458,7 @@ export default function ScoringSettingsPage() {
             <Card className="group hover:shadow-2xl transition-all duration-500 transform hover:scale-[1.03] border-0 shadow-xl bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm relative overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-r from-orange-500/5 to-orange-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 relative z-10">
-                <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">Other Types</CardTitle>
+                <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">Tipe Lainnya</CardTitle>
                 <div className="p-3 rounded-xl bg-gradient-to-br from-orange-100 to-orange-200 dark:from-orange-900/40 dark:to-orange-800/40 group-hover:from-orange-200 dark:group-hover:from-orange-900/60 group-hover:to-orange-300 dark:group-hover:to-orange-800/60 transition-all duration-300 transform group-hover:scale-110">
                   <span className="text-lg">⭐</span>
                 </div>
@@ -458,7 +469,7 @@ export default function ScoringSettingsPage() {
                 </div>
                 <div className="flex items-center space-x-2">
                   <Settings className="h-4 w-4 text-orange-500 animate-pulse" />
-                  <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Categories</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Kategori</p>
                 </div>
               </CardContent>
             </Card>
@@ -482,7 +493,7 @@ export default function ScoringSettingsPage() {
                         variant="ghost"
                         size="sm"
                         onClick={() => openAssignmentModal(category)}
-                        title="Manage Questions"
+                        title="Kelola Pertanyaan"
                         className="h-8 w-8 p-0 hover:bg-purple-100 dark:hover:bg-purple-900/30 text-purple-600 dark:text-purple-400 transition-all duration-200"
                       >
                         <Link className="h-4 w-4" />
@@ -491,7 +502,7 @@ export default function ScoringSettingsPage() {
                         variant="ghost"
                         size="sm"
                         onClick={() => openEditDialog(category)}
-                        title="Edit Category"
+                        title="Edit Kategori"
                         className="h-8 w-8 p-0 hover:bg-blue-100 dark:hover:bg-blue-900/30 text-blue-600 dark:text-blue-400 transition-all duration-200"
                       >
                         <Edit className="h-4 w-4" />
@@ -500,7 +511,7 @@ export default function ScoringSettingsPage() {
                         variant="ghost"
                         size="sm"
                         onClick={() => handleDelete(category.id)}
-                        title="Delete Category"
+                        title="Hapus Kategori"
                         className="h-8 w-8 p-0 hover:bg-red-100 dark:hover:bg-red-900/30 text-red-600 dark:text-red-400 transition-all duration-200"
                       >
                         <Trash2 className="h-4 w-4" />
@@ -508,22 +519,22 @@ export default function ScoringSettingsPage() {
                     </div>
                   </div>
                   <Badge className={`w-fit ${getScoreTypeColor(category.scoreType)}`}>
-                    {category.scoreType}
+                    {getScoreTypeLabel(category.scoreType)}
                   </Badge>
                 </CardHeader>
                 <CardContent className="relative z-10">
                   <p className="text-gray-600 dark:text-gray-300 text-sm mb-4">{category.description}</p>
                   <div className="space-y-3 text-sm">
                     <div className="flex justify-between items-center p-2 rounded-lg bg-gray-50 dark:bg-gray-700">
-                      <span className="text-gray-500 dark:text-gray-400">Weight:</span>
+                      <span className="text-gray-500 dark:text-gray-400">Bobot:</span>
                       <span className="font-semibold text-gray-900 dark:text-white">{category.weight}</span>
                     </div>
                     <div className="flex justify-between items-center p-2 rounded-lg bg-gray-50 dark:bg-gray-700">
-                      <span className="text-gray-500 dark:text-gray-400">Range:</span>
+                      <span className="text-gray-500 dark:text-gray-400">Rentang:</span>
                       <span className="font-semibold text-gray-900 dark:text-white">{category.minValue} - {category.maxValue}</span>
                     </div>
                     <div className="flex justify-between items-center p-2 rounded-lg bg-gray-50 dark:bg-gray-700">
-                      <span className="text-gray-500 dark:text-gray-400">Created:</span>
+                      <span className="text-gray-500 dark:text-gray-400">Dibuat:</span>
                       <span className="font-semibold text-gray-900 dark:text-white">
                         {new Date(category.createdAt).toLocaleDateString()}
                       </span>
@@ -541,16 +552,16 @@ export default function ScoringSettingsPage() {
                 <div className="p-4 rounded-2xl bg-gradient-to-br from-purple-100 to-purple-200 dark:from-purple-900/40 dark:to-purple-800/40 mb-4">
                   <Settings className="h-12 w-12 text-purple-600 dark:text-purple-400" />
                 </div>
-                <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No Question Categories</h3>
+                <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">Tidak Ada Kategori Pertanyaan</h3>
                 <p className="text-gray-600 dark:text-gray-300 text-center mb-6">
-                  Get started by creating your first question category to define scoring criteria.
+                  Mulai dengan membuat kategori pertanyaan pertama Anda untuk menentukan kriteria penilaian.
                 </p>
                 <Button 
                   onClick={() => setIsCreateDialogOpen(true)}
                   className="bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-700 hover:to-purple-600 text-white shadow-lg shadow-purple-500/25 hover:shadow-purple-500/40 transition-all duration-200"
                 >
                   <Plus className="h-4 w-4 mr-2" />
-                  Create First Category
+                  Buat Kategori Pertama
                 </Button>
               </CardContent>
             </Card>
@@ -560,29 +571,29 @@ export default function ScoringSettingsPage() {
           <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
             <DialogContent className="sm:max-w-[425px]">
               <DialogHeader>
-                <DialogTitle>Edit Question Category</DialogTitle>
+                <DialogTitle>Edit Kategori Pertanyaan</DialogTitle>
               </DialogHeader>
               <div className="grid gap-4 py-4">
                 <div className="grid gap-2">
-                  <Label htmlFor="edit-name">Name</Label>
+                                      <Label htmlFor="edit-name">Nama</Label>
                   <Input
                     id="edit-name"
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    placeholder="Enter category name"
+                                          placeholder="Masukkan nama kategori"
                   />
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="edit-description">Description</Label>
+                                      <Label htmlFor="edit-description">Deskripsi</Label>
                   <Textarea
                     id="edit-description"
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    placeholder="Enter category description"
+                                          placeholder="Masukkan deskripsi kategori"
                   />
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="edit-weight">Weight</Label>
+                                      <Label htmlFor="edit-weight">Bobot</Label>
                   <Input
                     id="edit-weight"
                     type="number"
@@ -594,7 +605,7 @@ export default function ScoringSettingsPage() {
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="grid gap-2">
-                    <Label htmlFor="edit-minValue">Min Value</Label>
+                                          <Label htmlFor="edit-minValue">Nilai Minimum</Label>
                     <Input
                       id="edit-minValue"
                       type="number"
@@ -604,7 +615,7 @@ export default function ScoringSettingsPage() {
                     />
                   </div>
                   <div className="grid gap-2">
-                    <Label htmlFor="edit-maxValue">Max Value</Label>
+                                          <Label htmlFor="edit-maxValue">Nilai Maksimum</Label>
                     <Input
                       id="edit-maxValue"
                       type="number"
@@ -615,26 +626,26 @@ export default function ScoringSettingsPage() {
                   </div>
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="edit-scoreType">Score Type</Label>
+                                      <Label htmlFor="edit-scoreType">Tipe Skor</Label>
                   <select
                     id="edit-scoreType"
                     value={formData.scoreType}
                     onChange={(e) => setFormData({ ...formData, scoreType: e.target.value as any })}
                     className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                   >
-                    <option value="number">Number</option>
-                    <option value="percentage">Percentage</option>
-                    <option value="currency">Currency</option>
-                    <option value="rating">Rating</option>
+                    <option value="number">Angka</option>
+                    <option value="percentage">Persentase</option>
+                    <option value="currency">Mata Uang</option>
+                    <option value="rating">Peringkat</option>
                     <option value="boolean">Boolean</option>
                   </select>
                 </div>
               </div>
               <div className="flex justify-end space-x-2">
                 <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
-                  Cancel
+                  Batal
                 </Button>
-                <Button onClick={handleEdit}>Update</Button>
+                <Button onClick={handleEdit}>Perbarui</Button>
               </div>
             </DialogContent>
           </Dialog>

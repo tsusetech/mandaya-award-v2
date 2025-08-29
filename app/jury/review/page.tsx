@@ -110,7 +110,7 @@ export default function JuriReviewPage() {
       setFilteredReviews(reviewsData.submissions)
     } catch (err) {
       console.error('Error fetching reviews:', err)
-      toast.error('Failed to load reviews')
+      toast.error('Gagal memuat tinjauan')
       
       // Use mock data for demonstration
       const mockReviews = [
@@ -140,13 +140,13 @@ export default function JuriReviewPage() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'completed':
-        return <Badge variant="default" className="bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300">Completed</Badge>
+        return <Badge variant="default" className="bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300">Selesai</Badge>
       case 'in_progress':
-        return <Badge variant="secondary" className="bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300">In Progress</Badge>
+        return <Badge variant="secondary" className="bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300">Sedang Berlangsung</Badge>
       case 'pending':
-        return <Badge variant="outline" className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-300">Pending</Badge>
+        return <Badge variant="outline" className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-300">Menunggu</Badge>
       case 'approved':
-        return <Badge variant="default" className="bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300">Approved by admin</Badge>
+        return <Badge variant="default" className="bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300">Disetujui admin</Badge>
       default:
         return <Badge variant="outline">{status}</Badge>
     }
@@ -216,7 +216,7 @@ export default function JuriReviewPage() {
                   className="flex items-center space-x-2 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border border-yellow-200/50 dark:border-yellow-800/50 hover:bg-yellow-50 dark:hover:bg-yellow-900/20 transition-all duration-200"
                 >
                   <ArrowLeft className="h-4 w-4" />
-                  <span>Back to Dashboard</span>
+                  <span>Kembali ke Beranda</span>
                 </Button>
                 <div className="flex items-center space-x-4">
                   <div className="flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-yellow-500 to-yellow-600 shadow-lg border-2 border-yellow-400/50 relative">
@@ -225,10 +225,10 @@ export default function JuriReviewPage() {
                   </div>
                   <div>
                     <h1 className="text-3xl font-bold bg-gradient-to-r from-yellow-600 via-yellow-500 to-yellow-400 bg-clip-text text-transparent">
-                      Review Submissions
+                      Tinjau Pengajuan
                     </h1>
                     <p className="text-gray-600 dark:text-gray-300 mt-1">
-                      Review and score assigned submissions with expertise
+                      Tinjau dan nilai pengajuan yang ditetapkan dengan keahlian
                     </p>
                   </div>
                 </div>
@@ -241,11 +241,11 @@ export default function JuriReviewPage() {
                   className="flex items-center space-x-2 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border border-yellow-200/50 dark:border-yellow-800/50 hover:bg-yellow-50 dark:hover:bg-yellow-900/20 transition-all duration-200"
                 >
                   <RefreshCw className="h-4 w-4" />
-                  <span>Refresh</span>
+                  <span>Segarkan</span>
                 </Button>
                 <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400 bg-white/50 dark:bg-gray-800/50 px-4 py-2 rounded-full backdrop-blur-sm border border-yellow-200/50 dark:border-yellow-800/50">
                   <Star className="h-4 w-4 text-yellow-500" />
-                  <span className="font-medium">{reviews.length} Reviews</span>
+                  <span className="font-medium">{reviews.length} Tinjauan</span>
                 </div>
               </div>
             </div>
@@ -261,7 +261,7 @@ export default function JuriReviewPage() {
                 <div className="relative">
                   <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                   <Input
-                    placeholder="Search by group name, user name, or email..."
+                    placeholder="Cari berdasarkan nama kelompok, nama pengguna, atau email..."
                     value={searchTerm}
                     onChange={(e) => {
                       const value = e.target.value
@@ -284,7 +284,7 @@ export default function JuriReviewPage() {
                 <div className="flex flex-wrap items-center gap-3">
                   <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
                     <Filter className="h-4 w-4" />
-                    <span>Filter by status:</span>
+                    <span>Filter berdasarkan status:</span>
                   </div>
                   <Button
                     variant={statusFilter === 'all' ? 'default' : 'outline'}
@@ -295,7 +295,7 @@ export default function JuriReviewPage() {
                     }}
                     className="bg-gradient-to-r from-yellow-600 to-yellow-500 hover:from-yellow-700 hover:to-yellow-600 text-white border-0 shadow-lg shadow-yellow-500/25 hover:shadow-yellow-500/40 transition-all duration-200"
                   >
-                    All
+                    Semua
                   </Button>
                   <Button
                     variant={statusFilter === 'pending' ? 'default' : 'outline'}
@@ -306,7 +306,7 @@ export default function JuriReviewPage() {
                     }}
                     className="border-yellow-200/50 dark:border-yellow-800/50 hover:bg-yellow-50 dark:hover:bg-yellow-900/20"
                   >
-                    Pending
+                    Menunggu
                   </Button>
                   <Button
                     variant={statusFilter === 'in_progress' ? 'default' : 'outline'}
@@ -317,7 +317,7 @@ export default function JuriReviewPage() {
                     }}
                     className="border-yellow-200/50 dark:border-yellow-800/50 hover:bg-yellow-50 dark:hover:bg-yellow-900/20"
                   >
-                    In Progress
+                    Sedang Berlangsung
                   </Button>
                   <Button
                     variant={statusFilter === 'completed' ? 'default' : 'outline'}
@@ -328,7 +328,7 @@ export default function JuriReviewPage() {
                     }}
                     className="border-yellow-200/50 dark:border-yellow-800/50 hover:bg-yellow-50 dark:hover:bg-yellow-900/20"
                   >
-                    Completed
+                    Selesai
                   </Button>
                 </div>
               </div>
@@ -345,11 +345,11 @@ export default function JuriReviewPage() {
                     <div className="w-32 h-32 mx-auto mb-8 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 to-gray-700 flex items-center justify-center">
                       <FileText className="h-16 w-16 text-gray-400" />
                     </div>
-                    <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">No reviews found</h3>
+                    <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Tidak ada tinjauan ditemukan</h3>
                     <p className="text-gray-500 dark:text-gray-400 mb-6 text-lg">
                       {searchTerm || statusFilter !== 'all' 
-                        ? 'Try adjusting your search or filters' 
-                        : 'No submissions are available for review'
+                        ? 'Coba sesuaikan pencarian atau filter Anda' 
+                        : 'Tidak ada pengajuan yang tersedia untuk ditinjau'
                       }
                     </p>
                     <div className="flex items-center justify-center space-x-2">
@@ -375,7 +375,7 @@ export default function JuriReviewPage() {
                           <div className="flex items-center space-x-4 text-sm text-gray-600 dark:text-gray-300 mb-2">
                             <div className="flex items-center space-x-2">
                               <Users className="h-4 w-4" />
-                              <span>Submitted by {review.userName}</span>
+                              <span>Dikirim oleh {review.userName}</span>
                             </div>
                             <div className="flex items-center space-x-2">
                               <MessageSquare className="h-4 w-4" />
@@ -383,7 +383,7 @@ export default function JuriReviewPage() {
                             </div>
                           </div>
                           <p className="text-sm text-gray-500 dark:text-gray-400">
-                            Submitted on {formatDate(review.submittedAt)}
+                            Dikirim pada {formatDate(review.submittedAt)}
                           </p>
                         </div>
                       </div>
@@ -396,7 +396,7 @@ export default function JuriReviewPage() {
                           className="flex items-center space-x-2 bg-gradient-to-r from-yellow-600 to-yellow-500 hover:from-yellow-700 hover:to-yellow-600 text-white border-0 shadow-lg shadow-yellow-500/25 hover:shadow-yellow-500/40 transition-all duration-200 transform hover:scale-105 px-6 py-3"
                         >
                           <Eye className="h-5 w-5" />
-                          <span className="font-semibold">Review</span>
+                          <span className="font-semibold">Tinjau</span>
                         </Button>
                       </div>
                     </div>

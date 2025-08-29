@@ -346,7 +346,7 @@ export default function AdminRankingsPage() {
   if (loading) {
     return (
       <AuthenticatedLayout allowedRoles={['ADMIN', 'SUPERADMIN']}>
-        <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
+        <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 -mt-16 pt-16">
           <div className="p-6 space-y-6">
             <div className="animate-pulse">
               <div className="h-8 bg-gray-200 rounded w-48 mb-6"></div>
@@ -364,7 +364,7 @@ export default function AdminRankingsPage() {
 
   return (
     <AuthenticatedLayout allowedRoles={['ADMIN', 'SUPERADMIN']}>
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 relative overflow-hidden">
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 relative overflow-hidden -mt-16 pt-16">
         {/* Animated Background Elements */}
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute -top-40 -right-40 h-96 w-96 rounded-full bg-gradient-to-br from-yellow-500/5 to-yellow-600/5 blur-3xl animate-pulse"></div>
@@ -386,7 +386,7 @@ export default function AdminRankingsPage() {
                   className="flex items-center space-x-2 bg-white/20 hover:bg-white/30 text-gray-900 dark:text-white backdrop-blur-sm border border-white/20"
                 >
                   <ArrowLeft className="h-4 w-4" />
-                  <span>Back to Dashboard</span>
+                  <span>Kembali ke Beranda</span>
                 </Button>
                 <div className="flex items-center space-x-4">
                   <div className="flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-yellow-500 to-yellow-600 shadow-lg border-2 border-yellow-400/50">
@@ -394,10 +394,10 @@ export default function AdminRankingsPage() {
                   </div>
                   <div>
                     <h1 className="text-3xl font-bold bg-gradient-to-r from-yellow-600 via-yellow-500 to-yellow-400 bg-clip-text text-transparent">
-                      9 Nominasi Rankings
+                      Peringkat 9 Nominasi
                     </h1>
                     <p className="text-gray-600 dark:text-gray-300 mt-1">
-                      Current standings based on 4 main categories with real-time updates
+                      Peringkat saat ini berdasarkan 4 kategori utama dengan pembaruan real-time
                     </p>
                   </div>
                 </div>
@@ -409,7 +409,7 @@ export default function AdminRankingsPage() {
                 className="flex items-center space-x-2 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border-yellow-200/50 dark:border-yellow-800/50 hover:bg-white/70 dark:hover:bg-gray-700/50"
               >
                 <Download className="h-4 w-4" />
-                <span>Export</span>
+                <span>Ekspor</span>
               </Button>
             </div>
           </div>
@@ -421,7 +421,7 @@ export default function AdminRankingsPage() {
             <Card className="group hover:shadow-2xl transition-all duration-500 transform hover:scale-[1.03] border-0 shadow-xl bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm relative overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-blue-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 relative z-10">
-                <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Submissions</CardTitle>
+                <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Pengajuan</CardTitle>
                 <div className="p-3 rounded-xl bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900/40 dark:to-blue-800/40 group-hover:from-blue-200 dark:group-hover:from-blue-900/60 group-hover:to-blue-300 dark:group-hover:to-blue-800/60 transition-all duration-300 transform group-hover:scale-110">
                   <Award className="h-6 w-6 text-blue-600 dark:text-blue-400" />
                 </div>
@@ -430,7 +430,7 @@ export default function AdminRankingsPage() {
                 <div className="text-4xl font-bold text-gray-900 dark:text-white mb-2">{stats.totalSubmissions}</div>
                 <div className="flex items-center space-x-2">
                   <TrendingUp className="h-4 w-4 text-green-500 animate-pulse" />
-                  <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">All submissions</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Semua pengajuan</p>
                 </div>
               </CardContent>
             </Card>
@@ -438,7 +438,7 @@ export default function AdminRankingsPage() {
             <Card className="group hover:shadow-2xl transition-all duration-500 transform hover:scale-[1.03] border-0 shadow-xl bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm relative overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-r from-green-500/5 to-green-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 relative z-10">
-                <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">Reviewed</CardTitle>
+                <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">Sudah Dinilai</CardTitle>
                 <div className="p-3 rounded-xl bg-gradient-to-br from-green-100 to-green-200 dark:from-green-900/40 dark:to-green-800/40 group-hover:from-green-200 dark:group-hover:from-green-900/60 group-hover:to-green-300 dark:group-hover:to-green-800/60 transition-all duration-300 transform group-hover:scale-110">
                   <Trophy className="h-6 w-6 text-green-600 dark:text-green-400" />
                 </div>
@@ -447,7 +447,7 @@ export default function AdminRankingsPage() {
                 <div className="text-4xl font-bold text-gray-900 dark:text-white mb-2">{stats.reviewedSubmissions}</div>
                 <div className="flex items-center space-x-2">
                   <BarChart3 className="h-4 w-4 text-green-500 animate-pulse" />
-                  <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Completed reviews</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Penilaian selesai</p>
                 </div>
               </CardContent>
             </Card>
@@ -455,7 +455,7 @@ export default function AdminRankingsPage() {
             <Card className="group hover:shadow-2xl transition-all duration-500 transform hover:scale-[1.03] border-0 shadow-xl bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm relative overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-r from-orange-500/5 to-orange-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 relative z-10">
-                <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">Average Score</CardTitle>
+                <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">Skor Rata-rata</CardTitle>
                 <div className="p-3 rounded-xl bg-gradient-to-br from-orange-100 to-orange-200 dark:from-orange-900/40 dark:to-orange-800/40 group-hover:from-orange-200 dark:group-hover:from-orange-900/60 group-hover:to-orange-300 dark:group-hover:to-orange-800/60 transition-all duration-300 transform group-hover:scale-110">
                   <Medal className="h-6 w-6 text-orange-600 dark:text-orange-400" />
                 </div>
@@ -464,7 +464,7 @@ export default function AdminRankingsPage() {
                 <div className="text-4xl font-bold text-gray-900 dark:text-white mb-2">{stats.averageScore.toFixed(1)}</div>
                 <div className="flex items-center space-x-2">
                   <Star className="h-4 w-4 text-orange-500 animate-pulse" />
-                  <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Overall average</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Rata-rata keseluruhan</p>
                 </div>
               </CardContent>
             </Card>
@@ -472,7 +472,7 @@ export default function AdminRankingsPage() {
             <Card className="group hover:shadow-2xl transition-all duration-500 transform hover:scale-[1.03] border-0 shadow-xl bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm relative overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-r from-yellow-500/5 to-yellow-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 relative z-10">
-                <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">Top Score</CardTitle>
+                <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">Skor Tertinggi</CardTitle>
                 <div className="p-3 rounded-xl bg-gradient-to-br from-yellow-100 to-yellow-200 dark:from-yellow-900/40 dark:to-yellow-800/40 group-hover:from-yellow-200 dark:group-hover:from-yellow-900/60 group-hover:to-yellow-300 dark:group-hover:to-yellow-800/60 transition-all duration-300 transform group-hover:scale-110">
                   <Crown className="h-6 w-6 text-yellow-600 dark:text-yellow-400" />
                 </div>
@@ -481,7 +481,7 @@ export default function AdminRankingsPage() {
                 <div className="text-4xl font-bold text-gray-900 dark:text-white mb-2">{stats.topScore.toFixed(1)}</div>
                 <div className="flex items-center space-x-2">
                   <Trophy className="h-4 w-4 text-yellow-500 animate-pulse" />
-                  <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Highest achieved</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Pencapaian tertinggi</p>
                 </div>
               </CardContent>
             </Card>
@@ -495,7 +495,7 @@ export default function AdminRankingsPage() {
                 <div className="relative">
                   <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
                   <Input
-                    placeholder="Search by group name, participant, category, or nomination..."
+                    placeholder="Cari berdasarkan nama kelompok, peserta, kategori, atau nominasi..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="pl-12 h-12 border-gray-300 focus:border-yellow-500 focus:ring-yellow-500/20 dark:border-gray-600 dark:bg-gray-800 dark:focus:border-yellow-400 transition-all duration-200"
@@ -508,7 +508,7 @@ export default function AdminRankingsPage() {
                     onClick={() => setCategoryFilter('all')}
                     className="text-xs sm:text-sm bg-gradient-to-r from-yellow-600 to-yellow-500 hover:from-yellow-700 hover:to-yellow-600 text-white shadow-lg shadow-yellow-500/25 hover:shadow-yellow-500/40 transition-all duration-200"
                   >
-                    All Categories
+                    Semua Kategori
                   </Button>
                   <Button
                     variant={categoryFilter === 'Pemerintah Daerah Pendukung Pemberdayaan' ? 'default' : 'outline'}
@@ -559,10 +559,10 @@ export default function AdminRankingsPage() {
                 <div className="p-2 rounded-lg bg-gradient-to-br from-yellow-100 to-yellow-200 dark:from-yellow-900/40 dark:to-yellow-800/40">
                   <Trophy className="h-5 w-5 text-yellow-600 dark:text-yellow-400" />
                 </div>
-                <span className="text-gray-900 dark:text-white font-bold">9 Nominasi Rankings</span>
+                <span className="text-gray-900 dark:text-white font-bold">Peringkat 9 Nominasi</span>
                 <div className="flex items-center space-x-1">
                   <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                  <span className="text-sm text-green-600 dark:text-green-400 font-medium">Live</span>
+                  <span className="text-sm text-green-600 dark:text-green-400 font-medium">Aktif</span>
                 </div>
               </CardTitle>
             </CardHeader>
@@ -572,11 +572,11 @@ export default function AdminRankingsPage() {
                   <div className="p-4 rounded-2xl bg-gradient-to-br from-yellow-100 to-yellow-200 dark:from-yellow-900/40 dark:to-yellow-800/40 mb-4 mx-auto w-fit">
                     <Trophy className="h-12 w-12 text-yellow-600 dark:text-yellow-400" />
                   </div>
-                  <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No rankings found</h3>
+                  <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">Tidak ada peringkat ditemukan</h3>
                   <p className="text-gray-600 dark:text-gray-300 text-center">
                     {searchTerm || categoryFilter !== 'all'
-                      ? 'Try adjusting your filters'
-                      : 'No submissions have been ranked yet'}
+                      ? 'Coba sesuaikan filter Anda'
+                      : 'Belum ada pengajuan yang dinilai'}
                   </p>
                 </div>
               ) : (
@@ -629,16 +629,16 @@ export default function AdminRankingsPage() {
                                   <div className="text-3xl font-bold text-gray-900 dark:text-white">
                                     {entry.totalScore.toFixed(1)}
                                   </div>
-                                  <div className="text-sm text-gray-500 dark:text-gray-400">Total Score</div>
+                                  <div className="text-sm text-gray-500 dark:text-gray-400">Total Skor</div>
                                 </div>
                                 
                                 <div className="text-center sm:text-right">
                                   <div className="text-sm text-gray-600 dark:text-gray-300">
-                                    Submitted: {formatDate(entry.submittedAt)}
+                                    Dikirim: {formatDate(entry.submittedAt)}
                                   </div>
                                   {entry.lastReviewedAt && (
                                     <div className="text-sm text-gray-500 dark:text-gray-400">
-                                      Last reviewed: {formatDate(entry.lastReviewedAt)}
+                                      Terakhir ditinjau: {formatDate(entry.lastReviewedAt)}
                                     </div>
                                   )}
                                 </div>
@@ -650,8 +650,8 @@ export default function AdminRankingsPage() {
                                     onClick={() => router.push(`/admin/submissions/${entry.id}`)}
                                     className="bg-gradient-to-r from-yellow-600 to-yellow-500 hover:from-yellow-700 hover:to-yellow-600 text-white border-yellow-600 shadow-lg shadow-yellow-500/25 hover:shadow-yellow-500/40 transition-all duration-200"
                                   >
-                                    <span className="hidden sm:inline">View Details</span>
-                                    <span className="sm:hidden">Details</span>
+                                    <span className="hidden sm:inline">Lihat Detail</span>
+                                    <span className="sm:hidden">Detail</span>
                                   </Button>
                                 </div>
                               </div>

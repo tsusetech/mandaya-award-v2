@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { 
@@ -13,7 +14,9 @@ import {
   Crown,
   Star,
   Sparkles,
-  Zap
+  Zap,
+  Trophy,
+  Settings
 } from 'lucide-react'
 import AuthenticatedLayout from '@/components/AuthenticatedLayout'
 
@@ -25,6 +28,7 @@ interface DashboardStats {
 }
 
 export default function AdminDashboardPage() {
+  const router = useRouter()
   const [stats, setStats] = useState<DashboardStats>({
     totalUsers: 0,
     totalGroups: 0,
@@ -91,10 +95,10 @@ export default function AdminDashboardPage() {
                   </div>
                   <div>
                     <h1 className="text-4xl font-bold bg-gradient-to-r from-yellow-600 via-yellow-500 to-yellow-400 bg-clip-text text-transparent">
-                      Admin Dashboard
+                      Beranda Admin
                     </h1>
                     <p className="text-gray-600 dark:text-gray-300 mt-1">
-                      Manage and monitor the Mandaya Award system
+                      Kelola dan pantau sistem Mandaya Award
                     </p>
                   </div>
                 </div>
@@ -102,7 +106,7 @@ export default function AdminDashboardPage() {
               <div className="flex items-center space-x-3">
                 <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400 bg-white/50 dark:bg-gray-800/50 px-4 py-2 rounded-full backdrop-blur-sm border border-yellow-200/50 dark:border-yellow-800/50">
                   <Zap className="h-4 w-4 text-green-500" />
-                  <span className="font-medium">System Online</span>
+                  <span className="font-medium">Sistem Online</span>
                 </div>
               </div>
             </div>
@@ -115,7 +119,7 @@ export default function AdminDashboardPage() {
             <Card className="group hover:shadow-2xl transition-all duration-500 transform hover:scale-[1.03] border-0 shadow-xl bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm relative overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-blue-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 relative z-10">
-                <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Users</CardTitle>
+                <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Pengguna</CardTitle>
                 <div className="p-3 rounded-xl bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900/40 dark:to-blue-800/40 group-hover:from-blue-200 dark:group-hover:from-blue-900/60 group-hover:to-blue-300 dark:group-hover:to-blue-800/60 transition-all duration-300 transform group-hover:scale-110">
                   <Users className="h-6 w-6 text-blue-600 dark:text-blue-400" />
                 </div>
@@ -124,7 +128,7 @@ export default function AdminDashboardPage() {
                 <div className="text-4xl font-bold text-gray-900 dark:text-white mb-2">{stats.totalUsers.toLocaleString()}</div>
                 <div className="flex items-center space-x-2">
                   <TrendingUp className="h-4 w-4 text-green-500 animate-pulse" />
-                  <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Active users</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Pengguna aktif</p>
                 </div>
               </CardContent>
             </Card>
@@ -132,7 +136,7 @@ export default function AdminDashboardPage() {
             <Card className="group hover:shadow-2xl transition-all duration-500 transform hover:scale-[1.03] border-0 shadow-xl bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm relative overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-r from-green-500/5 to-green-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 relative z-10">
-                <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Groups</CardTitle>
+                <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Kelompok</CardTitle>
                 <div className="p-3 rounded-xl bg-gradient-to-br from-green-100 to-green-200 dark:from-green-900/40 dark:to-green-800/40 group-hover:from-green-200 dark:group-hover:from-green-900/60 group-hover:to-green-300 dark:group-hover:to-green-800/60 transition-all duration-300 transform group-hover:scale-110">
                   <Shield className="h-6 w-6 text-green-600 dark:text-green-400" />
                 </div>
@@ -141,7 +145,7 @@ export default function AdminDashboardPage() {
                 <div className="text-4xl font-bold text-gray-900 dark:text-white mb-2">{stats.totalGroups}</div>
                 <div className="flex items-center space-x-2">
                   <Activity className="h-4 w-4 text-green-500 animate-pulse" />
-                  <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Registered groups</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Kelompok terdaftar</p>
                 </div>
               </CardContent>
             </Card>
@@ -149,7 +153,7 @@ export default function AdminDashboardPage() {
             <Card className="group hover:shadow-2xl transition-all duration-500 transform hover:scale-[1.03] border-0 shadow-xl bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm relative overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-r from-purple-500/5 to-purple-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 relative z-10">
-                <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Submissions</CardTitle>
+                <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Pengajuan</CardTitle>
                 <div className="p-3 rounded-xl bg-gradient-to-br from-purple-100 to-purple-200 dark:from-purple-900/40 dark:to-purple-800/40 group-hover:from-purple-200 dark:group-hover:from-purple-900/60 group-hover:to-purple-300 dark:group-hover:to-purple-800/60 transition-all duration-300 transform group-hover:scale-110">
                   <Upload className="h-6 w-6 text-purple-600 dark:text-purple-400" />
                 </div>
@@ -158,7 +162,7 @@ export default function AdminDashboardPage() {
                 <div className="text-4xl font-bold text-gray-900 dark:text-white mb-2">{stats.totalSubmissions}</div>
                 <div className="flex items-center space-x-2">
                   <BarChart3 className="h-4 w-4 text-purple-500 animate-pulse" />
-                  <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Total submissions</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Total pengajuan</p>
                 </div>
               </CardContent>
             </Card>
@@ -166,7 +170,7 @@ export default function AdminDashboardPage() {
             <Card className="group hover:shadow-2xl transition-all duration-500 transform hover:scale-[1.03] border-0 shadow-xl bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm relative overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-r from-orange-500/5 to-orange-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 relative z-10">
-                <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">Pending Reviews</CardTitle>
+                <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">Penilaian Tertunda</CardTitle>
                 <div className="p-3 rounded-xl bg-gradient-to-br from-orange-100 to-orange-200 dark:from-orange-900/40 dark:to-orange-800/40 group-hover:from-orange-200 dark:group-hover:from-orange-900/60 group-hover:to-orange-300 dark:group-hover:to-orange-800/60 transition-all duration-300 transform group-hover:scale-110">
                   <Activity className="h-6 w-6 text-orange-600 dark:text-orange-400" />
                 </div>
@@ -175,14 +179,14 @@ export default function AdminDashboardPage() {
                 <div className="text-4xl font-bold text-gray-900 dark:text-white mb-2">{stats.pendingReviews}</div>
                 <div className="flex items-center space-x-2">
                   <Star className="h-4 w-4 text-orange-500 animate-pulse" />
-                  <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Awaiting review</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Menunggu penilaian</p>
                 </div>
               </CardContent>
             </Card>
           </div>
 
           {/* Quick Actions */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
             <Card className="group hover:shadow-2xl transition-all duration-500 transform hover:scale-[1.03] border-0 shadow-xl bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm relative overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-blue-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
               <CardHeader className="relative z-10">
@@ -190,16 +194,19 @@ export default function AdminDashboardPage() {
                   <div className="p-3 rounded-xl bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900/40 dark:to-blue-800/40 group-hover:from-blue-200 dark:group-hover:from-blue-900/60 group-hover:to-blue-300 dark:group-hover:to-blue-800/60 transition-all duration-300 transform group-hover:scale-110">
                     <Users className="h-6 w-6 text-blue-600 dark:text-blue-400" />
                   </div>
-                  <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">View Users</CardTitle>
+                  <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">Lihat Pengguna</CardTitle>
                 </div>
               </CardHeader>
               <CardContent className="relative z-10">
                 <p className="text-gray-600 dark:text-gray-300 mb-6 leading-relaxed">
-                  Manage system users, roles, and permissions with comprehensive user management tools.
+                  Kelola pengguna sistem, peran, dan izin dengan alat manajemen pengguna yang komprehensif.
                 </p>
-                <Button className="w-full bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-all duration-200 transform hover:scale-105">
+                <Button 
+                  onClick={() => router.push('/admin/users')}
+                  className="w-full bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-all duration-200 transform hover:scale-105"
+                >
                   <Users className="h-4 w-4 mr-2" />
-                  View Users
+                  Lihat Pengguna
                 </Button>
               </CardContent>
             </Card>
@@ -211,16 +218,19 @@ export default function AdminDashboardPage() {
                   <div className="p-3 rounded-xl bg-gradient-to-br from-green-100 to-green-200 dark:from-green-900/40 dark:to-green-800/40 group-hover:from-green-200 dark:group-hover:from-green-900/60 group-hover:to-green-300 dark:group-hover:to-green-800/60 transition-all duration-300 transform group-hover:scale-110">
                     <Shield className="h-6 w-6 text-green-600 dark:text-green-400" />
                   </div>
-                  <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">Manage Groups</CardTitle>
+                  <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">Kelola Kelompok</CardTitle>
                 </div>
               </CardHeader>
               <CardContent className="relative z-10">
                 <p className="text-gray-600 dark:text-gray-300 mb-6 leading-relaxed">
-                  Organize participants into groups and manage categories for the award system.
+                  Atur peserta ke dalam kelompok dan kelola kategori untuk sistem penghargaan.
                 </p>
-                <Button className="w-full bg-gradient-to-r from-green-600 to-green-500 hover:from-green-700 hover:to-green-600 text-white shadow-lg shadow-green-500/25 hover:shadow-green-500/40 transition-all duration-200 transform hover:scale-105">
+                <Button 
+                  onClick={() => router.push('/admin/groups')}
+                  className="w-full bg-gradient-to-r from-green-600 to-green-500 hover:from-green-700 hover:to-green-600 text-white shadow-lg shadow-green-500/25 hover:shadow-green-500/40 transition-all duration-200 transform hover:scale-105"
+                >
                   <Shield className="h-4 w-4 mr-2" />
-                  Manage Groups
+                  Kelola Kelompok
                 </Button>
               </CardContent>
             </Card>
@@ -232,16 +242,67 @@ export default function AdminDashboardPage() {
                   <div className="p-3 rounded-xl bg-gradient-to-br from-purple-100 to-purple-200 dark:from-purple-900/40 dark:to-purple-800/40 group-hover:from-purple-200 dark:group-hover:from-purple-900/60 group-hover:to-purple-300 dark:group-hover:to-purple-800/60 transition-all duration-300 transform group-hover:scale-110">
                     <Upload className="h-6 w-6 text-purple-600 dark:text-purple-400" />
                   </div>
-                  <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">Review Submissions</CardTitle>
+                  <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">Tinjau Pengajuan</CardTitle>
                 </div>
               </CardHeader>
               <CardContent className="relative z-10">
                 <p className="text-gray-600 dark:text-gray-300 mb-6 leading-relaxed">
-                  Review and evaluate submitted applications with comprehensive assessment tools.
+                  Tinjau dan evaluasi aplikasi yang diajukan dengan alat penilaian yang komprehensif.
                 </p>
-                <Button className="w-full bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-700 hover:to-purple-600 text-white shadow-lg shadow-purple-500/25 hover:shadow-purple-500/40 transition-all duration-200 transform hover:scale-105">
+                <Button 
+                  onClick={() => router.push('/admin/submissions')}
+                  className="w-full bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-700 hover:to-purple-600 text-white shadow-lg shadow-purple-500/25 hover:shadow-purple-500/40 transition-all duration-200 transform hover:scale-105"
+                >
                   <Upload className="h-4 w-4 mr-2" />
-                  Review Submissions
+                  Tinjau Pengajuan
+                </Button>
+              </CardContent>
+            </Card>
+
+            <Card className="group hover:shadow-2xl transition-all duration-500 transform hover:scale-[1.03] border-0 shadow-xl bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-r from-yellow-500/5 to-yellow-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <CardHeader className="relative z-10">
+                <div className="flex items-center space-x-3">
+                  <div className="p-3 rounded-xl bg-gradient-to-br from-yellow-100 to-yellow-200 dark:from-yellow-900/40 dark:to-yellow-800/40 group-hover:from-yellow-200 dark:group-hover:from-yellow-900/60 group-hover:to-yellow-300 dark:group-hover:to-yellow-800/60 transition-all duration-300 transform group-hover:scale-110">
+                    <Trophy className="h-6 w-6 text-yellow-600 dark:text-yellow-400" />
+                  </div>
+                  <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">Lihat Peringkat</CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent className="relative z-10">
+                <p className="text-gray-600 dark:text-gray-300 mb-6 leading-relaxed">
+                  Pantau peringkat dan hasil penilaian peserta berdasarkan kategori dan nominasi yang berbeda.
+                </p>
+                <Button 
+                  onClick={() => router.push('/admin/rankings')}
+                  className="w-full bg-gradient-to-r from-yellow-600 to-yellow-500 hover:from-yellow-700 hover:to-yellow-600 text-white shadow-lg shadow-yellow-500/25 hover:shadow-yellow-500/40 transition-all duration-200 transform hover:scale-105"
+                >
+                  <Trophy className="h-4 w-4 mr-2" />
+                  Lihat Peringkat
+                </Button>
+              </CardContent>
+            </Card>
+
+            <Card className="group hover:shadow-2xl transition-all duration-500 transform hover:scale-[1.03] border-0 shadow-xl bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/5 to-indigo-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <CardHeader className="relative z-10">
+                <div className="flex items-center space-x-3">
+                  <div className="p-3 rounded-xl bg-gradient-to-br from-indigo-100 to-indigo-200 dark:from-indigo-900/40 dark:to-indigo-800/40 group-hover:from-indigo-200 dark:group-hover:from-indigo-900/60 group-hover:to-indigo-300 dark:group-hover:to-indigo-800/60 transition-all duration-300 transform group-hover:scale-110">
+                    <Settings className="h-6 w-6 text-indigo-600 dark:text-indigo-400" />
+                  </div>
+                  <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">Pengaturan Penilaian</CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent className="relative z-10">
+                <p className="text-gray-600 dark:text-gray-300 mb-6 leading-relaxed">
+                  Konfigurasi kriteria penilaian, kategori pertanyaan, dan bobot untuk sistem penghargaan.
+                </p>
+                <Button 
+                  onClick={() => router.push('/admin/scoring-settings')}
+                  className="w-full bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-700 hover:to-indigo-600 text-white shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 transition-all duration-200 transform hover:scale-105"
+                >
+                  <Settings className="h-4 w-4 mr-2" />
+                  Pengaturan Penilaian
                 </Button>
               </CardContent>
             </Card>
@@ -256,21 +317,21 @@ export default function AdminDashboardPage() {
                   <div className="p-3 rounded-xl bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-900/40 dark:to-gray-800/40 group-hover:from-gray-200 dark:group-hover:from-gray-900/60 group-hover:to-gray-300 dark:group-hover:to-gray-800/60 transition-all duration-300 transform group-hover:scale-110">
                     <Activity className="h-6 w-6 text-gray-600 dark:text-gray-400" />
                   </div>
-                  <CardTitle className="text-xl font-bold text-gray-900 dark:text-white">Recent Activity</CardTitle>
+                  <CardTitle className="text-xl font-bold text-gray-900 dark:text-white">Aktivitas Terbaru</CardTitle>
                 </div>
                 <div className="flex items-center space-x-2">
                   <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                  <span className="text-sm text-green-600 dark:text-green-400 font-medium">Live</span>
+                  <span className="text-sm text-green-600 dark:text-green-400 font-medium">Aktif</span>
                 </div>
               </div>
             </CardHeader>
             <CardContent className="relative z-10">
               <div className="space-y-4">
                 {[
-                  { action: 'New submission received', time: '2 minutes ago', type: 'submission' },
-                  { action: 'User registration completed', time: '5 minutes ago', type: 'user' },
-                  { action: 'Group assessment updated', time: '10 minutes ago', type: 'group' },
-                  { action: 'Review process completed', time: '15 minutes ago', type: 'review' }
+                  { action: 'Pengajuan baru diterima', time: '2 menit yang lalu', type: 'pengajuan' },
+                  { action: 'Registrasi pengguna selesai', time: '5 menit yang lalu', type: 'pengguna' },
+                  { action: 'Penilaian kelompok diperbarui', time: '10 menit yang lalu', type: 'kelompok' },
+                  { action: 'Proses penilaian selesai', time: '15 menit yang lalu', type: 'penilaian' }
                 ].map((activity, index) => (
                   <div key={index} className="flex items-center space-x-4 p-4 rounded-xl hover:bg-gradient-to-r hover:from-gray-50 hover:to-gray-100 dark:hover:from-gray-700/50 dark:hover:to-gray-600/50 transition-all duration-200">
                     <div className="w-3 h-3 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full animate-pulse"></div>

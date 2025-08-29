@@ -75,17 +75,17 @@ export default function FeedbackForm({
 
   const handleSubmit = async () => {
     if (!formData.strengths.trim() || !formData.weaknesses.trim()) {
-      toast.error('Please fill in all required fields')
+      toast.error('Harap isi semua field yang wajib')
       return
     }
 
     setLoading(true)
     try {
       await onSubmit({ ...formData, status: 'submitted' })
-      toast.success('Feedback submitted successfully')
+      toast.success('Umpan balik berhasil dikirim')
     } catch (err) {
       console.error('Error submitting feedback:', err)
-      toast.error('Failed to submit feedback')
+      toast.error('Gagal mengirim umpan balik')
     } finally {
       setLoading(false)
     }
@@ -96,11 +96,11 @@ export default function FeedbackForm({
     try {
       if (onSaveDraft) {
         await onSaveDraft({ ...formData, status: 'draft' })
-        toast.success('Draft saved successfully')
+        toast.success('Draft berhasil disimpan')
       }
     } catch (err) {
       console.error('Error saving draft:', err)
-      toast.error('Failed to save draft')
+      toast.error('Gagal menyimpan draft')
     } finally {
       setLoading(false)
     }
@@ -132,13 +132,13 @@ export default function FeedbackForm({
       <CardHeader>
         <CardTitle className="flex items-center space-x-2">
           <Send className="h-5 w-5" />
-          <span>Submission Feedback</span>
+          <span>Umpan Balik Pengajuan</span>
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Scoring Section */}
         <div className="space-y-4">
-          <h3 className="text-lg font-semibold">Scoring</h3>
+          <h3 className="text-lg font-semibold">Penilaian</h3>
           {SCORE_CRITERIA.map((criteria) => (
             <div key={criteria.name} className="space-y-2">
               <div className="flex justify-between items-start">
@@ -154,15 +154,15 @@ export default function FeedbackForm({
 
         {/* Written Feedback Section */}
         <div className="space-y-4">
-          <h3 className="text-lg font-semibold">Written Feedback</h3>
+          <h3 className="text-lg font-semibold">Umpan Balik Tertulis</h3>
           
           <div className="space-y-2">
             <Label htmlFor="strengths" className="text-sm font-medium">
-              Strengths <span className="text-red-500">*</span>
+              Kekuatan <span className="text-red-500">*</span>
             </Label>
             <Textarea
               id="strengths"
-              placeholder="What are the key strengths of this submission?"
+              placeholder="Apa kekuatan utama dari pengajuan ini?"
               value={formData.strengths}
               onChange={(e) => handleTextChange('strengths', e.target.value)}
               disabled={isReadOnly}
@@ -172,11 +172,11 @@ export default function FeedbackForm({
 
           <div className="space-y-2">
             <Label htmlFor="weaknesses" className="text-sm font-medium">
-              Areas for Improvement <span className="text-red-500">*</span>
+              Area Perbaikan <span className="text-red-500">*</span>
             </Label>
             <Textarea
               id="weaknesses"
-              placeholder="What areas could be improved?"
+              placeholder="Area mana yang bisa diperbaiki?"
               value={formData.weaknesses}
               onChange={(e) => handleTextChange('weaknesses', e.target.value)}
               disabled={isReadOnly}
@@ -186,11 +186,11 @@ export default function FeedbackForm({
 
           <div className="space-y-2">
             <Label htmlFor="suggestions" className="text-sm font-medium">
-              Suggestions
+              Saran
             </Label>
             <Textarea
               id="suggestions"
-              placeholder="Any suggestions for future improvements?"
+              placeholder="Saran untuk perbaikan di masa depan?"
               value={formData.suggestions}
               onChange={(e) => handleTextChange('suggestions', e.target.value)}
               disabled={isReadOnly}
@@ -200,11 +200,11 @@ export default function FeedbackForm({
 
           <div className="space-y-2">
             <Label htmlFor="comments" className="text-sm font-medium">
-              Additional Comments
+              Komentar Tambahan
             </Label>
             <Textarea
               id="comments"
-              placeholder="Any additional comments or observations?"
+              placeholder="Komentar atau observasi tambahan?"
               value={formData.comments}
               onChange={(e) => handleTextChange('comments', e.target.value)}
               disabled={isReadOnly}
@@ -224,7 +224,7 @@ export default function FeedbackForm({
                 className="flex items-center space-x-2"
               >
                 <Save className="h-4 w-4" />
-                <span>Save Draft</span>
+                <span>Simpan Draft</span>
               </Button>
             )}
             <Button
@@ -233,7 +233,7 @@ export default function FeedbackForm({
               className="flex items-center space-x-2"
             >
               <Send className="h-4 w-4" />
-              <span>{loading ? 'Submitting...' : 'Submit Feedback'}</span>
+              <span>{loading ? 'Mengirim...' : 'Kirim Umpan Balik'}</span>
             </Button>
           </div>
         )}

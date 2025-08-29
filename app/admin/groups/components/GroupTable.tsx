@@ -103,25 +103,25 @@ export default function GroupTable({ groups, onEdit, onDelete, onView }: GroupTa
     if (count === 0) {
       return (
         <Badge className="bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300 text-xs">
-          No members
+          Tidak ada anggota
         </Badge>
       )
     } else if (count < 5) {
       return (
         <Badge className="bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 text-xs">
-          {count} member{count !== 1 ? 's' : ''}
+          {count} anggota
         </Badge>
       )
     } else if (count < 10) {
       return (
         <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300 text-xs">
-          {count} members
+          {count} anggota
         </Badge>
       )
     } else {
       return (
         <Badge className="bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300 text-xs">
-          {count} members
+          {count} anggota
         </Badge>
       )
     }
@@ -133,16 +133,16 @@ export default function GroupTable({ groups, onEdit, onDelete, onView }: GroupTa
         <thead className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-700">
           <tr>
             <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
-              Group
+              Kelompok
             </th>
             <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
-              Description
+              Deskripsi
             </th>
             <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
-              Members
+              Anggota
             </th>
             <th className="px-6 py-4 text-center text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
-              Actions
+              Aksi
             </th>
           </tr>
         </thead>
@@ -172,14 +172,14 @@ export default function GroupTable({ groups, onEdit, onDelete, onView }: GroupTa
                         {group.groupName}
                       </div>
                       <div className="text-sm text-gray-500 dark:text-gray-400">
-                        Group ID: {group.id}
+                        ID Kelompok: {group.id}
                       </div>
                     </div>
                   </div>
                 </td>
                 <td className="px-6 py-4">
                   <div className="text-sm text-gray-900 dark:text-white max-w-xs truncate">
-                    {group.description || 'No description provided'}
+                    {group.description || 'Tidak ada deskripsi'}
                   </div>
                   {group.description && group.description.length > 50 && (
                     <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
@@ -209,7 +209,7 @@ export default function GroupTable({ groups, onEdit, onDelete, onView }: GroupTa
                       className="h-8 px-3 hover:bg-green-100 dark:hover:bg-green-900/30 text-green-600 dark:text-green-400 transition-all duration-200"
                     >
                       <Users className="h-4 w-4 mr-1" />
-                      <span className="text-xs">Members</span>
+                      <span className="text-xs">Anggota</span>
                     </Button>
                     <Button
                       size="sm"
@@ -247,8 +247,8 @@ export default function GroupTable({ groups, onEdit, onDelete, onView }: GroupTa
             <div className="mx-auto h-12 w-12 text-gray-400 mb-4">
               <Shield className="h-12 w-12" />
             </div>
-            <h3 className="text-sm font-medium text-gray-900 dark:text-white">No groups found</h3>
-            <p className="text-sm text-gray-500 dark:text-gray-400">Create a new group to get started</p>
+            <h3 className="text-sm font-medium text-gray-900 dark:text-white">Tidak ada kelompok ditemukan</h3>
+            <p className="text-sm text-gray-500 dark:text-gray-400">Buat kelompok baru untuk memulai</p>
           </div>
         </div>
       )}

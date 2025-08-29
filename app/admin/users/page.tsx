@@ -12,6 +12,7 @@ import { ArrowLeft, Search, UserPlus, Users, Shield, Activity, Upload, TrendingU
 import api from '@/lib/api'
 import { toast } from 'sonner'
 import Image from 'next/image'
+import AuthenticatedLayout from '@/components/AuthenticatedLayout'
 
 interface User {
   id: number
@@ -75,7 +76,7 @@ export default function AdminUsersPage() {
         ).length
       })
     } catch (err) {
-      toast.error('Failed to fetch users')
+      toast.error('Gagal memuat pengguna')
       console.error('Error fetching users:', err)
     } finally {
       setLoading(false)
@@ -114,10 +115,10 @@ export default function AdminUsersPage() {
   const handleDelete = async (id: number) => {
     try {
       await api.delete(`/users/${id}`)
-      toast.success('User deleted successfully')
+      toast.success('Pengguna berhasil dihapus')
       fetchUsers()
     } catch (err) {
-      toast.error('Failed to delete user')
+      toast.error('Gagal menghapus pengguna')
       console.error('Error deleting user:', err)
     }
   }
@@ -130,21 +131,21 @@ export default function AdminUsersPage() {
         username: data.username,
         roleName: data.role,
         ...(data.password && { password: data.password }),
-        ...(data.groupId && { groupId: parseInt(data.groupId) })
+        ...(data.groupId && { groupId: data.groupId })
       }
     
       if (selectedUser) {
         await api.put(`/users/${selectedUser.id}`, payload)
-        toast.success('User updated successfully')
+        toast.success('Pengguna berhasil diperbarui')
       } else {
         await api.post('/auth/signup', payload)
-        toast.success('User created successfully')
+        toast.success('Pengguna berhasil dibuat')
       }
     
       setFormOpen(false)
       fetchUsers()
     } catch (err) {
-      toast.error('Failed to save user')
+      toast.error('Gagal menyimpan pengguna')
       console.error('Error saving user:', err)
     }
   }
@@ -155,29 +156,32 @@ export default function AdminUsersPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
-        <div className="p-6 space-y-6">
-          <div className="animate-pulse">
-            <div className="h-8 bg-gray-200 rounded w-48 mb-6"></div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-              {[1, 2, 3].map(i => (
-                <div key={i} className="h-32 bg-gray-200 rounded-lg"></div>
-              ))}
+      <AuthenticatedLayout allowedRoles={['ADMIN', 'SUPERADMIN']}>
+        <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
+          <div className="p-6 space-y-6">
+            <div className="animate-pulse">
+              <div className="h-8 bg-gray-200 rounded w-48 mb-6"></div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                {[1, 2, 3].map(i => (
+                  <div key={i} className="h-32 bg-gray-200 rounded-lg"></div>
+                ))}
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      </AuthenticatedLayout>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 relative overflow-hidden">
-      {/* Animated Background Elements */}
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute -top-40 -right-40 h-96 w-96 rounded-full bg-gradient-to-br from-blue-500/5 to-blue-600/5 blur-3xl animate-pulse"></div>
-        <div className="absolute -bottom-40 -left-40 h-96 w-96 rounded-full bg-gradient-to-tr from-blue-400/5 to-blue-500/5 blur-3xl animate-pulse delay-1000"></div>
-        <div className="absolute top-1/4 left-1/4 h-64 w-64 rounded-full bg-gradient-to-r from-blue-500/3 to-blue-600/3 blur-2xl animate-pulse delay-500"></div>
-      </div>
+    <AuthenticatedLayout allowedRoles={['ADMIN', 'SUPERADMIN']}>
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 relative overflow-hidden">
+        {/* Animated Background Elements */}
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute -top-40 -right-40 h-96 w-96 rounded-full bg-gradient-to-br from-blue-500/5 to-blue-600/5 blur-3xl animate-pulse"></div>
+          <div className="absolute -bottom-40 -left-40 h-96 w-96 rounded-full bg-gradient-to-tr from-blue-400/5 to-blue-500/5 blur-3xl animate-pulse delay-1000"></div>
+          <div className="absolute top-1/4 left-1/4 h-64 w-64 rounded-full bg-gradient-to-r from-blue-500/3 to-blue-600/3 blur-2xl animate-pulse delay-500"></div>
+        </div>
 
       {/* Header Section */}
       <div className="relative bg-gradient-to-r from-blue-500/10 via-blue-600/10 to-blue-500/10 border-b border-blue-200/50 dark:border-blue-800/50 overflow-hidden">
@@ -193,7 +197,7 @@ export default function AdminUsersPage() {
                 className="flex items-center space-x-2 bg-white/20 hover:bg-white/30 text-gray-900 dark:text-white backdrop-blur-sm border border-white/20"
               >
                 <ArrowLeft className="h-4 w-4" />
-                <span>Back to Dashboard</span>
+                <span>Kembali ke Beranda</span>
               </Button>
               <div className="flex items-center space-x-4">
                 <div className="flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-lg border-2 border-blue-400/50">
@@ -201,10 +205,10 @@ export default function AdminUsersPage() {
                 </div>
                 <div>
                   <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 via-blue-500 to-blue-400 bg-clip-text text-transparent">
-                    User Management
+                    Manajemen Pengguna
                   </h1>
                   <p className="text-gray-600 dark:text-gray-300 mt-1">
-                    Manage system users and their permissions with comprehensive control
+                                         Kelola pengguna sistem dan izin mereka dengan kontrol yang komprehensif
                   </p>
                 </div>
               </div>
@@ -216,14 +220,14 @@ export default function AdminUsersPage() {
                 className="flex items-center space-x-2 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border-blue-200/50 dark:border-blue-800/50 hover:bg-white/70 dark:hover:bg-gray-700/50"
               >
                 <Upload className="h-4 w-4" />
-                <span>Bulk Import</span>
+                <span>Impor Massal</span>
               </Button>
               <Button 
                 onClick={handleCreate} 
                 className="flex items-center space-x-2 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-all duration-200"
               >
                 <UserPlus className="h-4 w-4" />
-                <span>Add User</span>
+                <span>Tambah Pengguna</span>
               </Button>
             </div>
           </div>
@@ -236,7 +240,7 @@ export default function AdminUsersPage() {
           <Card className="group hover:shadow-2xl transition-all duration-500 transform hover:scale-[1.03] border-0 shadow-xl bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm relative overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-blue-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 relative z-10">
-              <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Users</CardTitle>
+                             <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Pengguna</CardTitle>
               <div className="p-3 rounded-xl bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900/40 dark:to-blue-800/40 group-hover:from-blue-200 dark:group-hover:from-blue-900/60 group-hover:to-blue-300 dark:group-hover:to-blue-800/60 transition-all duration-300 transform group-hover:scale-110">
                 <Users className="h-6 w-6 text-blue-600 dark:text-blue-400" />
               </div>
@@ -245,7 +249,7 @@ export default function AdminUsersPage() {
               <div className="text-4xl font-bold text-gray-900 dark:text-white mb-2">{stats.total}</div>
               <div className="flex items-center space-x-2">
                 <TrendingUp className="h-4 w-4 text-green-500 animate-pulse" />
-                <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">All registered users</p>
+                                 <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Semua pengguna terdaftar</p>
               </div>
             </CardContent>
           </Card>
@@ -253,7 +257,7 @@ export default function AdminUsersPage() {
           <Card className="group hover:shadow-2xl transition-all duration-500 transform hover:scale-[1.03] border-0 shadow-xl bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm relative overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-r from-green-500/5 to-green-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 relative z-10">
-              <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">Active Users</CardTitle>
+                             <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">Pengguna Aktif</CardTitle>
               <div className="p-3 rounded-xl bg-gradient-to-br from-green-100 to-green-200 dark:from-green-900/40 dark:to-green-800/40 group-hover:from-green-200 dark:group-hover:from-green-900/60 group-hover:to-green-300 dark:group-hover:to-green-800/60 transition-all duration-300 transform group-hover:scale-110">
                 <UserCheck className="h-6 w-6 text-green-600 dark:text-green-400" />
               </div>
@@ -262,7 +266,7 @@ export default function AdminUsersPage() {
               <div className="text-4xl font-bold text-gray-900 dark:text-white mb-2">{stats.active}</div>
               <div className="flex items-center space-x-2">
                 <Activity className="h-4 w-4 text-blue-500 animate-pulse" />
-                <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Currently active</p>
+                                 <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Saat ini aktif</p>
               </div>
             </CardContent>
           </Card>
@@ -270,7 +274,7 @@ export default function AdminUsersPage() {
           <Card className="group hover:shadow-2xl transition-all duration-500 transform hover:scale-[1.03] border-0 shadow-xl bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm relative overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-r from-purple-500/5 to-purple-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 relative z-10">
-              <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">Administrators</CardTitle>
+                             <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">Administrator</CardTitle>
               <div className="p-3 rounded-xl bg-gradient-to-br from-purple-100 to-purple-200 dark:from-purple-900/40 dark:to-purple-800/40 group-hover:from-purple-200 dark:group-hover:from-purple-900/60 group-hover:to-purple-300 dark:group-hover:to-purple-800/60 transition-all duration-300 transform group-hover:scale-110">
                 <Shield className="h-6 w-6 text-purple-600 dark:text-purple-400" />
               </div>
@@ -279,7 +283,7 @@ export default function AdminUsersPage() {
               <div className="text-4xl font-bold text-gray-900 dark:text-white mb-2">{stats.admins}</div>
               <div className="flex items-center space-x-2">
                 <Shield className="h-4 w-4 text-purple-500 animate-pulse" />
-                <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Admin users</p>
+                                 <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Pengguna admin</p>
               </div>
             </CardContent>
           </Card>
@@ -294,7 +298,7 @@ export default function AdminUsersPage() {
                 <div className="relative flex-1 max-w-md">
                   <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
                   <Input
-                    placeholder="Search users by name, email, or username..."
+                                         placeholder="Cari pengguna berdasarkan nama, email, atau nama pengguna..."
                     value={searchTerm}
                     onChange={(e) => handleSearch(e.target.value)}
                     className="pl-12 h-12 border-gray-300 focus:border-blue-500 focus:ring-blue-500/20 dark:border-gray-600 dark:bg-gray-800 dark:focus:border-blue-400 transition-all duration-200"
@@ -302,15 +306,15 @@ export default function AdminUsersPage() {
                 </div>
                 <Button variant="outline" className="flex items-center space-x-2 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm">
                   <Filter className="h-4 w-4" />
-                  <span>Filters</span>
+                  <span>Filter</span>
                 </Button>
                 <Button variant="outline" className="flex items-center space-x-2 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm">
                   <Download className="h-4 w-4" />
-                  <span>Export</span>
+                  <span>Ekspor</span>
                 </Button>
               </div>
               <div className="text-sm text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 px-3 py-2 rounded-full">
-                Showing <span className="font-semibold text-gray-900 dark:text-white">{filteredUsers.length}</span> of <span className="font-semibold text-gray-900 dark:text-white">{users.length}</span> users
+                                 Menampilkan <span className="font-semibold text-gray-900 dark:text-white">{filteredUsers.length}</span> dari <span className="font-semibold text-gray-900 dark:text-white">{users.length}</span> pengguna
               </div>
             </div>
           </CardContent>
@@ -324,10 +328,10 @@ export default function AdminUsersPage() {
               <div className="p-2 rounded-lg bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900/40 dark:to-blue-800/40">
                 <Users className="h-5 w-5 text-blue-600 dark:text-blue-400" />
               </div>
-              <span className="text-gray-900 dark:text-white font-bold">Users</span>
+                             <span className="text-gray-900 dark:text-white font-bold">Pengguna</span>
               <div className="flex items-center space-x-1">
                 <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                <span className="text-sm text-green-600 dark:text-green-400 font-medium">Live</span>
+                                 <span className="text-sm text-green-600 dark:text-green-400 font-medium">Aktif</span>
               </div>
             </CardTitle>
           </CardHeader>
@@ -346,7 +350,10 @@ export default function AdminUsersPage() {
         open={formOpen}
         onClose={() => setFormOpen(false)}
         onSubmit={handleSubmit}
-        defaultValues={selectedUser}
+        defaultValues={selectedUser ? {
+          ...selectedUser,
+          id: selectedUser.id.toString()
+        } : undefined}
       />
 
       {/* Bulk Import Modal */}
@@ -355,6 +362,7 @@ export default function AdminUsersPage() {
         onClose={() => setBulkImportOpen(false)}
         onSuccess={fetchUsers}
       />
-    </div>
+      </div>
+    </AuthenticatedLayout>
   )
 }

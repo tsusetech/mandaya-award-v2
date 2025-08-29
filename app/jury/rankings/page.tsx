@@ -114,7 +114,7 @@ export default function JuryRankingsPage() {
        })
          } catch (err) {
        console.error('Error fetching rankings:', err)
-       toast.error('Failed to load rankings')
+       toast.error('Gagal memuat peringkat')
        
        // Use mock data as fallback
        const mockRankings: RankingEntry[] = [
@@ -467,11 +467,11 @@ export default function JuryRankingsPage() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'completed':
-        return <Badge variant="default" className="bg-green-100 text-green-800">Completed</Badge>
+        return <Badge variant="default" className="bg-green-100 text-green-800">Selesai</Badge>
       case 'in_progress':
-        return <Badge variant="default" className="bg-orange-100 text-orange-800">In Progress</Badge>
+        return <Badge variant="default" className="bg-orange-100 text-orange-800">Sedang Berlangsung</Badge>
       case 'pending':
-        return <Badge variant="default" className="bg-gray-100 text-gray-800">Pending</Badge>
+        return <Badge variant="default" className="bg-gray-100 text-gray-800">Menunggu</Badge>
       default:
         return <Badge variant="outline">{status}</Badge>
     }
@@ -487,7 +487,7 @@ export default function JuryRankingsPage() {
 
   const exportRankings = () => {
     // Implementation for exporting rankings to CSV/Excel
-    toast.info('Export functionality coming soon')
+    toast.info('Fitur ekspor akan segera hadir')
   }
 
   if (loading) {
@@ -514,103 +514,152 @@ export default function JuryRankingsPage() {
 
   return (
     <AuthenticatedLayout allowedRoles={['JURI', 'SUPERADMIN']}>
-      <div className="p-4 sm:p-6 space-y-6">
-                 {/* Header */}
-         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-           <div className="flex items-center space-x-4">
-             <Button
-               variant="ghost"
-               size="sm"
-               onClick={() => router.back()}
-               className="flex items-center space-x-2"
-             >
-               <ArrowLeft className="h-4 w-4" />
-               <span className="hidden sm:inline">Back</span>
-             </Button>
-             <div>
-               <h1 className="text-xl sm:text-2xl font-bold text-gray-900">9 Nominasi Rankings</h1>
-               <p className="text-sm sm:text-base text-gray-600">Current standings based on 4 main categories</p>
-             </div>
-           </div>
-           <Button
-             variant="outline"
-             size="sm"
-             onClick={exportRankings}
-             className="flex items-center space-x-2 self-start sm:self-auto"
-           >
-             <Download className="h-4 w-4" />
-             <span className="hidden sm:inline">Export</span>
-           </Button>
-         </div>
-
-                 {/* Statistics Cards */}
-         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-                     <Card className="hover:shadow-md transition-shadow">
-             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-               <CardTitle className="text-xs sm:text-sm font-medium text-gray-600">Total Submissions</CardTitle>
-               <Award className="h-4 w-4 text-blue-600" />
-             </CardHeader>
-             <CardContent>
-               <div className="text-lg sm:text-2xl font-bold text-gray-900">{stats.totalSubmissions}</div>
-               <p className="text-xs text-gray-500 mt-1">All submissions</p>
-             </CardContent>
-           </Card>
-
-                     <Card className="hover:shadow-md transition-shadow">
-             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-               <CardTitle className="text-xs sm:text-sm font-medium text-gray-600">Reviewed</CardTitle>
-               <Trophy className="h-4 w-4 text-green-600" />
-             </CardHeader>
-             <CardContent>
-               <div className="text-lg sm:text-2xl font-bold text-gray-900">{stats.reviewedSubmissions}</div>
-               <p className="text-xs text-gray-500 mt-1">Completed reviews</p>
-             </CardContent>
-           </Card>
-
-           <Card className="hover:shadow-md transition-shadow">
-             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-               <CardTitle className="text-xs sm:text-sm font-medium text-gray-600">Average Score</CardTitle>
-               <Medal className="h-4 w-4 text-orange-600" />
-             </CardHeader>
-             <CardContent>
-               <div className="text-lg sm:text-2xl font-bold text-gray-900">{stats.averageScore.toFixed(1)}</div>
-               <p className="text-xs text-gray-500 mt-1">Overall average</p>
-             </CardContent>
-           </Card>
-
-           <Card className="hover:shadow-md transition-shadow">
-             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-               <CardTitle className="text-xs sm:text-sm font-medium text-gray-600">Top Score</CardTitle>
-               <Trophy className="h-4 w-4 text-yellow-600" />
-             </CardHeader>
-             <CardContent>
-               <div className="text-lg sm:text-2xl font-bold text-gray-900">{stats.topScore.toFixed(1)}</div>
-               <p className="text-xs text-gray-500 mt-1">Highest achieved</p>
-             </CardContent>
-           </Card>
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 relative overflow-hidden -mt-16 pt-16">
+        {/* Animated Background Elements */}
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute -top-40 -right-40 h-96 w-96 rounded-full bg-gradient-to-br from-yellow-500/5 to-yellow-600/5 blur-3xl animate-pulse"></div>
+          <div className="absolute -bottom-40 -left-40 h-96 w-96 rounded-full bg-gradient-to-tr from-yellow-400/5 to-yellow-500/5 blur-3xl animate-pulse delay-1000"></div>
+          <div className="absolute top-1/4 left-1/4 h-64 w-64 rounded-full bg-gradient-to-r from-yellow-500/3 to-yellow-600/3 blur-2xl animate-pulse delay-500"></div>
         </div>
 
-                 {/* Search and Filters */}
-         <Card>
-           <CardContent className="pt-6">
-             <div className="flex flex-col gap-4">
-               <div className="relative">
-                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                 <Input
-                   placeholder="Search by group name, participant, category, or nomination..."
-                   value={searchTerm}
-                   onChange={(e) => setSearchTerm(e.target.value)}
-                   className="pl-10"
-                 />
-               </div>
-                                               <div className="flex flex-wrap gap-2">
+        {/* Header Section */}
+        <div className="relative bg-gradient-to-r from-yellow-500/10 via-yellow-600/10 to-yellow-500/10 border-b border-yellow-200/50 dark:border-yellow-800/50 overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-r from-yellow-500/5 to-yellow-600/5"></div>
+          <div className="absolute inset-0 bg-[url('data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'32\\' height=\\'32\\' viewBox=\\'0 0 32 32\\'><path fill=\\'%23EAB308\\' d=\\'M0 31h32v1H0zM31 0v32h1V0z\\'/></svg>')] opacity-5"></div>
+          <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-6">
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => router.push('/jury')}
+                  className="flex items-center space-x-2 bg-white/20 hover:bg-white/30 text-gray-900 dark:text-white backdrop-blur-sm border border-white/20"
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                  <span>Kembali ke Beranda</span>
+                </Button>
+                <div className="flex items-center space-x-4">
+                  <div className="flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-yellow-500 to-yellow-600 shadow-lg border-2 border-yellow-400/50">
+                    <Trophy className="h-8 w-8 text-white" />
+                  </div>
+                  <div>
+                    <h1 className="text-3xl font-bold bg-gradient-to-r from-yellow-600 via-yellow-500 to-yellow-400 bg-clip-text text-transparent">
+                      9 Nominasi Peringkat
+                    </h1>
+                    <p className="text-gray-600 dark:text-gray-300 mt-1">
+                      Posisi saat ini berdasarkan 4 kategori utama dengan pembaruan real-time
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={exportRankings}
+                className="flex items-center space-x-2 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border-yellow-200/50 dark:border-yellow-800/50 hover:bg-white/70 dark:hover:bg-gray-700/50"
+              >
+                <Download className="h-4 w-4" />
+                <span>Ekspor</span>
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+          {/* Statistics Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <Card className="group hover:shadow-2xl transition-all duration-500 transform hover:scale-[1.03] border-0 shadow-xl bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-blue-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 relative z-10">
+                <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Pengajuan</CardTitle>
+                <div className="p-3 rounded-xl bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900/40 dark:to-blue-800/40 group-hover:from-blue-200 dark:group-hover:from-blue-900/60 group-hover:to-blue-300 dark:group-hover:to-blue-800/60 transition-all duration-300 transform group-hover:scale-110">
+                  <Award className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                </div>
+              </CardHeader>
+              <CardContent className="relative z-10">
+                <div className="text-4xl font-bold text-gray-900 dark:text-white mb-2">{stats.totalSubmissions}</div>
+                <div className="flex items-center space-x-2">
+                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Semua pengajuan</p>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="group hover:shadow-2xl transition-all duration-500 transform hover:scale-[1.03] border-0 shadow-xl bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-r from-green-500/5 to-green-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 relative z-10">
+                <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">Sudah Ditinjau</CardTitle>
+                <div className="p-3 rounded-xl bg-gradient-to-br from-green-100 to-green-200 dark:from-green-900/40 dark:to-green-800/40 group-hover:from-green-200 dark:group-hover:from-green-900/60 group-hover:to-green-300 dark:group-hover:to-green-800/60 transition-all duration-300 transform group-hover:scale-110">
+                  <Trophy className="h-6 w-6 text-green-600 dark:text-green-400" />
+                </div>
+              </CardHeader>
+              <CardContent className="relative z-10">
+                <div className="text-4xl font-bold text-gray-900 dark:text-white mb-2">{stats.reviewedSubmissions}</div>
+                <div className="flex items-center space-x-2">
+                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Tinjauan selesai</p>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="group hover:shadow-2xl transition-all duration-500 transform hover:scale-[1.03] border-0 shadow-xl bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-r from-orange-500/5 to-orange-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 relative z-10">
+                <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">Skor Rata-rata</CardTitle>
+                <div className="p-3 rounded-xl bg-gradient-to-br from-orange-100 to-orange-200 dark:from-orange-900/40 dark:to-orange-800/40 group-hover:from-orange-200 dark:group-hover:from-orange-900/60 group-hover:to-orange-300 dark:group-hover:to-orange-800/60 transition-all duration-300 transform group-hover:scale-110">
+                  <Medal className="h-6 w-6 text-orange-600 dark:text-orange-400" />
+                </div>
+              </CardHeader>
+              <CardContent className="relative z-10">
+                <div className="text-4xl font-bold text-gray-900 dark:text-white mb-2">{stats.averageScore.toFixed(1)}</div>
+                <div className="flex items-center space-x-2">
+                  <div className="w-2 h-2 bg-orange-500 rounded-full animate-pulse"></div>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Rata-rata keseluruhan</p>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="group hover:shadow-2xl transition-all duration-500 transform hover:scale-[1.03] border-0 shadow-xl bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-r from-yellow-500/5 to-yellow-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 relative z-10">
+                <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">Skor Tertinggi</CardTitle>
+                <div className="p-3 rounded-xl bg-gradient-to-br from-yellow-100 to-yellow-200 dark:from-yellow-900/40 dark:to-yellow-800/40 group-hover:from-yellow-200 dark:group-hover:from-yellow-900/60 group-hover:to-yellow-300 dark:group-hover:to-yellow-800/60 transition-all duration-300 transform group-hover:scale-110">
+                  <Trophy className="h-6 w-6 text-yellow-600 dark:text-yellow-400" />
+                </div>
+              </CardHeader>
+              <CardContent className="relative z-10">
+                <div className="text-4xl font-bold text-gray-900 dark:text-white mb-2">{stats.topScore.toFixed(1)}</div>
+                <div className="flex items-center space-x-2">
+                  <div className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse"></div>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Pencapaian tertinggi</p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Search and Filters */}
+          <Card className="border-0 shadow-xl bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm relative overflow-hidden group hover:shadow-2xl transition-all duration-500 mb-8">
+            <div className="absolute inset-0 bg-gradient-to-r from-gray-500/5 to-gray-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+            <CardContent className="pt-6 relative z-10">
+              <div className="flex flex-col gap-4">
+                <div className="relative">
+                  <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+                  <Input
+                    placeholder="Cari berdasarkan nama kelompok, peserta, kategori, atau nominasi..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-12 h-12 border-gray-300 focus:border-yellow-500 focus:ring-yellow-500/20 dark:border-gray-600 dark:bg-gray-800 dark:focus:border-yellow-400 transition-all duration-200"
+                  />
+                </div>
+                <div className="flex flex-wrap gap-2">
                   <Button
                     variant={categoryFilter === 'all' ? 'default' : 'outline'}
                     size="sm"
                     onClick={() => setCategoryFilter('all')}
-                    className="text-xs sm:text-sm"
+                    className="text-xs sm:text-sm bg-gradient-to-r from-yellow-600 to-yellow-500 hover:from-yellow-700 hover:to-yellow-600 text-white shadow-lg shadow-yellow-500/25 hover:shadow-yellow-500/40 transition-all duration-200"
                   >
-                    All Categories
+                    Semua Kategori
                   </Button>
                   <Button
                     variant={categoryFilter === 'Pemerintah Daerah Pendukung Pemberdayaan' ? 'default' : 'outline'}
@@ -649,28 +698,40 @@ export default function JuryRankingsPage() {
                     <span className="sm:hidden">Lifetime</span>
                   </Button>
                 </div>
-             </div>
-           </CardContent>
-         </Card>
+              </div>
+            </CardContent>
+          </Card>
 
-                 {/* Rankings Table */}
-         <Card>
-           <CardHeader>
-             <CardTitle>9 Nominasi Rankings</CardTitle>
-           </CardHeader>
-           <CardContent>
-             {filteredRankings.length === 0 ? (
-               <div className="text-center py-8">
-                 <Trophy className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                 <p className="text-gray-500">No rankings found</p>
-                                   <p className="text-sm text-gray-400">
+          {/* Rankings Table */}
+          <Card className="border-0 shadow-2xl bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm relative overflow-hidden group hover:shadow-3xl transition-all duration-500">
+            <div className="absolute inset-0 bg-gradient-to-r from-gray-500/5 to-gray-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+            <CardHeader className="relative z-10">
+              <CardTitle className="flex items-center space-x-3 text-xl">
+                <div className="p-2 rounded-lg bg-gradient-to-br from-yellow-100 to-yellow-200 dark:from-yellow-900/40 dark:to-yellow-800/40">
+                  <Trophy className="h-5 w-5 text-yellow-600 dark:text-yellow-400" />
+                </div>
+                <span className="text-gray-900 dark:text-white font-bold">9 Nominasi Peringkat</span>
+                <div className="flex items-center space-x-1">
+                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                  <span className="text-sm text-green-600 dark:text-green-400 font-medium">Aktif</span>
+                </div>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="relative z-10">
+              {filteredRankings.length === 0 ? (
+                <div className="text-center py-12">
+                  <div className="p-4 rounded-2xl bg-gradient-to-br from-yellow-100 to-yellow-200 dark:from-yellow-900/40 dark:to-yellow-800/40 mb-4 mx-auto w-fit">
+                    <Trophy className="h-12 w-12 text-yellow-600 dark:text-yellow-400" />
+                  </div>
+                  <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">Tidak ada peringkat ditemukan</h3>
+                  <p className="text-gray-600 dark:text-gray-300 text-center">
                     {searchTerm || categoryFilter !== 'all'
-                      ? 'Try adjusting your filters'
-                      : 'No submissions have been ranked yet'}
+                      ? 'Coba sesuaikan filter Anda'
+                      : 'Belum ada pengajuan yang diperingkat'}
                   </p>
-               </div>
-                           ) : (
-                <div className="space-y-6">
+                </div>
+              ) : (
+                <div className="space-y-8">
                   {(() => {
                     // Group entries by nomination
                     const groupedByNomination = filteredRankings.reduce((groups, entry) => {
@@ -682,63 +743,70 @@ export default function JuryRankingsPage() {
                     }, {} as Record<string, typeof filteredRankings>)
 
                     return Object.entries(groupedByNomination).map(([nomination, entries]) => (
-                      <div key={nomination} className="space-y-3">
-                        <div className="flex items-center space-x-2">
-                          <h3 className="text-lg font-semibold text-gray-900">{nomination}</h3>
-                          <Badge variant="outline" className="text-xs">
+                      <div key={nomination} className="space-y-4">
+                        <div className="flex items-center space-x-3">
+                          <h3 className="text-xl font-bold text-gray-900 dark:text-white">{nomination}</h3>
+                          <Badge variant="outline" className="text-xs bg-yellow-50 text-yellow-700 border-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-300 dark:border-yellow-800">
                             {entries[0]?.category}
                           </Badge>
                         </div>
-                        <div className="space-y-2">
+                        <div className="space-y-3">
                           {entries.map((entry) => (
-                                                         <div
-                               key={entry.id}
-                               className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors gap-3"
-                             >
-                               <div className="flex items-center space-x-3 sm:space-x-4">
-                                 <div className="flex items-center space-x-2">
-                                   {getRankIcon(entry.rank)}
-                                   <span className="text-base sm:text-lg font-bold text-gray-900">#{entry.rank}</span>
-                                 </div>
-                                 <div className="min-w-0 flex-1">
-                                   <h3 className="font-semibold text-gray-900 text-sm sm:text-base truncate">{entry.groupName}</h3>
-                                   <p className="text-xs sm:text-sm text-gray-600 truncate">
-                                     {entry.participantName} • {entry.participantEmail}
-                                   </p>
-                                 </div>
-                               </div>
-                               
-                                                                <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6">
-                                   <div className="text-left sm:text-right">
-                                     <div className="text-base sm:text-lg font-bold text-gray-900">
-                                       {entry.totalScore.toFixed(1)}
-                                     </div>
-                                   </div>
-                                 
-                                 <div className="text-left sm:text-right">
-                                   <div className="text-xs sm:text-sm text-gray-600">
-                                     Submitted: {formatDate(entry.submittedAt)}
-                                   </div>
-                                   {entry.lastReviewedAt && (
-                                     <div className="text-xs sm:text-sm text-gray-500">
-                                       Last reviewed: {formatDate(entry.lastReviewedAt)}
-                                     </div>
-                                   )}
-                                 </div>
-                                 
-                                 <div className="flex items-center">
-                                   <Button
-                                     variant="outline"
-                                     size="sm"
-                                     onClick={() => router.push(`/jury/review/${entry.id}`)}
-                                     className="text-xs sm:text-sm"
-                                   >
-                                     <span className="hidden sm:inline">View Details</span>
-                                     <span className="sm:hidden">Details</span>
-                                   </Button>
-                                 </div>
-                               </div>
-                             </div>
+                            <div
+                              key={entry.id}
+                              className="group/item flex flex-col sm:flex-row sm:items-center sm:justify-between p-6 border border-gray-200 dark:border-gray-700 rounded-xl hover:bg-gradient-to-r hover:from-yellow-50 hover:to-yellow-100 dark:hover:from-yellow-900/20 dark:hover:to-yellow-800/20 transition-all duration-300 transform hover:scale-[1.02] gap-4"
+                            >
+                              <div className="flex items-center space-x-4">
+                                <div className="flex items-center space-x-3">
+                                  <div className="flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-br from-yellow-500 to-yellow-600 shadow-lg">
+                                    {getRankIcon(entry.rank)}
+                                  </div>
+                                  <div className="text-center">
+                                    <div className="text-2xl font-bold text-gray-900 dark:text-white">
+                                      #{entry.rank}
+                                    </div>
+                                  </div>
+                                </div>
+                                <div className="min-w-0 flex-1">
+                                  <h3 className="font-bold text-gray-900 dark:text-white text-lg truncate">{entry.groupName}</h3>
+                                  <p className="text-sm text-gray-600 dark:text-gray-300 truncate">
+                                    {entry.participantName} • {entry.participantEmail}
+                                  </p>
+                                </div>
+                              </div>
+                              
+                              <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-8">
+                                <div className="text-center sm:text-right">
+                                  <div className="text-3xl font-bold text-gray-900 dark:text-white">
+                                    {entry.totalScore.toFixed(1)}
+                                  </div>
+                                  <div className="text-sm text-gray-500 dark:text-gray-400">Total Skor</div>
+                                </div>
+                                
+                                <div className="text-center sm:text-right">
+                                  <div className="text-sm text-gray-600 dark:text-gray-300">
+                                    Dikirim: {formatDate(entry.submittedAt)}
+                                  </div>
+                                  {entry.lastReviewedAt && (
+                                    <div className="text-sm text-gray-500 dark:text-gray-400">
+                                      Terakhir ditinjau: {formatDate(entry.lastReviewedAt)}
+                                    </div>
+                                  )}
+                                </div>
+                                
+                                <div className="flex items-center justify-center">
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => router.push(`/jury/review/${entry.id}`)}
+                                    className="bg-gradient-to-r from-yellow-600 to-yellow-500 hover:from-yellow-700 hover:to-yellow-600 text-white border-yellow-600 shadow-lg shadow-yellow-500/25 hover:shadow-yellow-500/40 transition-all duration-200"
+                                  >
+                                    <span className="hidden sm:inline">Lihat Detail</span>
+                                    <span className="sm:hidden">Detail</span>
+                                  </Button>
+                                </div>
+                              </div>
+                            </div>
                           ))}
                         </div>
                       </div>
@@ -746,8 +814,9 @@ export default function JuryRankingsPage() {
                   })()}
                 </div>
               )}
-           </CardContent>
-         </Card>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </AuthenticatedLayout>
   )

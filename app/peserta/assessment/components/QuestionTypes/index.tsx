@@ -236,7 +236,7 @@ export function QuestionInput({
             onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => handleChange(e.target.value)}
             onBlur={handleBlur}
             onFocus={handleFocus}
-            placeholder="Type your answer here..."
+            placeholder="Ketik jawaban Anda di sini..."
             className="min-h-[100px]"
           />
         )
@@ -249,7 +249,7 @@ export function QuestionInput({
             onChange={(e) => handleChange(e.target.value)}
             onBlur={handleBlur}
             onFocus={handleFocus}
-            placeholder="Type your answer here..."
+            placeholder="Ketik jawaban Anda di sini..."
           />
         )
 
@@ -261,7 +261,7 @@ export function QuestionInput({
             onChange={(e) => handleChange(parseFloat(e.target.value))}
             onBlur={handleBlur}
             onFocus={handleFocus}
-            placeholder="Enter a number"
+            placeholder="Masukkan angka"
           />
         )
 
@@ -316,7 +316,7 @@ export function QuestionInput({
                      <div className="ml-6 mt-2">
                        <Input
                          type="text"
-                         placeholder="Please specify..."
+                         placeholder="Silakan sebutkan..."
                          value={(() => {
                            // Find the other text value from the array
                            const otherItem = (localValue || []).find((v: any) => {
@@ -375,7 +375,7 @@ export function QuestionInput({
               onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => handleChange(e.target.value)}
               onBlur={handleBlur}
               onFocus={handleFocus}
-              placeholder="Type your answer here..."
+              placeholder="Ketik jawaban Anda di sini..."
               className="min-h-[100px]"
             />
           )
@@ -474,7 +474,7 @@ export function QuestionInput({
               onChange={(e) => handleChange(e.target.value)}
               onBlur={handleBlur}
               onFocus={handleFocus}
-              placeholder="Enter your email address"
+              placeholder="Masukkan alamat email Anda"
             />
             {isPrefilledFromAuth && localValue && (
               <p className="text-xs text-blue-600">
@@ -493,7 +493,7 @@ export function QuestionInput({
             onChange={(e) => handleChange(e.target.value)}
             onBlur={handleBlur}
             onFocus={handleFocus}
-            placeholder="Enter a URL"
+            placeholder="Masukkan URL"
           />
         )
 
@@ -510,7 +510,7 @@ export function QuestionInput({
                 if (file) {
                   try {
                     // Show loading state
-                    handleChange('Uploading...')
+                    handleChange('Mengunggah...')
                     
                     // Option 1: Upload to Cloudinary (recommended)
                     const imageUrl = await uploadToCloudinary(file)
@@ -524,26 +524,26 @@ export function QuestionInput({
                     // handleChange(file.name)
                     
                   } catch (error) {
-                    console.error('Upload failed:', error)
-                    handleChange('Upload failed')
+                            console.error('Upload failed:', error)
+        handleChange('Gagal mengunggah')
                   }
                 }
               }}
               onBlur={handleBlur}
               onFocus={handleFocus}
             />
-            {localValue && localValue !== 'Uploading...' && localValue !== 'Upload failed' && (
+            {localValue && localValue !== 'Mengunggah...' && localValue !== 'Gagal mengunggah' && (
               <div className="mt-2">
                 {localValue.startsWith('http') ? (
                   <div>
-                    <p className="text-sm text-green-600">✓ File uploaded successfully</p>
+                    <p className="text-sm text-green-600">✓ File berhasil diunggah</p>
                     <a 
                       href={localValue} 
                       target="_blank" 
                       rel="noopener noreferrer"
                       className="text-sm text-blue-600 hover:underline"
                     >
-                      View uploaded file
+                      Lihat file yang diunggah
                     </a>
                   </div>
                 ) : (
@@ -551,11 +551,11 @@ export function QuestionInput({
                 )}
               </div>
             )}
-            {localValue === 'Uploading...' && (
-              <p className="text-sm text-blue-600">Uploading file...</p>
+            {localValue === 'Mengunggah...' && (
+              <p className="text-sm text-blue-600">Mengunggah file...</p>
             )}
-            {localValue === 'Upload failed' && (
-              <p className="text-sm text-red-600">Upload failed. Please try again.</p>
+            {localValue === 'Gagal mengunggah' && (
+              <p className="text-sm text-red-600">Gagal mengunggah. Silakan coba lagi.</p>
             )}
           </div>
         )
@@ -577,7 +577,7 @@ export function QuestionInput({
                  onChange={(e) => handleChange(e.target.value)}
                  onBlur={handleBlur}
                  onFocus={handleFocus}
-                 placeholder="Please enter your answer here..."
+                 placeholder="Silakan masukkan jawaban Anda di sini..."
                  className="border-red-300"
                />
              </div>
@@ -623,7 +623,7 @@ export function QuestionInput({
             onChange={(e) => handleUrlChange(e.target.value)}
             onBlur={handleBlur}
             onFocus={handleFocus}
-            placeholder="https://example.com"
+            placeholder="https://contoh.com"
             className="mt-1"
           />
           <p className="text-xs text-gray-500 mt-1">

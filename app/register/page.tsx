@@ -34,13 +34,13 @@ export default function RegisterPage() {
     setLoading(true)
     try {
       const { message } = await registerUser(data)
-      toast.success(message || 'Registration successful!')
+      toast.success(message || 'Registrasi berhasil!')
   
       // Optional: auto-login or redirect
       router.push('/login')
     } catch (err: unknown) {
       const error = err as { response?: { data?: { message?: string } } }
-      toast.error(error?.response?.data?.message || 'Registration failed')
+      toast.error(error?.response?.data?.message || 'Registrasi gagal')
     } finally {
       setLoading(false)
     }
@@ -49,7 +49,7 @@ export default function RegisterPage() {
 
   return (
     <div className="max-w-md mx-auto mt-20 p-6 border rounded shadow">
-      <h1 className="text-2xl font-bold mb-6">Register</h1>
+      <h1 className="text-2xl font-bold mb-6">Daftar</h1>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div>
           <label className="block font-medium">Email</label>
@@ -63,7 +63,7 @@ export default function RegisterPage() {
           )}
         </div>
         <div>
-          <label className="block font-medium">Username</label>
+          <label className="block font-medium">Nama Pengguna</label>
           <input
             type="text"
             {...register('username')}
@@ -74,7 +74,7 @@ export default function RegisterPage() {
           )}
         </div>
         <div>
-          <label className="block font-medium">Full Name (optional)</label>
+          <label className="block font-medium">Nama Lengkap (opsional)</label>
           <input
             type="text"
             {...register('name')}
@@ -82,7 +82,7 @@ export default function RegisterPage() {
           />
         </div>
         <div>
-          <label className="block font-medium">Password</label>
+          <label className="block font-medium">Kata Sandi</label>
           <input
             type="password"
             {...register('password')}
@@ -97,7 +97,7 @@ export default function RegisterPage() {
           disabled={loading}
           className="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700"
         >
-          {loading ? 'Registering...' : 'Register'}
+          {loading ? 'Mendaftar...' : 'Daftar'}
         </button>
       </form>
     </div>

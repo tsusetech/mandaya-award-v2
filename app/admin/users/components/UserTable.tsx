@@ -48,7 +48,7 @@ export function UserTable({ users, onEdit, onDelete }: UserTableProps) {
       <div className="flex items-center space-x-2">
         <div className={`w-2 h-2 rounded-full ${isActive ? 'bg-green-500' : 'bg-gray-400'}`}></div>
         <span className={`text-xs font-medium ${isActive ? 'text-green-600 dark:text-green-400' : 'text-gray-500 dark:text-gray-400'}`}>
-          {isActive ? 'Active' : 'Inactive'}
+          {isActive ? 'Aktif' : 'Tidak Aktif'}
         </span>
       </div>
     )
@@ -60,19 +60,19 @@ export function UserTable({ users, onEdit, onDelete }: UserTableProps) {
         <thead className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-700">
           <tr>
             <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
-              User
+              Pengguna
             </th>
             <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
-              Contact
+              Kontak
             </th>
             <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
-              Role
+              Peran
             </th>
             <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
               Status
             </th>
             <th className="px-6 py-4 text-center text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
-              Actions
+              Aksi
             </th>
           </tr>
         </thead>

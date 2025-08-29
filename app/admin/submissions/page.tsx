@@ -173,7 +173,7 @@ export default function AdminSubmissionsPage() {
       setFilteredSubmissions(allSubmissions)
     } catch (err) {
       console.error('Error fetching submissions:', err)
-      toast.error('Failed to load submissions')
+      toast.error('Gagal memuat pengajuan')
       setSubmissions([])
       setFilteredSubmissions([])
     } finally {
@@ -270,33 +270,33 @@ export default function AdminSubmissionsPage() {
   const getStatusLabel = (status: string) => {
     switch (status) {
       case 'draft':
-        return 'Draft'
+        return 'Draf'
       case 'in_progress':
-        return 'In Progress'
+        return 'Sedang Berlangsung'
       case 'submitted':
-        return 'Submitted'
+        return 'Dikirim'
       case 'pending_review':
-        return 'Pending Review'
+        return 'Menunggu Tinjauan'
       case 'under_review':
-        return 'Under Review'
+        return 'Sedang Ditinjau'
       case 'needs_revision':
-        return 'Needs Revision'
+        return 'Perlu Revisi'
       case 'resubmitted':
-        return 'Resubmitted'
+        return 'Dikirim Ulang'
       case 'approved':
-        return 'Approved'
+        return 'Disetujui'
       case 'rejected':
-        return 'Rejected'
+        return 'Ditolak'
       case 'passed_to_jury':
-        return 'Passed to Jury'
+        return 'Diteruskan ke Juri'
       case 'jury_scoring':
-        return 'Jury Scoring'
+        return 'Penilaian Juri'
       case 'jury_deliberation':
-        return 'Jury Deliberation'
+        return 'Deliberasi Juri'
       case 'final_decision':
-        return 'Final Decision'
+        return 'Keputusan Akhir'
       case 'completed':
-        return 'Completed'
+        return 'Selesai'
       default:
         return status
     }
@@ -358,7 +358,7 @@ export default function AdminSubmissionsPage() {
                   className="flex items-center space-x-2 bg-white/20 hover:bg-white/30 text-gray-900 dark:text-white backdrop-blur-sm border border-white/20"
                 >
                   <ArrowLeft className="h-4 w-4" />
-                  <span>Back to Dashboard</span>
+                  <span>Kembali ke Beranda</span>
                 </Button>
                 <div className="flex items-center space-x-4">
                   <div className="flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-orange-500 to-orange-600 shadow-lg border-2 border-orange-400/50">
@@ -366,10 +366,10 @@ export default function AdminSubmissionsPage() {
                   </div>
                   <div>
                     <h1 className="text-3xl font-bold bg-gradient-to-r from-orange-600 via-orange-500 to-orange-400 bg-clip-text text-transparent">
-                      Assessment Submissions
+                      Pengajuan Penilaian
                     </h1>
                     <p className="text-gray-600 dark:text-gray-300 mt-1">
-                      Review and manage assessment submissions with real-time updates
+                      Tinjau dan kelola pengajuan penilaian dengan pembaruan real-time
                     </p>
                   </div>
                 </div>
@@ -382,7 +382,7 @@ export default function AdminSubmissionsPage() {
                 className="flex items-center space-x-2 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border-orange-200/50 dark:border-orange-800/50 hover:bg-white/70 dark:hover:bg-gray-700/50"
               >
                 <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-                <span>Refresh</span>
+                <span>Segarkan</span>
               </Button>
             </div>
           </div>
@@ -394,7 +394,7 @@ export default function AdminSubmissionsPage() {
             <Card className="group hover:shadow-2xl transition-all duration-500 transform hover:scale-[1.03] border-0 shadow-xl bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm relative overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-blue-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 relative z-10">
-                <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Submissions</CardTitle>
+                <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Pengajuan</CardTitle>
                 <div className="p-3 rounded-xl bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900/40 dark:to-blue-800/40 group-hover:from-blue-200 dark:group-hover:from-blue-900/60 group-hover:to-blue-300 dark:group-hover:to-blue-800/60 transition-all duration-300 transform group-hover:scale-110">
                   <FileText className="h-6 w-6 text-blue-600 dark:text-blue-400" />
                 </div>
@@ -403,7 +403,7 @@ export default function AdminSubmissionsPage() {
                 <div className="text-4xl font-bold text-gray-900 dark:text-white mb-2">{stats.total}</div>
                 <div className="flex items-center space-x-2">
                   <TrendingUp className="h-4 w-4 text-green-500 animate-pulse" />
-                  <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">All submissions</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Semua pengajuan</p>
                 </div>
               </CardContent>
             </Card>
@@ -411,7 +411,7 @@ export default function AdminSubmissionsPage() {
             <Card className="group hover:shadow-2xl transition-all duration-500 transform hover:scale-[1.03] border-0 shadow-xl bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm relative overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-r from-green-500/5 to-green-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 relative z-10">
-                <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">Submitted</CardTitle>
+                <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">Dikirim</CardTitle>
                 <div className="p-3 rounded-xl bg-gradient-to-br from-green-100 to-green-200 dark:from-green-900/40 dark:to-green-800/40 group-hover:from-green-200 dark:group-hover:from-green-900/60 group-hover:to-green-300 dark:group-hover:to-green-800/60 transition-all duration-300 transform group-hover:scale-110">
                   <CheckCircle className="h-6 w-6 text-green-600 dark:text-green-400" />
                 </div>
@@ -420,7 +420,7 @@ export default function AdminSubmissionsPage() {
                 <div className="text-4xl font-bold text-gray-900 dark:text-white mb-2">{stats.submitted}</div>
                 <div className="flex items-center space-x-2">
                   <BarChart3 className="h-4 w-4 text-green-500 animate-pulse" />
-                  <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Ready for review</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Siap untuk ditinjau</p>
                 </div>
               </CardContent>
             </Card>
@@ -428,7 +428,7 @@ export default function AdminSubmissionsPage() {
             <Card className="group hover:shadow-2xl transition-all duration-500 transform hover:scale-[1.03] border-0 shadow-xl bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm relative overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-r from-red-500/5 to-red-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 relative z-10">
-                <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">Needs Revision</CardTitle>
+                <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">Perlu Revisi</CardTitle>
                 <div className="p-3 rounded-xl bg-gradient-to-br from-red-100 to-red-200 dark:from-red-900/40 dark:to-red-800/40 group-hover:from-red-200 dark:group-hover:from-red-900/60 group-hover:to-red-300 dark:group-hover:to-red-800/60 transition-all duration-300 transform group-hover:scale-110">
                   <AlertTriangle className="h-6 w-6 text-red-600 dark:text-red-400" />
                 </div>
@@ -437,7 +437,7 @@ export default function AdminSubmissionsPage() {
                 <div className="text-4xl font-bold text-gray-900 dark:text-white mb-2">{stats.needsRevision}</div>
                 <div className="flex items-center space-x-2">
                   <Clock className="h-4 w-4 text-red-500 animate-pulse" />
-                  <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Require updates</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Memerlukan pembaruan</p>
                 </div>
               </CardContent>
             </Card>
@@ -445,7 +445,7 @@ export default function AdminSubmissionsPage() {
             <Card className="group hover:shadow-2xl transition-all duration-500 transform hover:scale-[1.03] border-0 shadow-xl bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm relative overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-r from-orange-500/5 to-orange-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 relative z-10">
-                <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">Approved</CardTitle>
+                <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">Disetujui</CardTitle>
                 <div className="p-3 rounded-xl bg-gradient-to-br from-orange-100 to-orange-200 dark:from-orange-900/40 dark:to-orange-800/40 group-hover:from-orange-200 dark:group-hover:from-orange-900/60 group-hover:to-orange-300 dark:group-hover:to-orange-800/60 transition-all duration-300 transform group-hover:scale-110">
                   <Trophy className="h-6 w-6 text-orange-600 dark:text-orange-400" />
                 </div>
@@ -454,7 +454,7 @@ export default function AdminSubmissionsPage() {
                 <div className="text-4xl font-bold text-gray-900 dark:text-white mb-2">{stats.approved + stats.completed}</div>
                 <div className="flex items-center space-x-2">
                   <Star className="h-4 w-4 text-orange-500 animate-pulse" />
-                  <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Passed to jury</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Diteruskan ke juri</p>
                 </div>
               </CardContent>
             </Card>
@@ -468,7 +468,7 @@ export default function AdminSubmissionsPage() {
                 <div className="relative flex-1">
                   <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
                   <Input
-                    placeholder="Search by group name, user name, or email..."
+                    placeholder="Cari berdasarkan nama kelompok, nama pengguna, atau email..."
                     value={searchTerm}
                     onChange={(e) => handleSearch(e.target.value)}
                     className="pl-12 h-12 border-gray-300 focus:border-orange-500 focus:ring-orange-500/20 dark:border-gray-600 dark:bg-gray-800 dark:focus:border-orange-400 transition-all duration-200"
@@ -481,7 +481,7 @@ export default function AdminSubmissionsPage() {
                     onClick={() => handleStatusFilter('all')}
                     className="bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 text-white shadow-lg shadow-orange-500/25 hover:shadow-orange-500/40 transition-all duration-200"
                   >
-                    All
+                    Semua
                   </Button>
 
                   <Button
@@ -489,14 +489,14 @@ export default function AdminSubmissionsPage() {
                     size="sm"
                     onClick={() => handleStatusFilter('draft')}
                   >
-                    Draft
+                    Draf
                   </Button>
                   <Button
                     variant={statusFilter === 'submitted' ? 'default' : 'outline'}
                     size="sm"
                     onClick={() => handleStatusFilter('submitted')}
                   >
-                    Submitted
+                    Dikirim
                   </Button>
 
                   <Button
@@ -504,21 +504,21 @@ export default function AdminSubmissionsPage() {
                     size="sm"
                     onClick={() => handleStatusFilter('needs_revision')}
                   >
-                    Needs Revision
+                    Perlu Revisi
                   </Button>
                   <Button
                     variant={statusFilter === 'resubmitted' ? 'default' : 'outline'}
                     size="sm"
                     onClick={() => handleStatusFilter('resubmitted')}
                   >
-                    Resubmitted
+                    Dikirim Ulang
                   </Button>
                   <Button
                     variant={statusFilter === 'approved' ? 'default' : 'outline'}
                     size="sm"
                     onClick={() => handleStatusFilter('approved')}
                   >
-                    Approve to Jury
+                    Setujui ke Juri
                   </Button>
 
                   <Button
@@ -526,7 +526,7 @@ export default function AdminSubmissionsPage() {
                     size="sm"
                     onClick={() => handleStatusFilter('completed')}
                   >
-                    Completed
+                    Selesai
                   </Button>
                 </div>
               </div>
@@ -543,11 +543,11 @@ export default function AdminSubmissionsPage() {
                     <div className="p-4 rounded-2xl bg-gradient-to-br from-orange-100 to-orange-200 dark:from-orange-900/40 dark:to-orange-800/40 mb-4 mx-auto w-fit">
                       <FileText className="h-12 w-12 text-orange-600 dark:text-orange-400" />
                     </div>
-                    <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No submissions found</h3>
+                    <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">Tidak ada pengajuan ditemukan</h3>
                     <p className="text-gray-600 dark:text-gray-300 text-center">
                       {searchTerm || statusFilter !== 'all'
-                        ? 'Try adjusting your filters'
-                        : 'No submissions have been submitted yet'}
+                        ? 'Coba sesuaikan filter Anda'
+                        : 'Belum ada pengajuan yang dikirim'}
                     </p>
                   </div>
                 </CardContent>
@@ -568,10 +568,10 @@ export default function AdminSubmissionsPage() {
                               {submission.groupName}
                             </h3>
                             <p className="text-sm text-gray-600 dark:text-gray-300">
-                              Submitted by {submission.userName} ({submission.userEmail})
+                              Dikirim oleh {submission.userName} ({submission.userEmail})
                             </p>
                             <p className="text-sm text-gray-500 dark:text-gray-400">
-                              Submitted on {new Date(submission.submittedAt).toLocaleDateString()}
+                              Dikirim pada {new Date(submission.submittedAt).toLocaleDateString()}
                             </p>
                           </div>
                         </div>
@@ -583,14 +583,14 @@ export default function AdminSubmissionsPage() {
                           <div className="flex items-center space-x-2">
                             <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
                             <span className="text-sm text-gray-600 dark:text-gray-300">
-                              Progress: {submission.progressPercentage}%
+                              Kemajuan: {submission.progressPercentage}%
                             </span>
                           </div>
                           {submission.revisionCount > 0 && (
                             <div className="flex items-center space-x-2">
                               <RefreshCw className="h-4 w-4 text-orange-500" />
                               <span className="text-sm text-gray-600 dark:text-gray-300">
-                                Revisions: {submission.revisionCount}
+                                Revisi: {submission.revisionCount}
                               </span>
                             </div>
                           )}
@@ -600,7 +600,7 @@ export default function AdminSubmissionsPage() {
                           <div className="mt-4 p-4 bg-orange-50 dark:bg-orange-900/20 rounded-xl border border-orange-200 dark:border-orange-800">
                             <div className="flex items-center space-x-2">
                               <MessageSquare className="h-4 w-4 text-orange-500 flex-shrink-0" />
-                              <span className="text-sm font-medium text-orange-700 dark:text-orange-300">Feedback:</span>
+                              <span className="text-sm font-medium text-orange-700 dark:text-orange-300">Umpan Balik:</span>
                             </div>
                             <p className="text-sm text-orange-600 dark:text-orange-400 mt-1 break-words">{submission.feedback}</p>
                           </div>
@@ -614,7 +614,7 @@ export default function AdminSubmissionsPage() {
                           className="flex items-center space-x-2 bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 text-white border-orange-600 shadow-lg shadow-orange-500/25 hover:shadow-orange-500/40 transition-all duration-200"
                         >
                           <Eye className="h-4 w-4" />
-                          <span>Review</span>
+                          <span>Tinjau</span>
                         </Button>
                       </div>
                     </div>

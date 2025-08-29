@@ -102,7 +102,7 @@ export default function JuriDashboard() {
       setCurrentPage(dashboardData.pagination.page)
     } catch (err) {
       console.error('Error fetching juri data:', err)
-      toast.error('Failed to load dashboard data')
+      toast.error('Gagal memuat data dashboard')
       
       // Use mock data for demonstration
       const mockReviews = [
@@ -180,11 +180,11 @@ export default function JuriDashboard() {
   const getStatusLabel = (status: string) => {
     switch (status) {
       case 'completed':
-        return 'Completed'
+        return 'Selesai'
       case 'in_progress':
-        return 'In Progress'
+        return 'Sedang Berlangsung'
       case 'pending':
-        return 'Pending'
+        return 'Menunggu'
       default:
         return status
     }
@@ -234,10 +234,10 @@ export default function JuriDashboard() {
                   </div>
                   <div>
                     <h1 className="text-3xl font-bold bg-gradient-to-r from-yellow-600 via-yellow-500 to-yellow-400 bg-clip-text text-transparent">
-                      Jury Dashboard
+                      Beranda Juri
                     </h1>
                     <p className="text-gray-600 dark:text-gray-300 mt-1">
-                      Review and score submissions with expertise
+                      Tinjau dan nilai pengajuan dengan keahlian
                     </p>
                   </div>
                 </div>
@@ -245,7 +245,7 @@ export default function JuriDashboard() {
               <div className="flex items-center space-x-3">
                 <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400 bg-white/50 dark:bg-gray-800/50 px-4 py-2 rounded-full backdrop-blur-sm border border-yellow-200/50 dark:border-yellow-800/50">
                   <Star className="h-4 w-4 text-yellow-500" />
-                  <span className="font-medium">Expert Jury Panel</span>
+                  <span className="font-medium">Panel Juri Ahli</span>
                 </div>
               </div>
             </div>
@@ -265,8 +265,8 @@ export default function JuriDashboard() {
                   <TrendingUp className="h-5 w-5 text-blue-500" />
                 </div>
                 <div className="text-3xl font-bold text-gray-900 dark:text-white mb-2">{stats.totalAssigned}</div>
-                <p className="text-gray-600 dark:text-gray-300 font-medium">Total Assigned</p>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Submissions to review</p>
+                <p className="text-gray-600 dark:text-gray-300 font-medium">Total Ditetapkan</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Pengajuan untuk ditinjau</p>
               </CardContent>
             </Card>
 
@@ -280,8 +280,8 @@ export default function JuriDashboard() {
                   <Activity className="h-5 w-5 text-green-500" />
                 </div>
                 <div className="text-3xl font-bold text-gray-900 dark:text-white mb-2">{stats.reviewed}</div>
-                <p className="text-gray-600 dark:text-gray-300 font-medium">Reviewed</p>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Completed reviews</p>
+                <p className="text-gray-600 dark:text-gray-300 font-medium">Sudah Ditinjau</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Tinjauan selesai</p>
               </CardContent>
             </Card>
 
@@ -295,8 +295,8 @@ export default function JuriDashboard() {
                   <BarChart3 className="h-5 w-5 text-orange-500" />
                 </div>
                 <div className="text-3xl font-bold text-gray-900 dark:text-white mb-2">{stats.inProgress}</div>
-                <p className="text-gray-600 dark:text-gray-300 font-medium">In Progress</p>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Reviews in progress</p>
+                <p className="text-gray-600 dark:text-gray-300 font-medium">Sedang Berlangsung</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Tinjauan sedang berlangsung</p>
               </CardContent>
             </Card>
 
@@ -310,8 +310,8 @@ export default function JuriDashboard() {
                   <Target className="h-5 w-5 text-red-500" />
                 </div>
                 <div className="text-3xl font-bold text-gray-900 dark:text-white mb-2">{stats.pending}</div>
-                <p className="text-gray-600 dark:text-gray-300 font-medium">Pending</p>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Not yet reviewed</p>
+                <p className="text-gray-600 dark:text-gray-300 font-medium">Menunggu</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Belum ditinjau</p>
               </CardContent>
             </Card>
           </div>
@@ -324,11 +324,11 @@ export default function JuriDashboard() {
                 <div className="flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-lg mb-4">
                   <Award className="h-8 w-8 text-white" />
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Review Submissions</h3>
-                <p className="text-gray-600 dark:text-gray-300 mb-4">Review and score assigned submissions with expert evaluation</p>
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Tinjau Pengajuan</h3>
+                <p className="text-gray-600 dark:text-gray-300 mb-4">Tinjau dan nilai pengajuan yang ditetapkan dengan evaluasi ahli</p>
                 <Button className="w-full bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-all duration-200 transform hover:scale-105">
                   <Eye className="h-4 w-4 mr-2" />
-                  Start Reviewing
+                  Mulai Meninjau
                 </Button>
               </CardContent>
             </Card>
@@ -339,11 +339,11 @@ export default function JuriDashboard() {
                 <div className="flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-yellow-500 to-yellow-600 shadow-lg mb-4">
                   <Trophy className="h-8 w-8 text-white" />
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Award Rankings</h3>
-                <p className="text-gray-600 dark:text-gray-300 mb-4">View current award rankings and standings</p>
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Peringkat Penghargaan</h3>
+                <p className="text-gray-600 dark:text-gray-300 mb-4">Lihat peringkat penghargaan dan posisi saat ini</p>
                 <Button className="w-full bg-gradient-to-r from-yellow-600 to-yellow-500 hover:from-yellow-700 hover:to-yellow-600 text-white shadow-lg shadow-yellow-500/25 hover:shadow-yellow-500/40 transition-all duration-200 transform hover:scale-105">
                   <BarChart3 className="h-4 w-4 mr-2" />
-                  View Rankings
+                  Lihat Peringkat
                 </Button>
               </CardContent>
             </Card>
@@ -354,11 +354,11 @@ export default function JuriDashboard() {
                 <div className="flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-500 to-purple-600 shadow-lg mb-4">
                   <Brain className="h-8 w-8 text-white" />
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Expert Insights</h3>
-                <p className="text-gray-600 dark:text-gray-300 mb-4">Access evaluation criteria and scoring guidelines</p>
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Wawasan Ahli</h3>
+                <p className="text-gray-600 dark:text-gray-300 mb-4">Akses kriteria evaluasi dan panduan penilaian</p>
                 <Button className="w-full bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-700 hover:to-purple-600 text-white shadow-lg shadow-purple-500/25 hover:shadow-purple-500/40 transition-all duration-200 transform hover:scale-105">
                   <Star className="h-4 w-4 mr-2" />
-                  View Guidelines
+                  Lihat Panduan
                 </Button>
               </CardContent>
             </Card>
@@ -372,7 +372,7 @@ export default function JuriDashboard() {
                 <div className="relative flex-1">
                   <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
                   <Input
-                    placeholder="Search reviews by group name, participant, or email..."
+                    placeholder="Cari tinjauan berdasarkan nama kelompok, peserta, atau email..."
                     value={searchTerm}
                     onChange={(e) => {
                       const value = e.target.value
@@ -394,7 +394,7 @@ export default function JuriDashboard() {
                 </div>
                 <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400 bg-white/50 dark:bg-gray-800/50 px-4 py-2 rounded-full backdrop-blur-sm border border-yellow-200/50 dark:border-yellow-800/50">
                   <Filter className="h-4 w-4" />
-                  <span className="font-medium">{filteredReviews.length} of {reviews.length} submissions</span>
+                  <span className="font-medium">{filteredReviews.length} dari {reviews.length} pengajuan</span>
                 </div>
               </div>
             </CardContent>
@@ -405,14 +405,14 @@ export default function JuriDashboard() {
             <div className="absolute inset-0 bg-gradient-to-r from-gray-500/5 to-gray-600/5"></div>
             <CardHeader className="relative z-10">
               <div className="flex items-center justify-between">
-                <CardTitle className="text-2xl font-bold text-gray-900 dark:text-white">Recent Reviews</CardTitle>
+                <CardTitle className="text-2xl font-bold text-gray-900 dark:text-white">Tinjauan Terbaru</CardTitle>
                 <Button 
                   variant="outline" 
                   size="sm"
                   onClick={() => router.push('/jury/review')}
                   className="flex items-center space-x-2 bg-gradient-to-r from-yellow-600 to-yellow-500 hover:from-yellow-700 hover:to-yellow-600 text-white border-0 shadow-lg shadow-yellow-500/25 hover:shadow-yellow-500/40 transition-all duration-200"
                 >
-                  <span>View All</span>
+                  <span>Lihat Semua</span>
                   <ArrowRight className="h-4 w-4" />
                 </Button>
               </div>
@@ -423,9 +423,9 @@ export default function JuriDashboard() {
                   <div className="w-32 h-32 mx-auto mb-8 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 to-gray-700 flex items-center justify-center">
                     <ClipboardList className="h-16 w-16 text-gray-400" />
                   </div>
-                  <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">No reviews found</h3>
+                  <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Tidak ada tinjauan ditemukan</h3>
                   <p className="text-gray-500 dark:text-gray-400 mb-6 text-lg">
-                    {searchTerm ? 'Try adjusting your search' : 'You have no reviews assigned yet'}
+                    {searchTerm ? 'Coba sesuaikan pencarian Anda' : 'Anda belum memiliki tinjauan yang ditetapkan'}
                   </p>
                   <div className="flex items-center justify-center space-x-2">
                     <div className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse"></div>
@@ -457,7 +457,7 @@ export default function JuriDashboard() {
                       </div>
                       <div className="flex items-center space-x-4">
                         <div className="text-sm text-gray-500 dark:text-gray-400">
-                          Submitted {new Date(review.submittedAt).toLocaleDateString()}
+                          Dikirim {new Date(review.submittedAt).toLocaleDateString()}
                         </div>
                         <Button 
                           variant="outline" 
@@ -465,7 +465,7 @@ export default function JuriDashboard() {
                           className="bg-gradient-to-r from-yellow-600 to-yellow-500 hover:from-yellow-700 hover:to-yellow-600 text-white border-0 shadow-lg shadow-yellow-500/25 hover:shadow-yellow-500/40 transition-all duration-200 transform hover:scale-105"
                         >
                           <Eye className="h-4 w-4 mr-2" />
-                          Review
+                          Tinjau
                         </Button>
                       </div>
                     </div>

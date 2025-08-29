@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { Button } from '@/components/ui/button'
-import { LogOut, User, Users, FileText, Bell, Settings, Award, Home } from 'lucide-react'
+import { LogOut, User, Users, FileText, Bell, Settings, Award, Home, Trophy } from 'lucide-react'
 import { logoutUser, getProfile } from '@/lib/auth'
 import { toast } from 'sonner'
 
@@ -45,10 +45,10 @@ export default function Navigation({ className = '' }: NavigationProps) {
   const handleLogout = async () => {
     try {
       await logoutUser()
-      toast.success('Logged out successfully')
+      toast.success('Berhasil keluar')
       router.push('/login')
     } catch (err) {
-      toast.error('Failed to logout')
+      toast.error('Gagal keluar')
     }
   }
 
@@ -62,29 +62,33 @@ export default function Navigation({ className = '' }: NavigationProps) {
     switch (role) {
       case 'ADMIN':
         return [
-          { href: '/admin', label: 'Dashboard', icon: Home },
-          { href: '/admin/users', label: 'Users', icon: Users },
-          { href: '/admin/groups', label: 'Groups', icon: FileText },
+          { href: '/admin', label: 'Beranda', icon: Home },
+          { href: '/admin/users', label: 'Pengguna', icon: Users },
+          { href: '/admin/groups', label: 'Kelompok', icon: FileText },
+          { href: '/admin/submissions', label: 'Pengajuan', icon: FileText },
+          { href: '/admin/rankings', label: 'Peringkat', icon: Trophy },
         ]
       case 'SUPERADMIN':
         return [
-          { href: '/admin', label: 'Admin Dashboard', icon: Home },
-          { href: '/admin/users', label: 'Users', icon: Users },
-          { href: '/admin/groups', label: 'Groups', icon: FileText },
-          { href: '/admin/submissions', label: 'Submissions', icon: FileText },
-          { href: '/admin/scoring-settings', label: 'Scoring Settings', icon: Settings },
+          { href: '/admin', label: 'Beranda Admin', icon: Home },
+          { href: '/admin/users', label: 'Pengguna', icon: Users },
+          { href: '/admin/groups', label: 'Kelompok', icon: FileText },
+          { href: '/admin/submissions', label: 'Pengajuan', icon: FileText },
+          { href: '/admin/rankings', label: 'Peringkat', icon: Trophy },
+          { href: '/admin/scoring-settings', label: 'Pengaturan Penilaian', icon: Settings },
         ]
       case 'JURI':
         return [
-          { href: '/jury', label: 'Dashboard', icon: Home },
-          { href: '/jury/review', label: 'Reviews', icon: Award },
+          { href: '/jury', label: 'Beranda', icon: Home },
+          { href: '/jury/review', label: 'Penilaian', icon: Award },
+          { href: '/jury/rankings', label: 'Peringkat Penghargaan', icon: Trophy },
         ]
       case 'PESERTA':
       default:
         return [
-          { href: '/peserta', label: 'Dashboard', icon: Home },
-          { href: '/peserta/groups', label: 'My Groups', icon: FileText },
-          { href: '/peserta/submissions', label: 'My Submissions', icon: FileText },
+          { href: '/peserta', label: 'Beranda', icon: Home },
+          { href: '/peserta/groups', label: 'Kelompok Saya', icon: FileText },
+          { href: '/peserta/submissions', label: 'Pengajuan Saya', icon: FileText },
         ]
     }
   }
@@ -124,9 +128,6 @@ export default function Navigation({ className = '' }: NavigationProps) {
 
           {/* User Menu */}
           <div className="flex items-center space-x-4">
-            <div className="text-sm text-gray-700">
-              Welcome, {user?.name || user?.username}
-            </div>
             <Button
               variant="ghost"
               size="sm"
@@ -134,7 +135,7 @@ export default function Navigation({ className = '' }: NavigationProps) {
               className="flex items-center space-x-2"
             >
               <LogOut className="h-4 w-4" />
-              <span>Logout</span>
+              <span>Keluar</span>
             </Button>
           </div>
         </div>

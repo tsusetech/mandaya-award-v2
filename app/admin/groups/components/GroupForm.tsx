@@ -30,14 +30,14 @@ export default function GroupForm({ open, onClose, onSubmit, defaultValues }: Gr
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{defaultValues?.id ? 'Edit Group' : 'Create Group'}</DialogTitle>
+          <DialogTitle>{defaultValues?.id ? 'Edit Kelompok' : 'Buat Kelompok'}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <Input {...register('groupName')} placeholder="Group Name" required />
-          <Input {...register('description')} placeholder="Description" required />
+          <Input {...register('groupName')} placeholder="Nama Kelompok" required />
+          <Input {...register('description')} placeholder="Deskripsi" required />
           <div className="flex justify-end gap-2">
-            <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
-            <Button type="submit">Save</Button>
+            <Button type="button" variant="outline" onClick={onClose}>Batal</Button>
+            <Button type="submit">Simpan</Button>
           </div>
         </form>
       </DialogContent>

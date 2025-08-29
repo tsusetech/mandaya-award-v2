@@ -236,7 +236,7 @@ export default function SubmissionsPage() {
       setFilteredSubmissions(allSubmissions)
     } catch (err) {
       console.error('Error fetching submissions:', err)
-      toast.error('Failed to load submissions')
+      toast.error('Gagal memuat pengajuan')
       // Set empty array to prevent further errors
       setSubmissions([])
       setFilteredSubmissions([])
@@ -359,7 +359,7 @@ export default function SubmissionsPage() {
                   className="flex items-center space-x-2 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border border-yellow-200/50 dark:border-yellow-800/50 hover:bg-yellow-50 dark:hover:bg-yellow-900/20 transition-all duration-200"
                 >
                   <ArrowLeft className="h-4 w-4" />
-                  <span>Back to Dashboard</span>
+                  <span>Kembali ke Beranda</span>
                 </Button>
                 <div className="flex items-center space-x-4">
                   <div className="flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-yellow-500 to-yellow-600 shadow-lg border-2 border-yellow-400/50 relative">
@@ -368,10 +368,10 @@ export default function SubmissionsPage() {
                   </div>
                   <div>
                     <h1 className="text-3xl font-bold bg-gradient-to-r from-yellow-600 via-yellow-500 to-yellow-400 bg-clip-text text-transparent">
-                      My Submissions
+                      Pengajuan Saya
                     </h1>
                     <p className="text-gray-600 dark:text-gray-300 mt-1">
-                      View and track all your submissions
+                      Lihat dan lacak semua pengajuan Anda
                     </p>
                   </div>
                 </div>
@@ -382,11 +382,11 @@ export default function SubmissionsPage() {
                   className="flex items-center space-x-2 bg-gradient-to-r from-yellow-600 to-yellow-500 hover:from-yellow-700 hover:to-yellow-600 text-white shadow-lg shadow-yellow-500/25 hover:shadow-yellow-500/40 transition-all duration-200 transform hover:scale-105"
                 >
                   <Play className="h-4 w-4" />
-                  <span>Start Assessment</span>
+                  <span>Mulai Penilaian</span>
                 </Button>
                 <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400 bg-white/50 dark:bg-gray-800/50 px-4 py-2 rounded-full backdrop-blur-sm border border-yellow-200/50 dark:border-yellow-800/50">
                   <Zap className="h-4 w-4 text-green-500" />
-                  <span className="font-medium">{submissions.length} Submissions</span>
+                  <span className="font-medium">{submissions.length} Pengajuan</span>
                 </div>
               </div>
             </div>
@@ -402,7 +402,7 @@ export default function SubmissionsPage() {
                 <div className="relative flex-1">
                   <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
                   <Input
-                    placeholder="Search submissions by group name..."
+                    placeholder="Cari pengajuan berdasarkan nama kelompok..."
                     value={searchTerm}
                     onChange={(e) => handleSearch(e.target.value)}
                     className="pl-12 h-12 border-gray-300 focus:border-yellow-500 focus:ring-yellow-500/20 dark:border-gray-600 dark:bg-gray-800 dark:focus:border-yellow-400 transition-all duration-200"
@@ -411,7 +411,7 @@ export default function SubmissionsPage() {
                 <div className="flex flex-wrap items-center gap-3">
                   <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
                     <Filter className="h-4 w-4" />
-                    <span>Filter by status:</span>
+                    <span>Filter berdasarkan status:</span>
                   </div>
                   <Button
                     variant={statusFilter === 'all' ? 'default' : 'outline'}
@@ -419,7 +419,7 @@ export default function SubmissionsPage() {
                     onClick={() => handleStatusFilter('all')}
                     className="bg-gradient-to-r from-yellow-600 to-yellow-500 hover:from-yellow-700 hover:to-yellow-600 text-white border-0 shadow-lg shadow-yellow-500/25 hover:shadow-yellow-500/40 transition-all duration-200"
                   >
-                    All
+                    Semua
                   </Button>
                   <Button
                     variant={statusFilter === 'draft' ? 'default' : 'outline'}
@@ -427,7 +427,7 @@ export default function SubmissionsPage() {
                     onClick={() => handleStatusFilter('draft')}
                     className="border-yellow-200/50 dark:border-yellow-800/50 hover:bg-yellow-50 dark:hover:bg-yellow-900/20"
                   >
-                    Draft
+                    Draf
                   </Button>
                   <Button
                     variant={statusFilter === 'submitted' ? 'default' : 'outline'}
@@ -435,7 +435,7 @@ export default function SubmissionsPage() {
                     onClick={() => handleStatusFilter('submitted')}
                     className="border-yellow-200/50 dark:border-yellow-800/50 hover:bg-yellow-50 dark:hover:bg-yellow-900/20"
                   >
-                    Submitted
+                    Dikirim
                   </Button>
                   <Button
                     variant={statusFilter === 'needs_revision' ? 'default' : 'outline'}
@@ -443,7 +443,7 @@ export default function SubmissionsPage() {
                     onClick={() => handleStatusFilter('needs_revision')}
                     className="border-yellow-200/50 dark:border-yellow-800/50 hover:bg-yellow-50 dark:hover:bg-yellow-900/20"
                   >
-                    Needs Revision
+                    Perlu Revisi
                   </Button>
                   <Button
                     variant={statusFilter === 'resubmitted' ? 'default' : 'outline'}
@@ -451,7 +451,7 @@ export default function SubmissionsPage() {
                     onClick={() => handleStatusFilter('resubmitted')}
                     className="border-yellow-200/50 dark:border-yellow-800/50 hover:bg-yellow-50 dark:hover:bg-yellow-900/20"
                   >
-                    Resubmitted
+                    Dikirim Ulang
                   </Button>
                   <Button
                     variant={statusFilter === 'approved' ? 'default' : 'outline'}
@@ -459,7 +459,7 @@ export default function SubmissionsPage() {
                     onClick={() => handleStatusFilter('approved')}
                     className="border-yellow-200/50 dark:border-yellow-800/50 hover:bg-yellow-50 dark:hover:bg-yellow-900/20"
                   >
-                    Approved
+                    Disetujui
                   </Button>
                   <Button
                     variant={statusFilter === 'completed' ? 'default' : 'outline'}
@@ -467,7 +467,7 @@ export default function SubmissionsPage() {
                     onClick={() => handleStatusFilter('completed')}
                     className="border-yellow-200/50 dark:border-yellow-800/50 hover:bg-yellow-50 dark:hover:bg-yellow-900/20"
                   >
-                    Completed
+                    Selesai
                   </Button>
                 </div>
               </div>
@@ -484,11 +484,11 @@ export default function SubmissionsPage() {
                     <div className="w-32 h-32 mx-auto mb-8 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 to-gray-700 flex items-center justify-center">
                       <FileText className="h-16 w-16 text-gray-400" />
                     </div>
-                    <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">No submissions found</h3>
+                    <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Tidak ada pengajuan ditemukan</h3>
                     <p className="text-gray-500 dark:text-gray-400 mb-6 text-lg">
                       {searchTerm || statusFilter !== 'all'
-                        ? 'Try adjusting your filters'
-                        : 'Create your first submission to get started'}
+                        ? 'Coba sesuaikan filter Anda'
+                        : 'Buat pengajuan pertama Anda untuk memulai'}
                     </p>
                     <div className="flex items-center justify-center space-x-2">
                       <div className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse"></div>
@@ -514,7 +514,7 @@ export default function SubmissionsPage() {
                               {submission.groupName}
                             </h3>
                             <p className="text-gray-500 dark:text-gray-400 mt-1">
-                              Submitted on {new Date(submission.submittedAt).toLocaleDateString()}
+                              Dikirim pada {new Date(submission.submittedAt).toLocaleDateString()}
                             </p>
                           </div>
                         </div>
@@ -522,14 +522,14 @@ export default function SubmissionsPage() {
                           <div className="flex items-center space-x-2">
                             <BarChart3 className="h-4 w-4 text-blue-500" />
                             <span className="text-sm text-gray-600 dark:text-gray-300 font-medium">
-                              Progress: {submission.progressPercentage}%
+                              Kemajuan: {submission.progressPercentage}%
                             </span>
                           </div>
                           {submission.revisionCount > 0 && (
                             <div className="flex items-center space-x-2">
                               <RefreshCw className="h-4 w-4 text-orange-500" />
                               <span className="text-sm text-gray-600 dark:text-gray-300 font-medium">
-                                Revisions: {submission.revisionCount}
+                                Revisi: {submission.revisionCount}
                               </span>
                             </div>
                           )}
@@ -538,7 +538,7 @@ export default function SubmissionsPage() {
                           <div className="mt-4 p-4 bg-gradient-to-r from-orange-50 to-red-50 dark:from-orange-900/20 dark:to-red-900/20 rounded-xl border border-orange-200/50 dark:border-orange-800/50">
                             <div className="flex items-center space-x-2 mb-2">
                               <MessageSquare className="h-5 w-5 text-orange-500" />
-                              <span className="text-sm font-semibold text-orange-700 dark:text-orange-300">Feedback:</span>
+                              <span className="text-sm font-semibold text-orange-700 dark:text-orange-300">Umpan Balik:</span>
                             </div>
                             <p className="text-sm text-orange-600 dark:text-orange-400">{submission.feedback}</p>
                           </div>
@@ -552,12 +552,12 @@ export default function SubmissionsPage() {
                           {submission.combinedStatus === 'draft' ? (
                             <>
                               <Play className="h-5 w-5" />
-                              <span className="font-semibold">Start Assessment</span>
+                              <span className="font-semibold">Mulai Penilaian</span>
                             </>
                           ) : (
                             <>
                               <Eye className="h-5 w-5" />
-                              <span className="font-semibold">Continue Assessment</span>
+                              <span className="font-semibold">Lanjutkan Penilaian</span>
                             </>
                           )}
                         </Button>

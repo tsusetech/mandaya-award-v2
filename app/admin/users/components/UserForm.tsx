@@ -100,26 +100,26 @@ export function UserForm({ open, onClose, onSubmit, defaultValues }: UserFormPro
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{defaultValues?.id ? 'Edit User' : 'Create User'}</DialogTitle>
+          <DialogTitle>{defaultValues?.id ? 'Edit Pengguna' : 'Buat Pengguna'}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <Input {...register('name')} placeholder="Name" required />
+          <Input {...register('name')} placeholder="Nama" required />
           <Input {...register('email')} placeholder="Email" required />
-          <Input {...register('username')} placeholder="Username" required />
+          <Input {...register('username')} placeholder="Nama Pengguna" required />
           {!defaultValues?.id && (
-            <Input {...register('password')} placeholder="Password" type="password" required />
+            <Input {...register('password')} placeholder="Kata Sandi" type="password" required />
           )}
           
           {/* Role Selection */}
           <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-700">Role</label>
+            <label className="text-sm font-medium text-gray-700">Peran</label>
             <select
               {...register('role')}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               required
               disabled={loadingRoles}
             >
-              <option value="">Select a role</option>
+              <option value="">Pilih peran</option>
               {roles.map((role) => (
                 <option key={role.id} value={role.name}>
                   {role.name}
@@ -127,27 +127,27 @@ export function UserForm({ open, onClose, onSubmit, defaultValues }: UserFormPro
               ))}
             </select>
             {loadingRoles && (
-              <p className="text-xs text-gray-500">Loading roles...</p>
+              <p className="text-xs text-gray-500">Memuat peran...</p>
             )}
             {!loadingRoles && roles.length === 0 && (
-              <p className="text-xs text-gray-500">No roles available</p>
+              <p className="text-xs text-gray-500">Tidak ada peran tersedia</p>
             )}
             {!loadingRoles && roles.length > 0 && (
-              <p className="text-xs text-gray-500">{roles.length} roles loaded</p>
+              <p className="text-xs text-gray-500">{roles.length} peran dimuat</p>
             )}
           </div>
           
           {/* Group Selection - Disabled when editing */}
           <div className="space-y-2">
             <label className="text-sm font-medium text-gray-700">
-              Assign to Group {defaultValues?.id && '(Disabled when editing)'}
+              Tetapkan ke Kelompok {defaultValues?.id && '(Dinonaktifkan saat mengedit)'}
             </label>
             <select
               {...register('groupId')}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               disabled={loadingGroups || !!defaultValues?.id}
             >
-              <option value="">Select a group (optional)</option>
+              <option value="">Pilih kelompok (opsional)</option>
               {groups.map((group) => (
                 <option key={group.id} value={group.id}>
                   {group.name || group.groupName || `Group ${group.id}`}
@@ -155,19 +155,19 @@ export function UserForm({ open, onClose, onSubmit, defaultValues }: UserFormPro
               ))}
             </select>
             {loadingGroups && (
-              <p className="text-xs text-gray-500">Loading groups...</p>
+              <p className="text-xs text-gray-500">Memuat kelompok...</p>
             )}
             {!loadingGroups && groups.length === 0 && (
-              <p className="text-xs text-gray-500">No groups available</p>
+              <p className="text-xs text-gray-500">Tidak ada kelompok tersedia</p>
             )}
             {!loadingGroups && groups.length > 0 && (
-              <p className="text-xs text-gray-500">{groups.length} groups loaded</p>
+              <p className="text-xs text-gray-500">{groups.length} kelompok dimuat</p>
             )}
           </div>
 
           <div className="flex justify-end gap-2">
-            <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
-            <Button type="submit">Save</Button>
+            <Button type="button" variant="outline" onClick={onClose}>Batal</Button>
+            <Button type="submit">Simpan</Button>
           </div>
         </form>
       </DialogContent>

@@ -51,7 +51,7 @@ export default function GroupsPage() {
       setGroups(userGroups)
     } catch (err) {
       console.error('Error fetching groups:', err)
-      toast.error('Failed to load groups')
+      toast.error('Gagal memuat kelompok')
     } finally {
       setLoading(false)
     }
@@ -68,7 +68,7 @@ export default function GroupsPage() {
       router.push(`/peserta/assessment/${groupId}`)
     } catch (err) {
       console.error('Error starting assessment:', err)
-      toast.error('Failed to start assessment')
+      toast.error('Gagal memulai penilaian')
     }
   }
 
@@ -115,7 +115,7 @@ export default function GroupsPage() {
                   className="flex items-center space-x-2 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border border-yellow-200/50 dark:border-yellow-800/50 hover:bg-yellow-50 dark:hover:bg-yellow-900/20 transition-all duration-200"
                 >
                   <ArrowLeft className="h-4 w-4" />
-                  <span>Back to Dashboard</span>
+                  <span>Kembali ke Beranda</span>
                 </Button>
                 <div className="flex items-center space-x-4">
                   <div className="flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-yellow-500 to-yellow-600 shadow-lg border-2 border-yellow-400/50 relative">
@@ -124,10 +124,10 @@ export default function GroupsPage() {
                   </div>
                   <div>
                     <h1 className="text-3xl font-bold bg-gradient-to-r from-yellow-600 via-yellow-500 to-yellow-400 bg-clip-text text-transparent">
-                      My Groups
+                      Kelompok Saya
                     </h1>
                     <p className="text-gray-600 dark:text-gray-300 mt-1">
-                      View and complete your group assessments
+                      Lihat dan selesaikan penilaian kelompok Anda
                     </p>
                   </div>
                 </div>
@@ -135,7 +135,7 @@ export default function GroupsPage() {
               <div className="flex items-center space-x-3">
                 <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400 bg-white/50 dark:bg-gray-800/50 px-4 py-2 rounded-full backdrop-blur-sm border border-yellow-200/50 dark:border-yellow-800/50">
                   <Zap className="h-4 w-4 text-green-500" />
-                  <span className="font-medium">{groups.length} Groups</span>
+                  <span className="font-medium">{groups.length} Kelompok</span>
                 </div>
               </div>
             </div>
@@ -151,8 +151,8 @@ export default function GroupsPage() {
                   <div className="w-32 h-32 mx-auto mb-8 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 to-gray-700 flex items-center justify-center">
                     <ClipboardList className="h-16 w-16 text-gray-400" />
                   </div>
-                  <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">No groups assigned yet</h3>
-                  <p className="text-gray-500 dark:text-gray-400 mb-6 text-lg">You will be notified when you are assigned to a group</p>
+                  <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Belum ada kelompok yang ditugaskan</h3>
+                  <p className="text-gray-500 dark:text-gray-400 mb-6 text-lg">Anda akan diberitahu ketika ditugaskan ke sebuah kelompok</p>
                   <div className="flex items-center justify-center space-x-2">
                     <div className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse"></div>
                     <div className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse delay-150"></div>
@@ -168,7 +168,7 @@ export default function GroupsPage() {
                 <Card className="group hover:shadow-2xl transition-all duration-500 transform hover:scale-[1.03] border-0 shadow-xl bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm relative overflow-hidden">
                   <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-blue-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 relative z-10">
-                    <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Groups</CardTitle>
+                    <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Kelompok</CardTitle>
                     <div className="p-3 rounded-xl bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900/40 dark:to-blue-800/40 group-hover:from-blue-200 dark:group-hover:from-blue-900/60 group-hover:to-blue-300 dark:group-hover:to-blue-800/60 transition-all duration-300 transform group-hover:scale-110">
                       <Users className="h-6 w-6 text-blue-600 dark:text-blue-400" />
                     </div>
@@ -177,7 +177,7 @@ export default function GroupsPage() {
                     <div className="text-3xl font-bold text-gray-900 dark:text-white mb-2">{groups.length}</div>
                     <div className="flex items-center space-x-2">
                       <TrendingUp className="h-4 w-4 text-blue-500 animate-pulse" />
-                      <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Assigned to you</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Ditugaskan kepada Anda</p>
                     </div>
                   </CardContent>
                 </Card>
@@ -185,7 +185,7 @@ export default function GroupsPage() {
                 <Card className="group hover:shadow-2xl transition-all duration-500 transform hover:scale-[1.03] border-0 shadow-xl bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm relative overflow-hidden">
                   <div className="absolute inset-0 bg-gradient-to-r from-orange-500/5 to-orange-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 relative z-10">
-                    <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">Active Assessments</CardTitle>
+                    <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">Penilaian Aktif</CardTitle>
                     <div className="p-3 rounded-xl bg-gradient-to-br from-orange-100 to-orange-200 dark:from-orange-900/40 dark:to-orange-800/40 group-hover:from-orange-200 dark:group-hover:from-orange-900/60 group-hover:to-orange-300 dark:group-hover:to-orange-800/60 transition-all duration-300 transform group-hover:scale-110">
                       <Clock className="h-6 w-6 text-orange-600 dark:text-orange-400" />
                     </div>
@@ -196,7 +196,7 @@ export default function GroupsPage() {
                     </div>
                     <div className="flex items-center space-x-2">
                       <Activity className="h-4 w-4 text-orange-500 animate-pulse" />
-                      <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">In progress</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Sedang berlangsung</p>
                     </div>
                   </CardContent>
                 </Card>
@@ -204,7 +204,7 @@ export default function GroupsPage() {
                 <Card className="group hover:shadow-2xl transition-all duration-500 transform hover:scale-[1.03] border-0 shadow-xl bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm relative overflow-hidden">
                   <div className="absolute inset-0 bg-gradient-to-r from-green-500/5 to-green-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 relative z-10">
-                    <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">Completed</CardTitle>
+                    <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">Selesai</CardTitle>
                     <div className="p-3 rounded-xl bg-gradient-to-br from-green-100 to-green-200 dark:from-green-900/40 dark:to-green-800/40 group-hover:from-green-200 dark:group-hover:from-green-900/60 group-hover:to-green-300 dark:group-hover:to-green-800/60 transition-all duration-300 transform group-hover:scale-110">
                       <CheckCircle className="h-6 w-6 text-green-600 dark:text-green-400" />
                     </div>
@@ -215,7 +215,7 @@ export default function GroupsPage() {
                     </div>
                     <div className="flex items-center space-x-2">
                       <Star className="h-4 w-4 text-green-500 animate-pulse" />
-                      <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Assessments done</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Penilaian selesai</p>
                     </div>
                   </CardContent>
                 </Card>
@@ -242,7 +242,7 @@ export default function GroupsPage() {
                                 <div className="flex items-center space-x-2">
                                   <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
                                   <span className="text-sm text-gray-600 dark:text-gray-300 font-medium">
-                                    Progress: {group.responseSession.progressPercentage}%
+                                    Kemajuan: {group.responseSession.progressPercentage}%
                                   </span>
                                 </div>
                                 <div className="flex items-center space-x-2">
@@ -254,7 +254,7 @@ export default function GroupsPage() {
                                 <div className="flex items-center space-x-2">
                                   <BarChart3 className="h-4 w-4 text-purple-500" />
                                   <span className="text-sm text-gray-600 dark:text-gray-300 font-medium">
-                                    Assessment Active
+                                    Penilaian Aktif
                                   </span>
                                 </div>
                               </div>
@@ -264,7 +264,7 @@ export default function GroupsPage() {
                         <div className="flex items-center space-x-4">
                           {group.responseSession && (
                             <div className="text-right">
-                              <div className="text-sm text-gray-500 dark:text-gray-400 mb-1">Progress</div>
+                              <div className="text-sm text-gray-500 dark:text-gray-400 mb-1">Kemajuan</div>
                               <div className="text-2xl font-bold text-gray-900 dark:text-white">
                                 {group.responseSession.progressPercentage}%
                               </div>
@@ -277,12 +277,12 @@ export default function GroupsPage() {
                             {group.responseSession ? (
                               <>
                                 <Clock className="h-5 w-5" />
-                                <span className="font-semibold">Continue</span>
+                                <span className="font-semibold">Lanjutkan</span>
                               </>
                             ) : (
                               <>
                                 <Play className="h-5 w-5" />
-                                <span className="font-semibold">Start Assessment</span>
+                                <span className="font-semibold">Mulai Penilaian</span>
                               </>
                             )}
                             <ArrowRight className="h-4 w-4" />

@@ -222,7 +222,7 @@ export default function QuestionAssignmentModal({
              console.log('All group questions:', allGroupQuestions)
        
        // Check for duplicate groupQuestionId values
-       const groupQuestionIds = allGroupQuestions.map(q => q.groupQuestionId)
+       const groupQuestionIds = allGroupQuestions.map((q: GroupQuestion) => q.groupQuestionId)
        const duplicateIds = groupQuestionIds.filter((id: number | string, index: number) => groupQuestionIds.indexOf(id) !== index)
        if (duplicateIds.length > 0) {
          console.warn('Duplicate groupQuestionId values found:', duplicateIds)
@@ -233,7 +233,7 @@ export default function QuestionAssignmentModal({
       setAvailableQuestions(allGroupQuestions)
     } catch (error) {
       console.error('Failed to fetch available questions:', error)
-      toast.error('Failed to load available questions')
+      toast.error('Gagal memuat pertanyaan yang tersedia')
     }
   }
 
@@ -243,13 +243,13 @@ export default function QuestionAssignmentModal({
       await api.post(`/question-categories/${category.id}/assign-question`, {
         groupQuestionId
       })
-      toast.success('Question assigned successfully')
+      toast.success('Pertanyaan berhasil ditetapkan')
       fetchAssignedQuestions()
       fetchAvailableQuestions()
       onUpdate()
     } catch (error) {
       console.error('Failed to assign question:', error)
-      toast.error('Failed to assign question')
+      toast.error('Gagal menetapkan pertanyaan')
     } finally {
       setLoading(false)
     }
@@ -259,13 +259,13 @@ export default function QuestionAssignmentModal({
     try {
       setLoading(true)
       await api.delete(`/question-categories/${category.id}/questions/${groupQuestionId}`)
-      toast.success('Question removed successfully')
+      toast.success('Pertanyaan berhasil dihapus')
       fetchAssignedQuestions()
       fetchAvailableQuestions()
       onUpdate()
     } catch (error) {
       console.error('Failed to remove question:', error)
-      toast.error('Failed to remove question')
+      toast.error('Gagal menghapus pertanyaan')
     } finally {
       setLoading(false)
     }
@@ -280,13 +280,13 @@ export default function QuestionAssignmentModal({
       }))
       
       await api.post('/question-categories/bulk-assign', { assignments })
-      toast.success('Questions assigned successfully')
+      toast.success('Pertanyaan berhasil ditetapkan')
       fetchAssignedQuestions()
       fetchAvailableQuestions()
       onUpdate()
     } catch (error) {
       console.error('Failed to assign questions:', error)
-      toast.error('Failed to assign questions')
+      toast.error('Gagal menetapkan pertanyaan')
     } finally {
       setLoading(false)
     }
@@ -310,7 +310,7 @@ export default function QuestionAssignmentModal({
       <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center space-x-2">
-            <span>Manage Questions for</span>
+            <span>Kelola Pertanyaan untuk</span>
             <Badge variant="secondary">{category.name}</Badge>
           </DialogTitle>
         </DialogHeader>
@@ -318,7 +318,7 @@ export default function QuestionAssignmentModal({
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Assigned Questions */}
           <div>
-            <h3 className="text-lg font-semibold mb-4">Assigned Questions ({assignedQuestions.length})</h3>
+            <h3 className="text-lg font-semibold mb-4">Pertanyaan yang Ditetapkan ({assignedQuestions.length})</h3>
             <div className="space-y-3 max-h-96 overflow-y-auto">
                              {assignedQuestions.map((question, index) => (
                  <Card key={`assigned-${question.groupQuestionId}-${index}`} className="p-3">
@@ -330,9 +330,9 @@ export default function QuestionAssignmentModal({
                           <p className="text-xs text-gray-600 mb-1">{question.sectionTitle}</p>
                         )}
                         <div className="flex items-center space-x-2 text-xs text-gray-500">
-                          <span>Group: {question.groupName}</span>
+                          <span>Kelompok: {question.groupName}</span>
                           {question.subsection && <span>• {question.subsection}</span>}
-                          {question.orderNumber && <span>• Order: {question.orderNumber}</span>}
+                          {question.orderNumber && <span>• Urutan: {question.orderNumber}</span>}
                           {question.assignedAt && (
                             <span>• {new Date(question.assignedAt).toLocaleDateString()}</span>
                           )}
@@ -353,7 +353,7 @@ export default function QuestionAssignmentModal({
               ))}
               {assignedQuestions.length === 0 && (
                 <div className="text-center py-8 text-gray-500">
-                  <p>No questions assigned to this category</p>
+                  <p>Tidak ada pertanyaan yang ditetapkan untuk kategori ini</p>
                 </div>
               )}
             </div>
@@ -361,12 +361,12 @@ export default function QuestionAssignmentModal({
 
           {/* Available Questions */}
           <div>
-            <h3 className="text-lg font-semibold mb-4">Available Questions</h3>
+            <h3 className="text-lg font-semibold mb-4">Pertanyaan yang Tersedia</h3>
             <div className="mb-4">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                 <Input
-                  placeholder="Search questions..."
+                  placeholder="Cari pertanyaan..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10"
@@ -384,9 +384,9 @@ export default function QuestionAssignmentModal({
                           <p className="text-xs text-gray-600 mb-1">{question.sectionTitle}</p>
                         )}
                         <div className="flex items-center space-x-2 text-xs text-gray-500">
-                          <span>Group: {question.groupName}</span>
+                          <span>Kelompok: {question.groupName}</span>
                           {question.subsection && <span>• {question.subsection}</span>}
-                          {question.orderNumber && <span>• Order: {question.orderNumber}</span>}
+                          {question.orderNumber && <span>• Urutan: {question.orderNumber}</span>}
                         </div>
                       </div>
                                              <Button
@@ -396,7 +396,7 @@ export default function QuestionAssignmentModal({
                          disabled={loading}
                        >
                          <Link className="h-4 w-4 mr-1" />
-                         {loading ? 'Assigning...' : 'Assign'}
+                         {loading ? 'Menetapkan...' : 'Tetapkan'}
                        </Button>
                     </div>
                   </CardContent>
@@ -404,7 +404,7 @@ export default function QuestionAssignmentModal({
               ))}
               {filteredAvailableQuestions.length === 0 && (
                 <div className="text-center py-8 text-gray-500">
-                  <p>No available questions found</p>
+                  <p>Tidak ada pertanyaan yang tersedia</p>
                 </div>
               )}
             </div>
@@ -413,7 +413,7 @@ export default function QuestionAssignmentModal({
 
         <div className="flex justify-end space-x-2 pt-4 border-t">
           <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Close
+            Tutup
           </Button>
         </div>
       </DialogContent>

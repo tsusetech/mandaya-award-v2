@@ -75,6 +75,7 @@ interface SessionData {
   reviewedAt: string
   reviewerName: string
   reviewComments: string
+  juryComments?: string
 }
 
 export default function ReviewPage() {
@@ -421,10 +422,10 @@ export default function ReviewPage() {
       
 
       
-      toast.success('Question saved successfully')
+      toast.success('Pertanyaan berhasil disimpan')
     } catch (err) {
       console.error('Error saving question:', err)
-      toast.error('Failed to save question')
+      toast.error('Gagal menyimpan pertanyaan')
     } finally {
       setSaving(false)
     }
@@ -450,142 +451,179 @@ export default function ReviewPage() {
 
   return (
     <AuthenticatedLayout allowedRoles={['JURI', 'SUPERADMIN']}>
-      <div className="p-4 sm:p-6 space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <Button 
-              variant="ghost" 
-              size="sm"
-                              onClick={() => router.push('/jury')}
-              className="flex items-center space-x-2"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              <span>Back to Dashboard</span>
-            </Button>
-            <div>
-              <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Review Submission</h1>
-              <p className="text-sm sm:text-base text-gray-600">Score and provide feedback</p>
-            </div>
-          </div>
-          <div className="flex items-center space-x-2">
-            {isCompleted ? (
-              <div className="flex items-center space-x-2">
-                <span className="text-sm text-gray-500">Review Completed</span>
-                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 relative overflow-hidden -mt-16 pt-16">
+        {/* Animated Background Elements */}
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute -top-40 -right-40 h-96 w-96 rounded-full bg-gradient-to-br from-yellow-500/5 to-yellow-600/5 blur-3xl animate-pulse"></div>
+          <div className="absolute -bottom-40 -left-40 h-96 w-96 rounded-full bg-gradient-to-tr from-yellow-400/5 to-yellow-500/5 blur-3xl animate-pulse delay-1000"></div>
+          <div className="absolute top-1/4 left-1/4 h-64 w-64 rounded-full bg-gradient-to-r from-yellow-500/3 to-yellow-600/3 blur-2xl animate-pulse delay-500"></div>
+        </div>
+
+        {/* Header Section */}
+        <div className="relative bg-gradient-to-r from-yellow-500/10 via-yellow-600/10 to-yellow-500/10 border-b border-yellow-200/50 dark:border-yellow-800/50 overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-r from-yellow-500/5 to-yellow-600/5"></div>
+          <div className="absolute inset-0 bg-[url('data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'32\\' height=\\'32\\' viewBox=\\'0 0 32 32\\'><path fill=\\'%23EAB308\\' d=\\'M0 31h32v1H0zM31 0v32h1V0z\\'/></svg>')] opacity-5"></div>
+          <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-6">
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => router.push('/jury')}
+                  className="flex items-center space-x-2 bg-white/20 hover:bg-white/30 text-gray-900 dark:text-white backdrop-blur-sm border border-white/20"
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                  <span>Kembali ke Beranda</span>
+                </Button>
+                <div className="flex items-center space-x-4">
+                  <div className="flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-yellow-500 to-yellow-600 shadow-lg border-2 border-yellow-400/50">
+                    <FileText className="h-8 w-8 text-white" />
+                  </div>
+                  <div>
+                    <h1 className="text-3xl font-bold bg-gradient-to-r from-yellow-600 via-yellow-500 to-yellow-400 bg-clip-text text-transparent">
+                      Tinjau Pengajuan
+                    </h1>
+                    <p className="text-gray-600 dark:text-gray-300 mt-1">
+                      Nilai dan berikan umpan balik dengan keahlian juri
+                    </p>
+                  </div>
+                </div>
               </div>
-            ) : (
-              <Button
-                onClick={handleCompleteReview}
-                disabled={saving}
-                className="flex items-center space-x-2"
-              >
-                <Send className="h-4 w-4" />
-                <span>{saving ? 'Submitting...' : 'Complete Review'}</span>
-              </Button>
-            )}
+              <div className="flex items-center space-x-2">
+                {isCompleted ? (
+                  <div className="flex items-center space-x-2 bg-green-100 dark:bg-green-900/40 px-4 py-2 rounded-full">
+                    <span className="text-sm text-green-700 dark:text-green-300 font-medium">Tinjauan Selesai</span>
+                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                  </div>
+                ) : (
+                  <Button
+                    onClick={handleCompleteReview}
+                    disabled={saving}
+                    className="flex items-center space-x-2 bg-gradient-to-r from-yellow-600 to-yellow-500 hover:from-yellow-700 hover:to-yellow-600 text-white shadow-lg shadow-yellow-500/25 hover:shadow-yellow-500/40 transition-all duration-200"
+                  >
+                    <Send className="h-4 w-4" />
+                    <span>{saving ? 'Mengirim...' : 'Selesaikan Tinjauan'}</span>
+                  </Button>
+                )}
+              </div>
+            </div>
           </div>
         </div>
 
-        <div className="max-w-5xl mx-auto space-y-6">
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="max-w-5xl mx-auto space-y-6">
           {/* Read-only Notice */}
           {isReadOnly && (
-            <Card className="border-green-200 bg-green-50">
-              <CardContent className="pt-6">
+            <Card className="border-0 shadow-xl bg-green-50/90 dark:bg-green-900/20 backdrop-blur-sm relative overflow-hidden group hover:shadow-2xl transition-all duration-500">
+              <div className="absolute inset-0 bg-gradient-to-r from-green-500/5 to-green-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <CardContent className="pt-6 relative z-10">
                 <div className="flex items-center space-x-3">
-                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                  <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
                   <div>
-                    <h3 className="text-sm font-medium text-green-800">Review Completed</h3>
-                    <p className="text-sm text-green-600">This submission has been reviewed and completed. All fields are read-only.</p>
+                    <h3 className="text-sm font-medium text-green-800 dark:text-green-300">Tinjauan Selesai</h3>
+                    <p className="text-sm text-green-600 dark:text-green-400">Pengajuan ini telah ditinjau dan selesai. Semua field bersifat read-only.</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
           )}
 
-          {/* Submission Info */}
-           <Card>
-             <CardHeader>
-               <CardTitle>Submission Details</CardTitle>
-             </CardHeader>
-             <CardContent>
-               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                 <div>
-                   <h3 className="text-sm font-medium text-gray-500">Group Name</h3>
-                   <p className="mt-1 text-gray-900">{submission.groupName}</p>
-                 </div>
-                 <div>
-                   <h3 className="text-sm font-medium text-gray-500">Status</h3>
-                   <p className="mt-1 text-gray-900 capitalize">{submission.status}</p>
-                 </div>
-                 
-                 <div>
-                   <h3 className="text-sm font-medium text-gray-500">Submitted On</h3>
-                   <p className="mt-1 text-gray-900">
-                     {submission.submittedAt ? new Date(submission.submittedAt).toLocaleString() : 'Invalid Date'}
-                   </p>
-                 </div>
-                 {isCompleted && submission.reviewScore !== undefined && (
-                   <div>
-                     <h3 className="text-sm font-medium text-gray-500">Review Score</h3>
-                     <p className="mt-1 text-gray-900 font-semibold text-lg">{submission.reviewScore}</p>
+                     {/* Submission Info */}
+            <Card className="border-0 shadow-xl bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm relative overflow-hidden group hover:shadow-2xl transition-all duration-500">
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-blue-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <CardHeader className="relative z-10">
+                <CardTitle className="flex items-center space-x-3">
+                  <div className="p-2 rounded-lg bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900/40 dark:to-blue-800/40">
+                    <FileText className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                  </div>
+                  <span className="text-gray-900 dark:text-white font-bold">Detail Pengajuan</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="relative z-10">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                     <div>
+                     <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Nama Kelompok</h3>
+                     <p className="mt-1 text-gray-900 dark:text-white font-medium">{submission?.groupName || 'N/A'}</p>
                    </div>
-                 )}
-               </div>
-             </CardContent>
-           </Card>
-
-           {/* Overall Comments (Readonly) */}
-           <Card>
-             <CardHeader>
-               <CardTitle className="flex items-center space-x-2">
-                 <MessageSquare className="h-5 w-5" />
-                 <span>Admin Comments</span>
-               </CardTitle>
-             </CardHeader>
-             <CardContent>
-               <div className="bg-gray-50 p-4 rounded-lg min-h-[150px]">
-                 {overallComments ? (
-                   <p className="text-gray-900 whitespace-pre-wrap">{overallComments}</p>
-                 ) : (
-                   <p className="text-gray-500 italic">No admin comments provided</p>
-                 )}
-               </div>
-             </CardContent>
-           </Card>
-
-           {/* Jury Comments */}
-           <Card>
-             <CardHeader>
-               <CardTitle className="flex items-center space-x-2">
-                 <MessageSquare className="h-5 w-5" />
-                 <span>Jury Comments</span>
-               </CardTitle>
-             </CardHeader>
-             <CardContent>
-               {isReadOnly ? (
-                 <div className="bg-gray-50 p-4 rounded-lg min-h-[150px]">
-                   {juryComments ? (
-                     <p className="text-gray-900 whitespace-pre-wrap">{juryComments}</p>
-                   ) : (
-                     <p className="text-gray-500 italic">No jury comments provided</p>
+                   <div>
+                     <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Status</h3>
+                     <p className="mt-1 text-gray-900 dark:text-white capitalize font-medium">{submission?.status || 'N/A'}</p>
+                   </div>
+                   
+                   <div>
+                     <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Dikirim Pada</h3>
+                     <p className="mt-1 text-gray-900 dark:text-white">
+                       {submission?.submittedAt ? new Date(submission.submittedAt).toLocaleString() : 'Tanggal Tidak Valid'}
+                     </p>
+                   </div>
+                                     {isCompleted && submission?.reviewScore !== undefined && (
+                     <div>
+                       <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Skor Tinjauan</h3>
+                       <p className="mt-1 text-gray-900 dark:text-white font-semibold text-lg">{submission.reviewScore}</p>
+                     </div>
                    )}
-                 </div>
-               ) : (
-                 <Textarea
-                   value={juryComments}
-                   onChange={(e) => setJuryComments(e.target.value)}
-                   placeholder="Provide your jury feedback and comments about this submission..."
-                   className="min-h-[150px]"
-                 />
-               )}
-             </CardContent>
-           </Card>
+                </div>
+              </CardContent>
+            </Card>
+
+                       {/* Overall Comments (Readonly) */}
+            <Card className="border-0 shadow-xl bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm relative overflow-hidden group hover:shadow-2xl transition-all duration-500">
+              <div className="absolute inset-0 bg-gradient-to-r from-purple-500/5 to-purple-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <CardHeader className="relative z-10">
+                <CardTitle className="flex items-center space-x-3">
+                  <div className="p-2 rounded-lg bg-gradient-to-br from-purple-100 to-purple-200 dark:from-purple-900/40 dark:to-purple-800/40">
+                    <MessageSquare className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                  </div>
+                  <span className="text-gray-900 dark:text-white font-bold">Komentar Admin</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="relative z-10">
+                <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg min-h-[150px] border border-gray-200 dark:border-gray-600">
+                  {overallComments ? (
+                    <p className="text-gray-900 dark:text-gray-100 whitespace-pre-wrap">{overallComments}</p>
+                  ) : (
+                    <p className="text-gray-500 dark:text-gray-400 italic">Tidak ada komentar admin</p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Jury Comments */}
+            <Card className="border-0 shadow-xl bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm relative overflow-hidden group hover:shadow-2xl transition-all duration-500">
+              <div className="absolute inset-0 bg-gradient-to-r from-yellow-500/5 to-yellow-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <CardHeader className="relative z-10">
+                <CardTitle className="flex items-center space-x-3">
+                  <div className="p-2 rounded-lg bg-gradient-to-br from-yellow-100 to-yellow-200 dark:from-yellow-900/40 dark:to-yellow-800/40">
+                    <MessageSquare className="h-5 w-5 text-yellow-600 dark:text-yellow-400" />
+                  </div>
+                  <span className="text-gray-900 dark:text-white font-bold">Komentar Juri</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="relative z-10">
+                {isReadOnly ? (
+                  <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg min-h-[150px] border border-gray-200 dark:border-gray-600">
+                    {juryComments ? (
+                      <p className="text-gray-900 dark:text-gray-100 whitespace-pre-wrap">{juryComments}</p>
+                    ) : (
+                      <p className="text-gray-500 dark:text-gray-400 italic">Tidak ada komentar juri</p>
+                    )}
+                  </div>
+                ) : (
+                  <Textarea
+                    value={juryComments}
+                    onChange={(e) => setJuryComments(e.target.value)}
+                    placeholder="Berikan umpan balik dan komentar juri Anda tentang pengajuan ini..."
+                    className="min-h-[150px] border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 focus:border-yellow-500 focus:ring-yellow-500/20"
+                  />
+                )}
+              </CardContent>
+            </Card>
 
                      {/* Subsection Filters */}
            {subsections.length > 0 && (
-             <Card>
-               <CardContent className="pt-6">
+             <Card className="border-0 shadow-xl bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm relative overflow-hidden group hover:shadow-2xl transition-all duration-500">
+               <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/5 to-indigo-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+               <CardContent className="pt-6 relative z-10">
                  <div className="flex flex-wrap gap-2">
                    {subsections.map((subsection) => (
                      <Button
@@ -593,12 +631,16 @@ export default function ReviewPage() {
                        variant={activeSubsection === subsection ? 'default' : 'outline'}
                        size="sm"
                        onClick={() => setActiveSubsection(subsection)}
-                       className="flex items-center space-x-2"
+                       className={`flex items-center space-x-2 ${
+                         activeSubsection === subsection 
+                           ? 'bg-gradient-to-r from-yellow-600 to-yellow-500 hover:from-yellow-700 hover:to-yellow-600 text-white shadow-lg shadow-yellow-500/25 hover:shadow-yellow-500/40' 
+                           : 'hover:bg-yellow-50 dark:hover:bg-yellow-900/20'
+                       } transition-all duration-200`}
                      >
                        <span>{subsection}</span>
-                                               {shouldShowScoreCount(subsection) && (
-                          <span className="text-xs opacity-75">({getQuestionCount(subsection)} scored)</span>
-                        )}
+                       {shouldShowScoreCount(subsection) && (
+                         <span className="text-xs opacity-75">({getQuestionCount(subsection)} scored)</span>
+                       )}
                      </Button>
                    ))}
                  </div>
@@ -609,39 +651,49 @@ export default function ReviewPage() {
            {/* Questions and Scoring */}
            {activeSubsection && (
              <>
-               <Card>
-                 <CardHeader>
-                   <CardTitle className="text-lg">{activeSubsection}</CardTitle>
-                                       {shouldShowScoreCount(activeSubsection) && (
-                      <p className="text-sm text-gray-500">
-                        {getQuestionCount(activeSubsection)} questions scored
-                      </p>
-                    )}
+               <Card className="border-0 shadow-xl bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm relative overflow-hidden group hover:shadow-2xl transition-all duration-500">
+                 <div className="absolute inset-0 bg-gradient-to-r from-green-500/5 to-green-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                 <CardHeader className="relative z-10">
+                   <CardTitle className="flex items-center space-x-3 text-xl">
+                     <div className="p-2 rounded-lg bg-gradient-to-br from-green-100 to-green-200 dark:from-green-900/40 dark:to-green-800/40">
+                       <FileText className="h-5 w-5 text-green-600 dark:text-green-400" />
+                     </div>
+                     <span className="text-gray-900 dark:text-white font-bold">{activeSubsection}</span>
+                     {shouldShowScoreCount(activeSubsection) && (
+                       <div className="flex items-center space-x-2">
+                         <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                         <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">
+                           {getQuestionCount(activeSubsection)} pertanyaan dinilai
+                         </p>
+                       </div>
+                     )}
+                   </CardTitle>
                  </CardHeader>
                </Card>
                {getQuestionsBySubsection(activeSubsection).map((question) => (
-            <Card key={question.id}>
-                             <CardHeader>
-                                   <div className="flex items-center justify-between">
-                    <CardTitle className="text-base">{question.questionText}</CardTitle>
+            <Card key={question.id} className="border-0 shadow-xl bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm relative overflow-hidden group hover:shadow-2xl transition-all duration-500">
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-blue-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <CardHeader className="relative z-10">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-base text-gray-900 dark:text-white font-bold">{question.questionText}</CardTitle>
+                </div>
+                {question.description && (
+                  <p className="text-sm text-gray-500 dark:text-gray-400">{question.description}</p>
+                )}
+                {question.category && (
+                  <div className="mt-2">
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300">
+                      {question.category.name} (Bobot: {question.category.weight}, Min: {question.category.minValue}, Max: {question.category.maxValue}, Tipe: {question.category.scoreType})
+                    </span>
                   </div>
-                 {question.description && (
-                   <p className="text-sm text-gray-500">{question.description}</p>
-                 )}
-                 {question.category && (
-                   <div className="mt-2">
-                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                       {question.category.name} (Weight: {question.category.weight}, Min: {question.category.minValue}, Max: {question.category.maxValue}, Type: {question.category.scoreType})
-                     </span>
-                   </div>
-                 )}
-               </CardHeader>
+                )}
+              </CardHeader>
                <CardContent className="space-y-4">
                  {/* Response */}
                  <div className="bg-gray-50 p-4 rounded-lg">
                    <div className="flex items-start justify-between">
                      <div className="flex-1">
-                       <h4 className="text-sm font-medium text-gray-500 mb-2">Response</h4>
+                       <h4 className="text-sm font-medium text-gray-500 mb-2">Jawaban</h4>
                        <div className="text-gray-900">
                          {renderResponse(question.response, question.inputType, question.options)}
                        </div>
@@ -660,13 +712,13 @@ export default function ReviewPage() {
                          const actualMax = Math.max(minValue, maxValue)
                          
                          if (responseValue < actualMin) {
-                           resultText = `Under minimum (${actualMin})`
+                           resultText = `Di bawah minimum (${actualMin})`
                            resultColor = 'bg-red-100 text-red-800'
                          } else if (responseValue > actualMax) {
-                           resultText = `Above maximum (${actualMax})`
+                           resultText = `Di atas maksimum (${actualMax})`
                            resultColor = 'bg-orange-100 text-orange-800'
                          } else {
-                           resultText = `In range (${actualMin}-${actualMax})`
+                           resultText = `Dalam rentang (${actualMin}-${actualMax})`
                            resultColor = 'bg-green-100 text-green-800'
                          }
                          
@@ -684,7 +736,7 @@ export default function ReviewPage() {
                                  {/* Review Comments */}
                  {question.reviewComments && question.reviewComments.length > 0 && (
                    <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-lg">
-                     <h4 className="text-sm font-medium text-yellow-800 mb-2">Review Comments</h4>
+                     <h4 className="text-sm font-medium text-yellow-800 mb-2">Komentar Tinjauan</h4>
                      <div className="space-y-2">
                        {question.reviewComments.map((comment) => (
                          <div key={comment.id} className="text-sm">
@@ -697,7 +749,7 @@ export default function ReviewPage() {
                            <p className="text-yellow-700 mt-1">{comment.comment}</p>
                            {comment.isCritical && (
                              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800 mt-1">
-                               Critical
+                               Kritis
                              </span>
                            )}
                          </div>
@@ -713,11 +765,11 @@ export default function ReviewPage() {
                     <>
                                              <div>
                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                           Score (0-10)
+                           Skor (0-10)
                          </label>
                          {isReadOnly ? (
                            <div className="bg-gray-50 p-3 rounded border w-32">
-                             <span className="text-gray-900">{scores[question.id] || 'Not scored'}</span>
+                             <span className="text-gray-900">{scores[question.id] || 'Belum dinilai'}</span>
                            </div>
                          ) : (
                            <Input
@@ -734,21 +786,21 @@ export default function ReviewPage() {
                       {/* Comments */}
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Comments
+                          Komentar
                         </label>
                         {isReadOnly ? (
                           <div className="bg-gray-50 p-4 rounded-lg min-h-[100px]">
                             {comments[question.id] ? (
                               <p className="text-gray-900 whitespace-pre-wrap">{comments[question.id]}</p>
                             ) : (
-                              <p className="text-gray-500 italic">No comments provided</p>
+                              <p className="text-gray-500 italic">Tidak ada komentar</p>
                             )}
                           </div>
                         ) : (
                           <Textarea
                             value={comments[question.id] || ''}
                             onChange={(e) => handleCommentChange(question.id, e.target.value)}
-                            placeholder="Add your comments about this response..."
+                            placeholder="Tambahkan komentar Anda tentang jawaban ini..."
                             className="min-h-[100px]"
                           />
                         )}
@@ -764,7 +816,7 @@ export default function ReviewPage() {
                             className="flex items-center space-x-2"
                           >
                             <Save className="h-4 w-4" />
-                            <span>{saving ? 'Saving...' : 'Save'}</span>
+                            <span>{saving ? 'Menyimpan...' : 'Simpan'}</span>
                           </Button>
                         </div>
                       )}
@@ -786,11 +838,11 @@ export default function ReviewPage() {
                      className="flex items-center space-x-2"
                    >
                      <ChevronLeft className="h-4 w-4" />
-                     <span>Previous Section</span>
+                     <span>Bagian Sebelumnya</span>
                    </Button>
                    
                    <div className="text-sm text-gray-500">
-                     Section {getCurrentSubsectionIndex() + 1} of {subsections.length}
+                     Bagian {getCurrentSubsectionIndex() + 1} dari {subsections.length}
                    </div>
                    
                    <Button
@@ -799,7 +851,7 @@ export default function ReviewPage() {
                      disabled={isLastSubsection}
                      className="flex items-center space-x-2"
                    >
-                     <span>Next Section</span>
+                     <span>Bagian Selanjutnya</span>
                      <ChevronRight className="h-4 w-4" />
                    </Button>
                  </div>
@@ -808,6 +860,7 @@ export default function ReviewPage() {
            )}
                           </>
            )}
+          </div>
         </div>
       </div>
     </AuthenticatedLayout>

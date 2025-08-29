@@ -46,7 +46,7 @@ export function BulkImportModal({ open, onClose, onSuccess }: BulkImportModalPro
     ]
     
     if (!allowedTypes.includes(selectedFile.type)) {
-      toast.error('Please select a valid Excel file (.xlsx or .xls)')
+      toast.error('Harap pilih file Excel yang valid (.xlsx atau .xls)')
       return
     }
     
@@ -89,12 +89,12 @@ export function BulkImportModal({ open, onClose, onSuccess }: BulkImportModalPro
       })
 
       setResults(response.data)
-      toast.success(`Bulk import completed: ${response.data.successful} successful, ${response.data.failed} failed`)
+      toast.success(`Impor massal selesai: ${response.data.successful} berhasil, ${response.data.failed} gagal`)
       onSuccess()
     } catch (error: unknown) {
       const err = error as { response?: { data?: { message?: string } } }
       console.error('Bulk import error:', error)
-      toast.error(err.response?.data?.message || 'Failed to upload file')
+      toast.error(err.response?.data?.message || 'Gagal mengunggah file')
     } finally {
       setUploading(false)
     }
@@ -133,7 +133,7 @@ export function BulkImportModal({ open, onClose, onSuccess }: BulkImportModalPro
         <DialogHeader>
           <DialogTitle className="flex items-center space-x-2">
             <FileSpreadsheet className="h-5 w-5" />
-            <span>Bulk Import Users</span>
+            <span>Impor Massal Pengguna</span>
           </DialogTitle>
         </DialogHeader>
 
@@ -142,15 +142,15 @@ export function BulkImportModal({ open, onClose, onSuccess }: BulkImportModalPro
           {!results && (
             <div className="space-y-4">
                              <div className="text-sm text-gray-600">
-                 <p>Upload an Excel file (.xlsx or .xls) with the following columns:</p>
+                 <p>Unggah file Excel (.xlsx atau .xls) dengan kolom berikut:</p>
                  <ul className="list-disc list-inside mt-2 space-y-1">
-                   <li><strong>Required:</strong> email, username, password</li>
-                   <li><strong>Optional:</strong> name, role, groupId</li>
+                   <li><strong>Wajib:</strong> email, username, password</li>
+                   <li><strong>Opsional:</strong> name, role, groupId</li>
                  </ul>
-                 <p className="mt-2 text-xs text-gray-500">
-                   <strong>Note:</strong> The role field accepts: USER, ADMIN, JURY, PESERTA. 
-                   Leave groupId empty if you don&apos;t want to assign users to a specific group.
-                 </p>
+                                    <p className="mt-2 text-xs text-gray-500">
+                     <strong>Catatan:</strong> Field peran menerima: USER, ADMIN, JURY, PESERTA. 
+                     Biarkan groupId kosong jika Anda tidak ingin menetapkan pengguna ke kelompok tertentu.
+                   </p>
                </div>
 
               <div className="flex space-x-2">
@@ -160,7 +160,7 @@ export function BulkImportModal({ open, onClose, onSuccess }: BulkImportModalPro
                   className="flex items-center space-x-2"
                 >
                   <Download className="h-4 w-4" />
-                  <span>Download Template</span>
+                  <span>Unduh Template</span>
                 </Button>
               </div>
 
@@ -183,11 +183,11 @@ export function BulkImportModal({ open, onClose, onSuccess }: BulkImportModalPro
                 <label htmlFor="file-upload" className="cursor-pointer">
                   <Upload className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                   <p className="text-lg font-medium text-gray-900 mb-2">
-                    {file ? file.name : 'Drop your Excel file here or click to browse'}
+                    {file ? file.name : 'Letakkan file Excel Anda di sini atau klik untuk memilih'}
                   </p>
-                  <p className="text-sm text-gray-500">
-                    Supports .xlsx and .xls files
-                  </p>
+                                      <p className="text-sm text-gray-500">
+                      Mendukung file .xlsx dan .xls
+                    </p>
                 </label>
               </div>
 
@@ -214,7 +214,7 @@ export function BulkImportModal({ open, onClose, onSuccess }: BulkImportModalPro
 
               <div className="flex justify-end space-x-2">
                 <Button variant="outline" onClick={onClose}>
-                  Cancel
+                  Batal
                 </Button>
                 <Button
                   onClick={handleUpload}
@@ -224,12 +224,12 @@ export function BulkImportModal({ open, onClose, onSuccess }: BulkImportModalPro
                   {uploading ? (
                     <>
                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                      <span>Uploading...</span>
+                      <span>Mengunggah...</span>
                     </>
                   ) : (
                     <>
                       <Upload className="h-4 w-4" />
-                      <span>Upload & Import</span>
+                      <span>Unggah & Impor</span>
                     </>
                   )}
                 </Button>
@@ -241,17 +241,17 @@ export function BulkImportModal({ open, onClose, onSuccess }: BulkImportModalPro
           {results && (
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold">Import Results</h3>
-                <Button variant="outline" onClick={resetForm}>
-                  Import Another File
-                </Button>
+                <h3 className="text-lg font-semibold">Hasil Impor</h3>
+                                  <Button variant="outline" onClick={resetForm}>
+                    Impor File Lain
+                  </Button>
               </div>
 
               {/* Summary Cards */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <Card>
                   <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-medium text-gray-600">Total Processed</CardTitle>
+                    <CardTitle className="text-sm font-medium text-gray-600">Total Diproses</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="text-2xl font-bold">{results.totalProcessed}</div>
@@ -260,7 +260,7 @@ export function BulkImportModal({ open, onClose, onSuccess }: BulkImportModalPro
 
                 <Card>
                   <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-medium text-gray-600">Successful</CardTitle>
+                    <CardTitle className="text-sm font-medium text-gray-600">Berhasil</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="text-2xl font-bold text-green-600">{results.successful}</div>
@@ -269,7 +269,7 @@ export function BulkImportModal({ open, onClose, onSuccess }: BulkImportModalPro
 
                 <Card>
                   <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-medium text-gray-600">Failed</CardTitle>
+                    <CardTitle className="text-sm font-medium text-gray-600">Gagal</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="text-2xl font-bold text-red-600">{results.failed}</div>
@@ -281,7 +281,7 @@ export function BulkImportModal({ open, onClose, onSuccess }: BulkImportModalPro
               {results.validationErrors.length > 0 && (
                 <Card>
                   <CardHeader>
-                    <CardTitle className="text-red-600">Validation Errors</CardTitle>
+                    <CardTitle className="text-red-600">Kesalahan Validasi</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <ul className="space-y-1">
@@ -299,7 +299,7 @@ export function BulkImportModal({ open, onClose, onSuccess }: BulkImportModalPro
               {/* Detailed Results */}
               <Card>
                 <CardHeader>
-                  <CardTitle>Detailed Results</CardTitle>
+                  <CardTitle>Hasil Detail</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-2 max-h-64 overflow-y-auto">
@@ -323,7 +323,7 @@ export function BulkImportModal({ open, onClose, onSuccess }: BulkImportModalPro
                             </div>
                           </div>
                           <Badge variant={result.success ? 'default' : 'destructive'}>
-                            {result.success ? 'Success' : 'Failed'}
+                            {result.success ? 'Berhasil' : 'Gagal'}
                           </Badge>
                         </div>
                         <p className="text-sm mt-2">
@@ -337,7 +337,7 @@ export function BulkImportModal({ open, onClose, onSuccess }: BulkImportModalPro
 
               <div className="flex justify-end">
                 <Button onClick={onClose}>
-                  Close
+                  Tutup
                 </Button>
               </div>
             </div>

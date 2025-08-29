@@ -42,7 +42,7 @@ export default function DashboardPage() {
   if (loading) {
     return (
       <AuthenticatedLayout>
-        <div className="p-8">Loading...</div>
+        <div className="p-8">Memuat...</div>
       </AuthenticatedLayout>
     )
   }
@@ -56,8 +56,8 @@ export default function DashboardPage() {
         return (
           <div className="p-6 space-y-6">
             <div>
-              <h1 className="text-2xl font-bold mb-2">Admin Dashboard</h1>
-              <p className="text-gray-600">Welcome back, {user?.name || user?.username}</p>
+              <h1 className="text-2xl font-bold mb-2">Beranda Admin</h1>
+              <p className="text-gray-600">Selamat datang kembali, {user?.name || user?.username}</p>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -65,13 +65,13 @@ export default function DashboardPage() {
                 <CardHeader>
                   <CardTitle className="flex items-center space-x-2">
                     <Users className="h-5 w-5 text-blue-600" />
-                    <span>User Management</span>
+                    <span>Manajemen Pengguna</span>
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-gray-600 text-sm">Manage users and their roles</p>
+                  <p className="text-gray-600 text-sm">Kelola pengguna dan peran mereka</p>
                   <Button className="mt-4 w-full" variant="outline">
-                    Manage Users
+                    Kelola Pengguna
                   </Button>
                 </CardContent>
               </Card>
@@ -80,13 +80,13 @@ export default function DashboardPage() {
                 <CardHeader>
                   <CardTitle className="flex items-center space-x-2">
                     <FileText className="h-5 w-5 text-green-600" />
-                    <span>Group Management</span>
+                    <span>Manajemen Kelompok</span>
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-gray-600 text-sm">Manage assessment groups</p>
+                  <p className="text-gray-600 text-sm">Kelola kelompok penilaian</p>
                   <Button className="mt-4 w-full" variant="outline">
-                    Manage Groups
+                    Kelola Kelompok
                   </Button>
                 </CardContent>
               </Card>
@@ -98,8 +98,8 @@ export default function DashboardPage() {
         return (
           <div className="p-6 space-y-6">
             <div>
-              <h1 className="text-2xl font-bold mb-2">Juri Dashboard</h1>
-              <p className="text-gray-600">Welcome back, {user?.name || user?.username}</p>
+              <h1 className="text-2xl font-bold mb-2">Beranda Juri</h1>
+              <p className="text-gray-600">Selamat datang kembali, {user?.name || user?.username}</p>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -107,13 +107,13 @@ export default function DashboardPage() {
                 <CardHeader>
                   <CardTitle className="flex items-center space-x-2">
                     <Award className="h-5 w-5 text-purple-600" />
-                    <span>Review Submissions</span>
+                    <span>Tinjau Pengajuan</span>
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-gray-600 text-sm">Review and score submissions</p>
+                  <p className="text-gray-600 text-sm">Tinjau dan nilai pengajuan</p>
                   <Button className="mt-4 w-full" variant="outline">
-                    Start Reviewing
+                    Mulai Meninjau
                   </Button>
                 </CardContent>
               </Card>
@@ -126,8 +126,8 @@ export default function DashboardPage() {
         return (
           <div className="p-6 space-y-6">
             <div>
-              <h1 className="text-2xl font-bold mb-2">Participant Dashboard</h1>
-              <p className="text-gray-600">Welcome back, {user?.name || user?.username}</p>
+              <h1 className="text-2xl font-bold mb-2">Beranda Peserta</h1>
+              <p className="text-gray-600">Selamat datang kembali, {user?.name || user?.username}</p>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -135,13 +135,13 @@ export default function DashboardPage() {
                 <CardHeader>
                   <CardTitle className="flex items-center space-x-2">
                     <FileText className="h-5 w-5 text-blue-600" />
-                    <span>My Groups</span>
+                    <span>Kelompok Saya</span>
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-gray-600 text-sm">View your assigned groups</p>
+                  <p className="text-gray-600 text-sm">Lihat kelompok yang ditugaskan</p>
                   <Button className="mt-4 w-full" variant="outline">
-                    View Groups
+                    Lihat Kelompok
                   </Button>
                 </CardContent>
               </Card>
@@ -150,13 +150,13 @@ export default function DashboardPage() {
                 <CardHeader>
                   <CardTitle className="flex items-center space-x-2">
                     <Users className="h-5 w-5 text-green-600" />
-                    <span>Profile</span>
+                    <span>Profil</span>
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-gray-600 text-sm">Manage your profile</p>
+                  <p className="text-gray-600 text-sm">Kelola profil Anda</p>
                   <Button className="mt-4 w-full" variant="outline">
-                    View Profile
+                    Lihat Profil
                   </Button>
                 </CardContent>
               </Card>
