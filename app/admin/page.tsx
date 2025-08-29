@@ -18,6 +18,8 @@ import {
   Trophy,
   Settings
 } from 'lucide-react'
+import { toast } from 'sonner'
+import api from '@/lib/api'
 import AuthenticatedLayout from '@/components/AuthenticatedLayout'
 
 interface DashboardStats {
@@ -25,6 +27,8 @@ interface DashboardStats {
   totalGroups: number
   totalSubmissions: number
   pendingReviews: number
+  activeUsers: number
+  completedSubmissions: number
 }
 
 export default function AdminDashboardPage() {
@@ -33,23 +37,82 @@ export default function AdminDashboardPage() {
     totalUsers: 0,
     totalGroups: 0,
     totalSubmissions: 0,
-    pendingReviews: 0
+    pendingReviews: 0,
+    activeUsers: 0,
+    completedSubmissions: 0
   })
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    // Simulate loading stats
-    const timer = setTimeout(() => {
-      setStats({
-        totalUsers: 1250,
-        totalGroups: 89,
-        totalSubmissions: 456,
-        pendingReviews: 23
-      })
-      setLoading(false)
-    }, 1000)
+  const fetchDashboardStats = async () => {
+    try {
+      setLoading(true)
+      
+      // Fetch all data in parallel for better performance
+      const [usersRes, groupsRes, submissionsRes, juryStatsRes] = await Promise.allSettled([
+        api.get('/users'),
+        api.get('/groups'),
+        api.get('/assessments/user-sessions', { params: { page: 1, limit: 1000 } }),
+        api.get('/assessments/jury/dashboard')
+      ])
 
-    return () => clearTimeout(timer)
+      // Extract data from successful responses
+      const users = usersRes.status === 'fulfilled' ? usersRes.value.data.users || [] : []
+      const groups = groupsRes.status === 'fulfilled' ? groupsRes.value.data.groups || [] : []
+      const submissions = submissionsRes.status === 'fulfilled' ? submissionsRes.value.data?.data || [] : []
+      const juryStats = juryStatsRes.status === 'fulfilled' ? juryStatsRes.value.data.data?.statistics : null
+
+      // Calculate statistics
+      const totalUsers = users.length
+      const totalGroups = groups.length
+      const totalSubmissions = submissions.length
+      
+      // Calculate active users (users who are not inactive)
+      const activeUsers = users.filter((user: any) => user.isActive !== false).length
+      
+      // Calculate pending reviews - submissions that are submitted but not reviewed
+      const pendingReviews = submissions.filter((submission: any) => 
+        submission.status === 'submitted' || submission.status === 'in_progress'
+      ).length
+      
+      // Calculate completed submissions
+      const completedSubmissions = submissions.filter((submission: any) => 
+        submission.status === 'completed' || submission.status === 'approved'
+      ).length
+
+      setStats({
+        totalUsers,
+        totalGroups,
+        totalSubmissions,
+        pendingReviews,
+        activeUsers,
+        completedSubmissions
+      })
+
+      // Show success message if this was a manual refresh
+      if (!loading) {
+        toast.success('Data dashboard berhasil diperbarui')
+      }
+
+    } catch (error) {
+      console.error('Error fetching dashboard stats:', error)
+      toast.error('Gagal memuat data dashboard')
+      
+      // Fallback to zero values if API fails
+      setStats({
+        totalUsers: 0,
+        totalGroups: 0,
+        totalSubmissions: 0,
+        pendingReviews: 0,
+        activeUsers: 0,
+        completedSubmissions: 0
+      })
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    fetchDashboardStats()
   }, [])
 
   if (loading) {
@@ -59,8 +122,8 @@ export default function AdminDashboardPage() {
           <div className="p-6 space-y-6">
             <div className="animate-pulse">
               <div className="h-8 bg-gray-200 rounded w-48 mb-6"></div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                {[1, 2, 3, 4].map(i => (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
+                {[1, 2, 3, 4, 5].map(i => (
                   <div key={i} className="h-32 bg-gray-200 rounded-lg"></div>
                 ))}
               </div>
@@ -104,6 +167,16 @@ export default function AdminDashboardPage() {
                 </div>
               </div>
               <div className="flex items-center space-x-3">
+                <Button
+                  onClick={fetchDashboardStats}
+                  disabled={loading}
+                  variant="outline"
+                  size="sm"
+                  className="bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border-yellow-200/50 dark:border-yellow-800/50 hover:bg-white/70 dark:hover:bg-gray-800/70"
+                >
+                  <Activity className="h-4 w-4 mr-2" />
+                  {loading ? 'Memuat...' : 'Refresh Data'}
+                </Button>
                 <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400 bg-white/50 dark:bg-gray-800/50 px-4 py-2 rounded-full backdrop-blur-sm border border-yellow-200/50 dark:border-yellow-800/50">
                   <Zap className="h-4 w-4 text-green-500" />
                   <span className="font-medium">Sistem Online</span>
@@ -115,7 +188,7 @@ export default function AdminDashboardPage() {
 
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Statistics Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
             <Card className="group hover:shadow-2xl transition-all duration-500 transform hover:scale-[1.03] border-0 shadow-xl bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm relative overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-blue-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 relative z-10">
@@ -180,6 +253,23 @@ export default function AdminDashboardPage() {
                 <div className="flex items-center space-x-2">
                   <Star className="h-4 w-4 text-orange-500 animate-pulse" />
                   <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Menunggu penilaian</p>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="group hover:shadow-2xl transition-all duration-500 transform hover:scale-[1.03] border-0 shadow-xl bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/5 to-emerald-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 relative z-10">
+                <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">Pengguna Aktif</CardTitle>
+                <div className="p-3 rounded-xl bg-gradient-to-br from-emerald-100 to-emerald-200 dark:from-emerald-900/40 dark:to-emerald-800/40 group-hover:from-emerald-200 dark:group-hover:from-emerald-900/60 group-hover:to-emerald-300 dark:group-hover:to-emerald-800/60 transition-all duration-300 transform group-hover:scale-110">
+                  <Users className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
+                </div>
+              </CardHeader>
+              <CardContent className="relative z-10">
+                <div className="text-4xl font-bold text-gray-900 dark:text-white mb-2">{stats.activeUsers.toLocaleString()}</div>
+                <div className="flex items-center space-x-2">
+                  <TrendingUp className="h-4 w-4 text-emerald-500 animate-pulse" />
+                  <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Pengguna aktif</p>
                 </div>
               </CardContent>
             </Card>
