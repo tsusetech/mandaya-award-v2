@@ -102,7 +102,7 @@ export default function Navigation({ className = '' }: NavigationProps) {
           <div className="flex items-center space-x-8">
             {/* Logo/Brand */}
             <div className="flex-shrink-0">
-              <h1 className="text-xl font-bold text-gray-900">Mandaya Award</h1>
+              <h1 className="text-xl font-bold text-gray-900">Mandaya Awards</h1>
             </div>
 
             {/* Navigation Links */}
