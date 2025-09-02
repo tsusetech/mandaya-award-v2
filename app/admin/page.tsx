@@ -161,7 +161,7 @@ export default function AdminDashboardPage() {
                       Beranda Admin
                     </h1>
                     <p className="text-gray-600 dark:text-gray-300 mt-1">
-                      Kelola dan pantau sistem Mandaya Award
+                      Kelola dan pantau sistem Mandaya Awards
                     </p>
                   </div>
                 </div>

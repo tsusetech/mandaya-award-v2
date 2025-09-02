@@ -92,7 +92,7 @@ export default function LoginPage() {
             {/* Header */}
             <div className="space-y-2">
               <h1 className="text-4xl font-bold bg-gradient-to-r from-yellow-600 via-yellow-500 to-yellow-400 bg-clip-text text-transparent">
-                Mandaya Award
+                Mandaya Awards
               </h1>
               <CardDescription className="text-lg text-gray-600 dark:text-gray-300 flex items-center justify-center space-x-2">
                 <Award className="h-5 w-5 text-yellow-500" />
