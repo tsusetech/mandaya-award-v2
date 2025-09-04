@@ -44,12 +44,12 @@ export function BulkImportModal({ open, onClose, onSuccess }: BulkImportModalPro
       'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // .xlsx
       'application/vnd.ms-excel' // .xls
     ]
-    
+
     if (!allowedTypes.includes(selectedFile.type)) {
       toast.error('Harap pilih file Excel yang valid (.xlsx atau .xls)')
       return
     }
-    
+
     setFile(selectedFile)
     setResults(null)
   }
@@ -68,7 +68,7 @@ export function BulkImportModal({ open, onClose, onSuccess }: BulkImportModalPro
     e.preventDefault()
     e.stopPropagation()
     setDragActive(false)
-    
+
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       handleFileSelect(e.dataTransfer.files[0])
     }
@@ -101,24 +101,13 @@ export function BulkImportModal({ open, onClose, onSuccess }: BulkImportModalPro
   }
 
   const downloadTemplate = () => {
-    // Create a simple CSV template that can be opened in Excel
-    const template = [
-      ['email', 'username', 'password', 'name', 'role', 'groupId'],
-      ['user1@example.com', 'user1', 'password123', 'John Doe', 'USER', '1'],
-      ['user2@example.com', 'user2', 'password123', 'Jane Smith', 'ADMIN', '2'],
-      ['user3@example.com', 'user3', 'password123', 'Bob Johnson', 'USER', ''],
-    ]
-
-    const csvContent = template.map(row => row.join(',')).join('\n')
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
-    const url = window.URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = 'user_import_template.csv'
-    document.body.appendChild(a)
-    a.click()
-    document.body.removeChild(a)
-    window.URL.revokeObjectURL(url)
+    // Create a link to download the Excel template from public folder
+    const link = document.createElement('a')
+    link.href = '/user_import_template.xlsx'
+    link.download = 'user_import_template.xlsx'
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
   }
 
   const resetForm = () => {
@@ -141,17 +130,17 @@ export function BulkImportModal({ open, onClose, onSuccess }: BulkImportModalPro
           {/* File Upload Section */}
           {!results && (
             <div className="space-y-4">
-                             <div className="text-sm text-gray-600">
-                 <p>Unggah file Excel (.xlsx atau .xls) dengan kolom berikut:</p>
-                 <ul className="list-disc list-inside mt-2 space-y-1">
-                   <li><strong>Wajib:</strong> email, username, password</li>
-                   <li><strong>Opsional:</strong> name, role, groupId</li>
-                 </ul>
-                                    <p className="mt-2 text-xs text-gray-500">
-                     <strong>Catatan:</strong> Field peran menerima: USER, ADMIN, JURY, PESERTA. 
-                     Biarkan groupId kosong jika Anda tidak ingin menetapkan pengguna ke kelompok tertentu.
-                   </p>
-               </div>
+              <div className="text-sm text-gray-600">
+                <p>Unggah file Excel (.xlsx atau .xls) dengan kolom berikut:</p>
+                <ul className="list-disc list-inside mt-2 space-y-1">
+                  <li><strong>Wajib:</strong> email, username, password</li>
+                  <li><strong>Opsional:</strong> name, role, groupId</li>
+                </ul>
+                <p className="mt-2 text-xs text-gray-500">
+                  <strong>Catatan:</strong> Field peran menerima: USER, ADMIN, JURY, PESERTA.
+                  Biarkan groupId kosong jika Anda tidak ingin menetapkan pengguna ke kelompok tertentu.
+                </p>
+              </div>
 
               <div className="flex space-x-2">
                 <Button
@@ -165,9 +154,8 @@ export function BulkImportModal({ open, onClose, onSuccess }: BulkImportModalPro
               </div>
 
               <div
-                className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
-                  dragActive ? 'border-blue-500 bg-blue-50' : 'border-gray-300'
-                }`}
+                className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${dragActive ? 'border-blue-500 bg-blue-50' : 'border-gray-300'
+                  }`}
                 onDragEnter={handleDrag}
                 onDragLeave={handleDrag}
                 onDragOver={handleDrag}
@@ -185,9 +173,9 @@ export function BulkImportModal({ open, onClose, onSuccess }: BulkImportModalPro
                   <p className="text-lg font-medium text-gray-900 mb-2">
                     {file ? file.name : 'Letakkan file Excel Anda di sini atau klik untuk memilih'}
                   </p>
-                                      <p className="text-sm text-gray-500">
-                      Mendukung file .xlsx dan .xls
-                    </p>
+                  <p className="text-sm text-gray-500">
+                    Mendukung file .xlsx dan .xls
+                  </p>
                 </label>
               </div>
 
@@ -242,9 +230,9 @@ export function BulkImportModal({ open, onClose, onSuccess }: BulkImportModalPro
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-semibold">Hasil Impor</h3>
-                                  <Button variant="outline" onClick={resetForm}>
-                    Impor File Lain
-                  </Button>
+                <Button variant="outline" onClick={resetForm}>
+                  Impor File Lain
+                </Button>
               </div>
 
               {/* Summary Cards */}
@@ -306,9 +294,8 @@ export function BulkImportModal({ open, onClose, onSuccess }: BulkImportModalPro
                     {results.results.map((result, index) => (
                       <div
                         key={index}
-                        className={`p-3 rounded-lg border ${
-                          result.success ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'
-                        }`}
+                        className={`p-3 rounded-lg border ${result.success ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'
+                          }`}
                       >
                         <div className="flex items-center justify-between">
                           <div className="flex items-center space-x-3">
