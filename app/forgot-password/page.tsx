@@ -65,20 +65,47 @@ export default function ForgotPasswordPage() {
 
   if (emailSent) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center p-4">
-        <Card className="w-full max-w-md">
-          <CardHeader className="text-center">
-            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/20">
-              <CheckCircle className="h-8 w-8 text-green-600 dark:text-green-400" />
-            </div>
-            <CardTitle className="text-2xl font-bold text-gray-900 dark:text-white">
-              Email Terkirim!
-            </CardTitle>
-            <CardDescription className="text-gray-600 dark:text-gray-300">
-              Kami telah mengirim instruksi reset password ke email Anda
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
+      <div className="min-h-screen bg-gradient-to-br from-yellow-50 via-amber-50 to-orange-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 relative overflow-hidden">
+        {/* Animated Background Elements */}
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute -top-40 -right-40 h-96 w-96 rounded-full bg-gradient-to-br from-yellow-500/5 to-yellow-600/5 blur-3xl animate-pulse"></div>
+          <div className="absolute -bottom-40 -left-40 h-96 w-96 rounded-full bg-gradient-to-tr from-yellow-400/5 to-yellow-500/5 blur-3xl animate-pulse delay-1000"></div>
+          <div className="absolute top-1/4 left-1/4 h-64 w-64 rounded-full bg-gradient-to-r from-yellow-500/3 to-yellow-600/3 blur-2xl animate-pulse delay-500"></div>
+        </div>
+
+        {/* Subtle Pattern Overlay */}
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'32\\' height=\\'32\\' viewBox=\\'0 0 32 32\\'><path fill=\\'%23EAB308\\' d=\\'M0 31h32v1H0zM31 0v32h1V0z\\'/></svg>')] opacity-5"></div>
+
+        <div className="relative z-10 flex items-center justify-center min-h-screen p-4">
+          <Card className="w-full max-w-lg border-0 shadow-2xl shadow-black/50 backdrop-blur-sm bg-white/95 dark:bg-gray-900/95">
+            <CardHeader className="space-y-6 text-center">
+              {/* Logo Container */}
+              <div className="flex justify-center">
+                <div className="relative">
+                  <div className="w-24 h-24 rounded-full bg-gradient-to-br from-yellow-500 to-yellow-600 shadow-lg border-2 border-yellow-400/50 flex items-center justify-center animate-pulse">
+                    <img src="/logo.png" alt="Mandaya Award Logo" className="w-16 h-16 rounded-full" />
+                  </div>
+                  <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-green-500 rounded-full border-2 border-white animate-pulse"></div>
+                </div>
+              </div>
+
+              {/* Success Icon */}
+              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/20">
+                <CheckCircle className="h-8 w-8 text-green-600 dark:text-green-400" />
+              </div>
+
+              {/* Header */}
+              <div className="space-y-2">
+                <h1 className="text-4xl font-bold bg-gradient-to-r from-yellow-600 via-yellow-500 to-yellow-400 bg-clip-text text-transparent">
+                  Email Terkirim!
+                </h1>
+                <CardDescription className="text-lg text-gray-600 dark:text-gray-300 flex items-center justify-center space-x-2">
+                  <Mail className="h-5 w-5 text-yellow-500" />
+                  <span>Instruksi reset password telah dikirim</span>
+                </CardDescription>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
             <div className="text-center">
               <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">
                 Email dikirim ke:
@@ -92,7 +119,7 @@ export default function ForgotPasswordPage() {
               <Button
                 onClick={handleResendEmail}
                 variant="outline"
-                className="w-full"
+                className="w-full h-12 border-yellow-300 text-yellow-700 hover:bg-yellow-50 dark:border-yellow-600 dark:text-yellow-400 dark:hover:bg-yellow-900/20"
                 disabled={loading}
               >
                 {loading ? 'Mengirim...' : 'Kirim Ulang Email'}
@@ -100,7 +127,7 @@ export default function ForgotPasswordPage() {
               
               <Button
                 onClick={handleBackToLogin}
-                className="w-full bg-blue-600 hover:bg-blue-700"
+                className="w-full h-12 bg-gradient-to-r from-yellow-600 to-yellow-500 hover:from-yellow-700 hover:to-yellow-600 text-white font-semibold shadow-lg shadow-yellow-500/25 hover:shadow-yellow-500/40 transition-all duration-200 transform hover:scale-[1.02]"
               >
                 Kembali ke Login
               </Button>
@@ -120,75 +147,104 @@ export default function ForgotPasswordPage() {
                 </div>
               </div>
             </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/20">
-            <Mail className="h-8 w-8 text-blue-600 dark:text-blue-400" />
-          </div>
-          <CardTitle className="text-2xl font-bold text-gray-900 dark:text-white">
-            Lupa Password?
-          </CardTitle>
-          <CardDescription className="text-gray-600 dark:text-gray-300">
-            Masukkan email Anda dan kami akan mengirim instruksi untuk reset password
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            <div>
-              <Label htmlFor="email" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                Email
-              </Label>
-              <div className="relative mt-1">
-                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-                <Input
-                  id="email"
-                  type="email"
-                  {...register('email')}
-                  className="pl-10"
-                  placeholder="Masukkan email Anda"
-                />
+    <div className="min-h-screen bg-gradient-to-br from-yellow-50 via-amber-50 to-orange-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 relative overflow-hidden">
+      {/* Animated Background Elements */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute -top-40 -right-40 h-96 w-96 rounded-full bg-gradient-to-br from-yellow-500/5 to-yellow-600/5 blur-3xl animate-pulse"></div>
+        <div className="absolute -bottom-40 -left-40 h-96 w-96 rounded-full bg-gradient-to-tr from-yellow-400/5 to-yellow-500/5 blur-3xl animate-pulse delay-1000"></div>
+        <div className="absolute top-1/4 left-1/4 h-64 w-64 rounded-full bg-gradient-to-r from-yellow-500/3 to-yellow-600/3 blur-2xl animate-pulse delay-500"></div>
+      </div>
+
+      {/* Subtle Pattern Overlay */}
+      <div className="absolute inset-0 bg-[url('data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'32\\' height=\\'32\\' viewBox=\\'0 0 32 32\\'><path fill=\\'%23EAB308\\' d=\\'M0 31h32v1H0zM31 0v32h1V0z\\'/></svg>')] opacity-5"></div>
+
+      <div className="relative z-10 flex items-center justify-center min-h-screen p-4">
+        <Card className="w-full max-w-lg border-0 shadow-2xl shadow-black/50 backdrop-blur-sm bg-white/95 dark:bg-gray-900/95">
+          <CardHeader className="space-y-6 text-center">
+            {/* Logo Container */}
+            <div className="flex justify-center">
+              <div className="relative">
+                <div className="w-24 h-24 rounded-full bg-gradient-to-br from-yellow-500 to-yellow-600 shadow-lg border-2 border-yellow-400/50 flex items-center justify-center animate-pulse">
+                  <img src="/logo.png" alt="Mandaya Award Logo" className="w-16 h-16 rounded-full" />
+                </div>
+                <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-green-500 rounded-full border-2 border-white animate-pulse"></div>
               </div>
-              {errors.email && (
-                <p className="mt-1 text-sm text-red-500">{errors.email.message}</p>
-              )}
             </div>
 
-            <Button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-            >
-              {loading ? (
-                <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                  Mengirim...
-                </>
-              ) : (
-                'Kirim Email Reset Password'
-              )}
-            </Button>
-          </form>
+            {/* Header */}
+            <div className="space-y-2">
+              <h1 className="text-4xl font-bold bg-gradient-to-r from-yellow-600 via-yellow-500 to-yellow-400 bg-clip-text text-transparent">
+                Lupa Password?
+              </h1>
+              <CardDescription className="text-lg text-gray-600 dark:text-gray-300 flex items-center justify-center space-x-2">
+                <Mail className="h-5 w-5 text-yellow-500" />
+                <span>Kami akan mengirim instruksi reset password</span>
+              </CardDescription>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+              {/* Email Field */}
+              <div className="space-y-2">
+                <Label htmlFor="email" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Email
+                </Label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                  <Input
+                    id="email"
+                    type="email"
+                    {...register('email')}
+                    className="pl-12 h-12 border-gray-300 focus:border-yellow-500 focus:ring-yellow-500/20 dark:border-gray-600 dark:bg-gray-800 dark:focus:border-yellow-400 transition-all duration-200"
+                    placeholder="Masukkan email Anda"
+                  />
+                  {errors.email && (
+                    <div className="absolute -bottom-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></div>
+                  )}
+                </div>
+                {errors.email && (
+                  <p className="text-sm text-red-500">{errors.email.message}</p>
+                )}
+              </div>
 
-          <div className="mt-6 text-center">
-            <Button
-              variant="ghost"
-              onClick={handleBackToLogin}
-              className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
-            >
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Kembali ke Login
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+              {/* Submit Button */}
+              <Button
+                type="submit"
+                disabled={loading}
+                className="w-full h-12 bg-gradient-to-r from-yellow-600 to-yellow-500 hover:from-yellow-700 hover:to-yellow-600 text-white font-semibold shadow-lg shadow-yellow-500/25 hover:shadow-yellow-500/40 transition-all duration-200 transform hover:scale-[1.02]"
+              >
+                {loading ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    Mengirim...
+                  </>
+                ) : (
+                  'Kirim Email Reset Password'
+                )}
+              </Button>
+            </form>
+
+            <div className="mt-6 text-center">
+              <Button
+                variant="ghost"
+                onClick={handleBackToLogin}
+                className="text-gray-600 dark:text-gray-300 hover:text-yellow-600 dark:hover:text-yellow-400 text-sm"
+              >
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Kembali ke Login
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   )
 }
