@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Upload Endpoints</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        .success { color: green; }
+        .error { color: red; }
+        .info { color: blue; }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #0056b3; }
+        .result {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 4px;
+            background: #f8f9fa;
+        }
+    </style>
+</head>
+<body>
+    <h1>Cloudinary Upload Endpoint Test</h1>
+    
+    <div class="test-section">
+        <h2>Test Image Upload (Should Work)</h2>
+        <input type="file" id="imageFile" accept="image/*">
+        <button onclick="testImageUpload()">Test Image Upload</button>
+        <div id="imageResult" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test PDF Upload (Currently Failing)</h2>
+        <input type="file" id="pdfFile" accept=".pdf">
+        <button onclick="testPdfUpload()">Test PDF Upload</button>
+        <div id="pdfResult" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Diagnosis</h2>
+        <div id="diagnosis" class="result">
+            <p class="info">This test will help identify why images work but PDFs don't.</p>
+            <p><strong>Expected behavior:</strong></p>
+            <ul>
+                <li>Images should upload to: <code>/image/upload</code> endpoint</li>
+                <li>PDFs should upload to: <code>/raw/upload</code> endpoint</li>
+                <li>Both should return a secure_url</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // You'll need to replace these with your actual values
+        const CLOUD_NAME = 'dcl6amjx5'; // Replace with your cloud name
+        const UPLOAD_PRESET = 'your_upload_preset'; // Replace with your upload preset
+
+        async function testImageUpload() {
+            const fileInput = document.getElementById('imageFile');
+            const resultDiv = document.getElementById('imageResult');
+            
+            if (!fileInput.files[0]) {
+                resultDiv.innerHTML = '<p class="error">Please select an image file first.</p>';
+                return;
+            }
+
+            const file = fileInput.files[0];
+            resultDiv.innerHTML = '<p class="info">Uploading image...</p>';
+
+            try {
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('upload_preset', UPLOAD_PRESET);
+                formData.append('access_mode', 'public');
+
+                const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.secure_url) {
+                    resultDiv.innerHTML = `
+                        <p class="success">✅ Image upload successful!</p>
+                        <p><strong>URL:</strong> <a href="${data.secure_url}" target="_blank">${data.secure_url}</a></p>
+                        <p><strong>Resource Type:</strong> ${data.resource_type}</p>
+                        <p><strong>Format:</strong> ${data.format}</p>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <p class="error">❌ Image upload failed</p>
+                        <p><strong>Error:</strong> ${data.error?.message || 'Unknown error'}</p>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<p class="error">❌ Network error: ${error.message}</p>`;
+            }
+        }
+
+        async function testPdfUpload() {
+            const fileInput = document.getElementById('pdfFile');
+            const resultDiv = document.getElementById('pdfResult');
+            
+            if (!fileInput.files[0]) {
+                resultDiv.innerHTML = '<p class="error">Please select a PDF file first.</p>';
+                return;
+            }
+
+            const file = fileInput.files[0];
+            resultDiv.innerHTML = '<p class="info">Uploading PDF...</p>';
+
+            try {
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('upload_preset', UPLOAD_PRESET);
+                formData.append('access_mode', 'public');
+
+                const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/raw/upload`, {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.secure_url) {
+                    resultDiv.innerHTML = `
+                        <p class="success">✅ PDF upload successful!</p>
+                        <p><strong>URL:</strong> <a href="${data.secure_url}" target="_blank">${data.secure_url}</a></p>
+                        <p><strong>Resource Type:</strong> ${data.resource_type}</p>
+                        <p><strong>Format:</strong> ${data.format}</p>
+                        <p><strong>Size:</strong> ${data.bytes} bytes</p>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <p class="error">❌ PDF upload failed</p>
+                        <p><strong>Error:</strong> ${data.error?.message || 'Unknown error'}</p>
+                        <p><strong>Status:</strong> ${response.status}</p>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<p class="error">❌ Network error: ${error.message}</p>`;
+            }
+        }
+
+        // Update diagnosis based on results
+        function updateDiagnosis() {
+            const diagnosis = document.getElementById('diagnosis');
+            const imageResult = document.getElementById('imageResult').textContent;
+            const pdfResult = document.getElementById('pdfResult').textContent;
+
+            if (imageResult.includes('✅') && pdfResult.includes('❌')) {
+                diagnosis.innerHTML = `
+                    <p class="error"><strong>Diagnosis:</strong> Images work but PDFs don't</p>
+                    <p><strong>Likely causes:</strong></p>
+                    <ul>
+                        <li>Upload preset doesn't allow "raw" resource type</li>
+                        <li>PDF delivery is disabled in Cloudinary settings</li>
+                        <li>Upload preset has restrictions on file types</li>
+                    </ul>
+                    <p><strong>Solution:</strong> Check your Cloudinary upload preset settings and enable PDF delivery.</p>
+                `;
+            } else if (imageResult.includes('✅') && pdfResult.includes('✅')) {
+                diagnosis.innerHTML = '<p class="success"><strong>Diagnosis:</strong> Both images and PDFs work correctly!</p>';
+            }
+        }
+
+        // Monitor results
+        const observer = new MutationObserver(updateDiagnosis);
+        observer.observe(document.getElementById('imageResult'), { childList: true, subtree: true });
+        observer.observe(document.getElementById('pdfResult'), { childList: true, subtree: true });
+    </script>
+</body>
+</html>

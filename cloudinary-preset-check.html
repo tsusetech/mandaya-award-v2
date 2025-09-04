@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cloudinary Upload Preset Check</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .step {
+            margin: 20px 0;
+            padding: 20px;
+            border-left: 4px solid #007bff;
+            background: #f8f9fa;
+        }
+        .critical {
+            border-left-color: #dc3545;
+            background: #fff5f5;
+        }
+        .success {
+            border-left-color: #28a745;
+            background: #f0fff4;
+        }
+        .code {
+            background: #f1f3f4;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            margin: 10px 0;
+        }
+        .highlight {
+            background: #fff3cd;
+            padding: 15px;
+            border-radius: 4px;
+            border: 1px solid #ffeaa7;
+            margin: 15px 0;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 4px;
+            border: 1px solid #f5c6cb;
+            margin: 15px 0;
+        }
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 4px;
+            border: 1px solid #c3e6cb;
+            margin: 15px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Cloudinary Upload Preset Configuration Fix</h1>
+        
+        <div class="error">
+            <h3>❌ Current Issue: HTTP 401 Error</h3>
+            <p>Your PDF upload is working, but the file is not publicly accessible. This means your upload preset needs to be configured properly.</p>
+        </div>
+
+        <div class="step critical">
+            <h3>🚨 Step 1: Fix Upload Preset (CRITICAL)</h3>
+            <p>Go to your <a href="https://cloudinary.com/console" target="_blank">Cloudinary Dashboard</a> and follow these steps:</p>
+            
+            <ol>
+                <li><strong>Settings → Upload</strong></li>
+                <li><strong>Find your upload preset</strong> (probably named something like "mandaya-awards-uploads")</li>
+                <li><strong>Click "Edit"</strong></li>
+                <li><strong>Look for these settings:</strong>
+                    <div class="code">
+                        Resource Type: Auto (NOT "Image")<br>
+                        Access Mode: Public (NOT "Private")
+                    </div>
+                </li>
+                <li><strong>Save the preset</strong></li>
+            </ol>
+        </div>
+
+        <div class="step critical">
+            <h3>🚨 Step 2: Enable PDF Delivery (CRITICAL)</h3>
+            <p>In your Cloudinary Dashboard:</p>
+            
+            <ol>
+                <li><strong>Settings → Security</strong></li>
+                <li><strong>Scroll down to "PDF and ZIP files delivery"</strong></li>
+                <li><strong>Enable "Allow delivery of PDF and ZIP files"</strong></li>
+                <li><strong>Save settings</strong></li>
+            </ol>
+        </div>
+
+        <div class="highlight">
+            <h3>💡 Why This Happens</h3>
+            <p><strong>HTTP 401 = Access Denied</strong></p>
+            <ul>
+                <li>Your file uploaded successfully ✅</li>
+                <li>But it's not publicly accessible ❌</li>
+                <li>This is controlled by your upload preset settings</li>
+                <li>Images work because they're probably set to "Public" by default</li>
+                <li>PDFs need explicit "Public" access mode</li>
+            </ul>
+        </div>
+
+        <div class="step">
+            <h3>🧪 Step 3: Test After Configuration</h3>
+            <p>After making the changes above:</p>
+            <ol>
+                <li>Upload a new PDF file</li>
+                <li>Check if the URL works in a new tab</li>
+                <li>You should see the PDF content, not a 401 error</li>
+            </ol>
+        </div>
+
+        <div class="step">
+            <h3>📋 Quick Checklist</h3>
+            <div class="code">
+                ✅ Upload Preset: Resource Type = "Auto"<br>
+                ✅ Upload Preset: Access Mode = "Public"<br>
+                ✅ Security Settings: PDF delivery enabled<br>
+                ✅ Test with new PDF upload
+            </div>
+        </div>
+
+        <div class="success-message">
+            <h3>🎯 Expected Result</h3>
+            <p>After fixing these settings, your PDF URLs should work like this:</p>
+            <div class="code">
+                ✅ https://res.cloudinary.com/your-cloud/raw/upload/v1234567890/your-file.pdf
+            </div>
+            <p>Instead of getting HTTP 401 errors.</p>
+        </div>
+
+        <div class="step">
+            <h3>🆘 Still Having Issues?</h3>
+            <p>If you still get 401 errors after these changes:</p>
+            <ul>
+                <li>Wait 1-2 minutes for settings to propagate</li>
+                <li>Try uploading a completely new PDF file</li>
+                <li>Check that your upload preset name matches your environment variable</li>
+                <li>Verify you're using the correct cloud name</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
+
