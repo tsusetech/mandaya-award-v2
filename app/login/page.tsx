@@ -164,6 +164,17 @@ export default function LoginPage() {
               >
                 {isLoading ? 'Sedang masuk...' : 'Masuk'}
               </Button>
+
+              {/* Forgot Password Link */}
+              <div className="text-center">
+                <Button
+                  variant="ghost"
+                  onClick={() => router.push('/forgot-password')}
+                  className="text-gray-600 dark:text-gray-300 hover:text-yellow-600 dark:hover:text-yellow-400 text-sm"
+                >
+                  Lupa password?
+                </Button>
+              </div>
             </form>
           </CardContent>
         </Card>
