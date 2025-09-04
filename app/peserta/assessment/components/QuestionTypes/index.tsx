@@ -6,7 +6,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Checkbox } from '@/components/ui/checkbox'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Label } from '@/components/ui/label'
-import { uploadToCloudinary, uploadToImgur, getFilenameOnly } from '@/lib/upload'
+import { uploadToCloudinary } from '@/lib/upload'
 
 // Indonesian provinces data (updated 2024)
 const INDONESIAN_PROVINCES = [
