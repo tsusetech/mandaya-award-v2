@@ -1,4 +1,4 @@
-// app/register/page.tsx
+// app/register/page.tsx new comment
 'use client'
 
 import { useForm } from 'react-hook-form'
