@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { Button } from '@/components/ui/button'
-import { LogOut, User, Users, FileText, Bell, Settings, Award, Home, Trophy } from 'lucide-react'
+import { LogOut, User, Users, FileText, Bell, Settings, Award, Home, Trophy, BookOpen, HelpCircle } from 'lucide-react'
 import { logoutUser, getProfile } from '@/lib/auth'
 import { toast } from 'sonner'
 
@@ -89,6 +89,8 @@ export default function Navigation({ className = '' }: NavigationProps) {
           { href: '/peserta', label: 'Beranda', icon: Home },
           { href: '/peserta/groups', label: 'Kelompok Saya', icon: FileText },
           { href: '/peserta/submissions', label: 'Pengajuan Saya', icon: FileText },
+          { href: '/peserta/tutorial', label: 'Tutorial', icon: BookOpen },
+          { href: '/peserta/faq', label: 'FAQ', icon: HelpCircle },
         ]
     }
   }

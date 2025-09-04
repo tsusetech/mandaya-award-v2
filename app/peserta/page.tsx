@@ -19,7 +19,8 @@ import {
   Zap,
   BookOpen,
   UserCheck,
-  BarChart3
+  BarChart3,
+  HelpCircle
 } from 'lucide-react'
 import { toast } from 'sonner'
 import api from '@/lib/api'
@@ -315,7 +316,7 @@ export default function PesertaDashboard() {
           </Card>
 
           {/* Quick Actions */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
             <Card className="group hover:shadow-2xl transition-all duration-500 transform hover:scale-[1.03] border-0 shadow-xl bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm relative overflow-hidden cursor-pointer" onClick={() => router.push('/peserta/groups')}>
               <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-blue-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
               <CardHeader className="relative z-10">
@@ -354,6 +355,48 @@ export default function PesertaDashboard() {
                 <Button className="w-full bg-gradient-to-r from-green-600 to-green-500 hover:from-green-700 hover:to-green-600 text-white shadow-lg shadow-green-500/25 hover:shadow-green-500/40 transition-all duration-200 transform hover:scale-105">
                   <FileText className="h-4 w-4 mr-2" />
                   Lihat Pengajuan
+                </Button>
+              </CardContent>
+            </Card>
+
+            <Card className="group hover:shadow-2xl transition-all duration-500 transform hover:scale-[1.03] border-0 shadow-xl bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm relative overflow-hidden cursor-pointer" onClick={() => router.push('/peserta/tutorial')}>
+              <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/5 to-purple-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <CardHeader className="relative z-10">
+                <div className="flex items-center space-x-3">
+                  <div className="p-3 rounded-xl bg-gradient-to-br from-indigo-100 to-purple-200 dark:from-indigo-900/40 dark:to-purple-800/40 group-hover:from-indigo-200 dark:group-hover:from-indigo-900/60 group-hover:to-purple-300 dark:group-hover:to-purple-800/60 transition-all duration-300 transform group-hover:scale-110">
+                    <BookOpen className="h-6 w-6 text-indigo-600 dark:text-indigo-400" />
+                  </div>
+                  <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">Tutorial</CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent className="relative z-10">
+                <p className="text-gray-600 dark:text-gray-300 mb-6 leading-relaxed">
+                  Panduan lengkap step-by-step untuk menyelesaikan assessment dengan mudah dan benar.
+                </p>
+                <Button className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 transition-all duration-200 transform hover:scale-105">
+                  <BookOpen className="h-4 w-4 mr-2" />
+                  Lihat Tutorial
+                </Button>
+              </CardContent>
+            </Card>
+
+            <Card className="group hover:shadow-2xl transition-all duration-500 transform hover:scale-[1.03] border-0 shadow-xl bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm relative overflow-hidden cursor-pointer" onClick={() => router.push('/peserta/faq')}>
+              <div className="absolute inset-0 bg-gradient-to-r from-pink-500/5 to-rose-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <CardHeader className="relative z-10">
+                <div className="flex items-center space-x-3">
+                  <div className="p-3 rounded-xl bg-gradient-to-br from-pink-100 to-rose-200 dark:from-pink-900/40 dark:to-rose-800/40 group-hover:from-pink-200 dark:group-hover:from-pink-900/60 group-hover:to-rose-300 dark:group-hover:to-rose-800/60 transition-all duration-300 transform group-hover:scale-110">
+                    <HelpCircle className="h-6 w-6 text-pink-600 dark:text-pink-400" />
+                  </div>
+                  <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">FAQ</CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent className="relative z-10">
+                <p className="text-gray-600 dark:text-gray-300 mb-6 leading-relaxed">
+                  Pertanyaan yang sering diajukan beserta jawabannya untuk membantu menyelesaikan masalah.
+                </p>
+                <Button className="w-full bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-700 hover:to-rose-700 text-white shadow-lg shadow-pink-500/25 hover:shadow-pink-500/40 transition-all duration-200 transform hover:scale-105">
+                  <HelpCircle className="h-4 w-4 mr-2" />
+                  Lihat FAQ
                 </Button>
               </CardContent>
             </Card>
