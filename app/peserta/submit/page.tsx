@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input'
 import { ArrowLeft, Upload, Save, FileText } from 'lucide-react'
 import { toast } from 'sonner'
 import api from '@/lib/api'
+import { uploadToCloudinary } from '@/lib/upload'
 
 export default function SubmitPage() {
   const router = useRouter()
@@ -165,7 +166,7 @@ export default function SubmitPage() {
                   </label>
                   <p className="pl-1">or drag and drop</p>
                 </div>
-                <p className="text-xs leading-5 text-gray-600">PDF, DOC, DOCX up to 10MB each</p>
+                <p className="text-xs leading-5 text-gray-600">Images, PDF, DOC, DOCX, TXT, RTF up to 10MB each</p>
               </div>
 
               {formData.files.length > 0 && (

@@ -6,7 +6,9 @@ import { Textarea } from '@/components/ui/textarea'
 import { Checkbox } from '@/components/ui/checkbox'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Label } from '@/components/ui/label'
-import { uploadToCloudinary, uploadToImgur, getFilenameOnly } from '@/lib/upload'
+import { Button } from '@/components/ui/button'
+import { uploadToCloudinary, uploadToImgur, getFilenameOnly, isPdfUrl, createPdfViewerUrl } from '@/lib/upload'
+import { PdfModal } from '@/components/ui/pdf-modal'
 
 // Indonesian provinces data (updated 2024)
 const INDONESIAN_PROVINCES = [
@@ -118,6 +120,7 @@ export function QuestionInput({
   })
   const [isFocused, setIsFocused] = useState(false)
   const [autoSaveStatus, setAutoSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle')
+  const [pdfModalOpen, setPdfModalOpen] = useState(false)
 
   // Update local value when prop value changes
   useEffect(() => {
@@ -504,7 +507,7 @@ export function QuestionInput({
           <div className="space-y-2">
             <Input
               type="file"
-              accept="image/*,.pdf,.doc,.docx"
+              accept="image/*,.pdf,.doc,.docx,.txt,.rtf"
               onChange={async (e) => {
                 const file = e.target.files?.[0]
                 if (file) {
@@ -512,9 +515,9 @@ export function QuestionInput({
                     // Show loading state
                     handleChange('Mengunggah...')
                     
-                    // Option 1: Upload to Cloudinary (recommended)
-                    const imageUrl = await uploadToCloudinary(file)
-                    handleChange(imageUrl)
+                    // Upload to Cloudinary (supports both images and documents)
+                    const fileUrl = await uploadToCloudinary(file)
+                    handleChange(fileUrl)
                     
                     // Option 2: Upload to Imgur (for images only)
                     // const imageUrl = await uploadToImgur(file)
@@ -524,31 +527,48 @@ export function QuestionInput({
                     // handleChange(file.name)
                     
                   } catch (error) {
-                            console.error('Upload failed:', error)
-        handleChange('Gagal mengunggah')
+                    console.error('Upload failed:', error)
+                    const errorMessage = error instanceof Error ? error.message : 'Gagal mengunggah'
+                    handleChange(`Error: ${errorMessage}`)
                   }
                 }
               }}
               onBlur={handleBlur}
               onFocus={handleFocus}
             />
-            {localValue && localValue !== 'Mengunggah...' && localValue !== 'Gagal mengunggah' && (
+            {localValue && localValue !== 'Mengunggah...' && localValue !== 'Gagal mengunggah' && !localValue.startsWith('Error:') && (
               <div className="mt-2">
                 {localValue.startsWith('http') ? (
-                  <div>
+                  <div className="space-y-2">
                     <p className="text-sm text-green-600">✓ File berhasil diunggah</p>
-                    <a 
-                      href={localValue} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="text-sm text-blue-600 hover:underline"
-                    >
-                      Lihat file yang diunggah
-                    </a>
+                    {isPdfUrl(localValue) ? (
+                      <Button
+                        variant="default"
+                        size="sm"
+                        onClick={() => setPdfModalOpen(true)}
+                        className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm hover:shadow-md transition-all duration-200"
+                      >
+                        📄 View PDF
+                      </Button>
+                    ) : (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => window.open(localValue, '_blank', 'noopener,noreferrer')}
+                        className="border-blue-200 text-blue-600 hover:bg-blue-50 hover:border-blue-300 transition-colors"
+                      >
+                        📄 View File
+                      </Button>
+                    )}
                   </div>
                 ) : (
                   <p className="text-sm text-gray-500">Selected file: {localValue}</p>
                 )}
+              </div>
+            )}
+            {localValue && localValue.startsWith('Error:') && (
+              <div className="mt-2">
+                <p className="text-sm text-red-600">{localValue}</p>
               </div>
             )}
             {localValue === 'Mengunggah...' && (
@@ -646,6 +666,16 @@ export function QuestionInput({
           </p>
         )}
       </div>
+
+      {/* PDF Modal for file uploads */}
+      {localValue && localValue.startsWith('http') && isPdfUrl(localValue) && (
+        <PdfModal
+          isOpen={pdfModalOpen}
+          onClose={() => setPdfModalOpen(false)}
+          pdfUrl={localValue}
+          title={questionText}
+        />
+      )}
     </div>
   )
 }

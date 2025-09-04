@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test PDF URL</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        .url-display {
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 4px;
+            word-break: break-all;
+            margin: 10px 0;
+        }
+        iframe {
+            width: 100%;
+            height: 600px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .error {
+            color: red;
+            background: #ffe6e6;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .success {
+            color: green;
+            background: #e6ffe6;
+            padding: 10px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <h1>PDF URL Test</h1>
+    
+    <div class="test-section">
+        <h2>Your Cloudinary PDF URL</h2>
+        <div class="url-display" id="originalUrl">
+            https://res.cloudinary.com/dcl6amjx5/raw/upload/v1756968007/yo5ijsuobyhhrgul9xxx.pdf
+        </div>
+        <div class="success">
+            ✅ This URL should work for direct access
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>PDF with Viewer Parameters</h2>
+        <div class="url-display" id="viewerUrl">
+            https://res.cloudinary.com/dcl6amjx5/raw/upload/v1756968007/yo5ijsuobyhhrgul9xxx.pdf#toolbar=0&navpanes=0&scrollbar=0&statusbar=0&messages=0&scrollbar=1
+        </div>
+        <div class="success">
+            ✅ This URL should work better in browser PDF viewers
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>Direct Link Test</h2>
+        <p>
+            <a href="https://res.cloudinary.com/dcl6amjx5/raw/upload/v1756968007/yo5ijsuobyhhrgul9xxx.pdf" 
+               target="_blank" 
+               style="color: blue; text-decoration: underline;">
+                📄 Open PDF in New Tab (Original URL)
+            </a>
+        </p>
+        <p>
+            <a href="https://res.cloudinary.com/dcl6amjx5/raw/upload/v1756968007/yo5ijsuobyhhrgul9xxx.pdf#toolbar=0&navpanes=0&scrollbar=0&statusbar=0&messages=0&scrollbar=1" 
+               target="_blank" 
+               style="color: green; text-decoration: underline;">
+                📖 Open PDF in New Tab (With Viewer Parameters)
+            </a>
+        </p>
+    </div>
+
+    <div class="test-section">
+        <h2>Embedded PDF Test</h2>
+        <p>If the PDF loads below, your URL is working correctly:</p>
+        <iframe src="https://res.cloudinary.com/dcl6amjx5/raw/upload/v1756968007/yo5ijsuobyhhrgul9xxx.pdf" 
+                title="PDF Document">
+            <div class="error">
+                ❌ PDF failed to load in iframe. This might be due to CORS restrictions.
+            </div>
+        </iframe>
+    </div>
+
+    <div class="test-section">
+        <h2>Troubleshooting</h2>
+        <ul>
+            <li><strong>If PDF doesn't load:</strong> The issue might be CORS restrictions from Cloudinary</li>
+            <li><strong>If you see "Failed to load PDF document":</strong> Try the direct link instead of embedded view</li>
+            <li><strong>If PDF loads in new tab but not embedded:</strong> This is normal - use direct links for PDFs</li>
+            <li><strong>Solution:</strong> Always use direct links (target="_blank") for PDF files</li>
+        </ul>
+    </div>
+
+    <script>
+        // Test if the URL is accessible
+        fetch('https://res.cloudinary.com/dcl6amjx5/raw/upload/v1756968007/yo5ijsuobyhhrgul9xxx.pdf', {
+            method: 'HEAD'
+        })
+        .then(response => {
+            if (response.ok) {
+                document.body.insertAdjacentHTML('afterbegin', 
+                    '<div class="success">✅ PDF URL is accessible and working!</div>'
+                );
+            } else {
+                document.body.insertAdjacentHTML('afterbegin', 
+                    '<div class="error">❌ PDF URL returned status: ' + response.status + '</div>'
+                );
+            }
+        })
+        .catch(error => {
+            document.body.insertAdjacentHTML('afterbegin', 
+                '<div class="error">❌ Error accessing PDF URL: ' + error.message + '</div>'
+            );
+        });
+    </script>
+</body>
+</html>

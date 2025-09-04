@@ -8,9 +8,11 @@ import { Progress } from '@/components/ui/progress'
 import { ArrowLeft, ArrowRight, Save, Send, AlertTriangle, CheckCircle, XCircle, Clock, Eye } from 'lucide-react'
 import { toast } from 'sonner'
 import { QuestionInput } from '../components/QuestionTypes'
+import { PdfModal } from '@/components/ui/pdf-modal'
 import api from '@/lib/api'
 import { getAssessmentStatus, getStatusBadge, type AssessmentStatus } from '@/lib/utils'
 import { getProfile } from '@/lib/auth'
+import { isPdfUrl } from '@/lib/upload'
 
 interface Question {
   id: number
@@ -89,6 +91,9 @@ export default function AssessmentPage() {
   const [responses, setResponses] = useState<Record<number, any>>({})
   const [validationErrors, setValidationErrors] = useState<Record<number, string>>({})
   const [userEmail, setUserEmail] = useState<string>('')
+  const [pdfModalOpen, setPdfModalOpen] = useState(false)
+  const [pdfModalUrl, setPdfModalUrl] = useState('')
+  const [pdfModalTitle, setPdfModalTitle] = useState('')
   const autoSaveTimeouts = useRef<Record<number, NodeJS.Timeout>>({})
 
   // Get the current assessment status
@@ -118,6 +123,13 @@ export default function AssessmentPage() {
            questionText.includes('e-mail') ||
            questionText.includes('email address') ||
            (inputType === 'text-open' && questionText.includes('email'))
+  }
+
+  // Function to open PDF modal
+  const openPdfModal = (url: string, title: string) => {
+    setPdfModalUrl(url)
+    setPdfModalTitle(title)
+    setPdfModalOpen(true)
   }
 
   // Function to pre-fill email fields with authenticated user's email
@@ -1090,6 +1102,46 @@ export default function AssessmentPage() {
                            {(() => {
                              // Handle different response formats
                              if (typeof question.response === 'string') {
+                               // Check if it's a file upload response (URL)
+                               if (question.response.startsWith('http') && isPdfUrl(question.response)) {
+                                 return (
+                                   <div className="space-y-2">
+                                     <div className="flex items-center space-x-2">
+                                       <div className="p-1 bg-green-100 rounded-full">
+                                         <span className="text-green-600 text-xs">✓</span>
+                                       </div>
+                                       <span className="text-sm font-medium text-gray-700">PDF Document uploaded</span>
+                                     </div>
+                                     <Button
+                                       variant="default"
+                                       size="sm"
+                                       onClick={() => openPdfModal(question.response, question.questionText)}
+                                       className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm hover:shadow-md transition-all duration-200"
+                                     >
+                                       📄 View PDF
+                                     </Button>
+                                   </div>
+                                 )
+                               } else if (question.response.startsWith('http')) {
+                                 return (
+                                   <div className="space-y-2">
+                                     <div className="flex items-center space-x-2">
+                                       <div className="p-1 bg-green-100 rounded-full">
+                                         <span className="text-green-600 text-xs">✓</span>
+                                       </div>
+                                       <span className="text-sm font-medium text-gray-700">File uploaded</span>
+                                     </div>
+                                     <Button
+                                       variant="outline"
+                                       size="sm"
+                                       onClick={() => window.open(question.response, '_blank', 'noopener,noreferrer')}
+                                       className="border-blue-200 text-blue-600 hover:bg-blue-50 hover:border-blue-300 transition-colors"
+                                     >
+                                       📄 View File
+                                     </Button>
+                                   </div>
+                                 )
+                               }
                                return question.response
                              } else if (typeof question.response === 'number') {
                                return question.response.toString()
@@ -1189,6 +1241,14 @@ export default function AssessmentPage() {
           </div>
         </div>
       </div>
+
+      {/* PDF Modal for read-only view */}
+      <PdfModal
+        isOpen={pdfModalOpen}
+        onClose={() => setPdfModalOpen(false)}
+        pdfUrl={pdfModalUrl}
+        title={pdfModalTitle}
+      />
     </div>
   )
 }

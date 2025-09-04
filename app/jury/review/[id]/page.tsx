@@ -11,6 +11,7 @@ import { toast } from 'sonner'
 import api from '@/lib/api'
 import AuthenticatedLayout from '@/components/AuthenticatedLayout'
 import { getProfile } from '@/lib/auth'
+import { isPdfUrl, createPdfViewerUrl } from '@/lib/upload'
 
 interface Question {
   id: number
@@ -250,16 +251,56 @@ export default function ReviewPage() {
               {response.map((url: string, index: number) => (
                 <div key={index} className="flex items-center space-x-2">
                   <FileText className="h-4 w-4 text-gray-400" />
-                  <a 
-                    href={url} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="text-blue-600 hover:text-blue-800 underline"
-                  >
-                    View File {index + 1}
-                  </a>
+                  <div className="flex flex-col space-y-1">
+                    <a 
+                      href={url} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:text-blue-800 underline"
+                    >
+                      📄 View File {index + 1}
+                    </a>
+                    {isPdfUrl(url) && (
+                      <a 
+                        href={createPdfViewerUrl(url)}
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-green-600 hover:text-green-800 underline text-sm"
+                      >
+                        📖 Open PDF in new tab
+                      </a>
+                    )}
+                  </div>
                 </div>
               ))}
+            </div>
+          )
+        }
+        // Handle single file URL (string)
+        if (typeof response === 'string' && response.startsWith('http')) {
+          return (
+            <div className="flex items-center space-x-2">
+              <FileText className="h-4 w-4 text-gray-400" />
+              <div className="flex flex-col space-y-1">
+                <a 
+                  href={response} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-blue-600 hover:text-blue-800 underline"
+                >
+                  📄 View Uploaded File
+                </a>
+                {isPdfUrl(response) && (
+                  <a 
+                    href={createPdfViewerUrl(response)}
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-green-600 hover:text-green-800 underline text-sm"
+                  >
+                    📖 Open PDF in new tab
+                  </a>
+                )}
+              </div>
             </div>
           )
         }

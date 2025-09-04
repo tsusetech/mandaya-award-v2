@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test PDF Direct Access</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        .success { color: green; }
+        .error { color: red; }
+        .info { color: blue; }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #0056b3; }
+        .result {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 4px;
+            background: #f8f9fa;
+        }
+        iframe {
+            width: 100%;
+            height: 600px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <h1>PDF Direct Access Test</h1>
+    
+    <div class="test-section">
+        <h2>Test Your PDF URL</h2>
+        <p>Enter your PDF URL below to test if it's accessible:</p>
+        <input type="text" id="pdfUrl" placeholder="https://res.cloudinary.com/..." style="width: 100%; padding: 10px; margin: 10px 0;">
+        <button onclick="testPdfUrl()">Test PDF URL</button>
+        <div id="testResult" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Direct Link Test</h2>
+        <p>If the URL is valid, you can test it here:</p>
+        <div id="directLink" style="margin: 10px 0;"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Embedded Test (May Fail)</h2>
+        <p>This is what causes "Failed to load PDF document" - browsers often block PDF embedding:</p>
+        <div id="embeddedTest"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Solutions</h2>
+        <div class="info">
+            <h3>✅ Working Solutions:</h3>
+            <ul>
+                <li><strong>Direct Link:</strong> Always use <code>target="_blank"</code> to open PDFs in new tabs</li>
+                <li><strong>Download Link:</strong> Add <code>download</code> attribute to force download</li>
+                <li><strong>Google Docs Viewer:</strong> Use Google's PDF viewer as fallback</li>
+            </ul>
+            
+            <h3>❌ What Doesn't Work:</h3>
+            <ul>
+                <li>Embedding PDFs in iframes (browser security restrictions)</li>
+                <li>Opening PDFs in same tab without proper headers</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        function testPdfUrl() {
+            const url = document.getElementById('pdfUrl').value;
+            const resultDiv = document.getElementById('testResult');
+            const directLinkDiv = document.getElementById('directLink');
+            const embeddedDiv = document.getElementById('embeddedTest');
+
+            if (!url) {
+                resultDiv.innerHTML = '<p class="error">Please enter a PDF URL</p>';
+                return;
+            }
+
+            resultDiv.innerHTML = '<p class="info">Testing PDF URL...</p>';
+
+            // Test if URL is accessible
+            fetch(url, { method: 'HEAD' })
+                .then(response => {
+                    if (response.ok) {
+                        resultDiv.innerHTML = `
+                            <p class="success">✅ PDF URL is accessible!</p>
+                            <p><strong>Status:</strong> ${response.status}</p>
+                            <p><strong>Content-Type:</strong> ${response.headers.get('content-type')}</p>
+                        `;
+
+                        // Create direct link
+                        directLinkDiv.innerHTML = `
+                            <a href="${url}" target="_blank" style="color: blue; text-decoration: underline;">
+                                📄 Open PDF in New Tab
+                            </a>
+                        `;
+
+                        // Create embedded test (will likely fail)
+                        embeddedDiv.innerHTML = `
+                            <p class="info">Trying to embed PDF (this may show "Failed to load PDF document"):</p>
+                            <iframe src="${url}" title="PDF Document">
+                                <p class="error">❌ PDF failed to load in iframe. This is normal - use direct links instead.</p>
+                            </iframe>
+                        `;
+                    } else {
+                        resultDiv.innerHTML = `
+                            <p class="error">❌ PDF URL returned status: ${response.status}</p>
+                            <p>This means the file is not publicly accessible.</p>
+                        `;
+                    }
+                })
+                .catch(error => {
+                    resultDiv.innerHTML = `
+                        <p class="error">❌ Error accessing PDF URL: ${error.message}</p>
+                        <p>This could be a CORS issue or the URL is not accessible.</p>
+                    `;
+                });
+        }
+
+        // Auto-test with a sample URL if provided
+        const urlParams = new URLSearchParams(window.location.search);
+        const testUrl = urlParams.get('url');
+        if (testUrl) {
+            document.getElementById('pdfUrl').value = testUrl;
+            testPdfUrl();
+        }
+    </script>
+</body>
+</html>
+
