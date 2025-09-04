@@ -97,6 +97,7 @@ export default function RegisterPage() {
           disabled={loading}
           className="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700"
         >
+
           {loading ? 'Mendaftar...' : 'Daftar'}
         </button>
       </form>
