@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Mandaya Awards - Sistem Penghargaan Pemerintah",
-  description: "Sistem Penghargaan Mandaya Awards untuk Pemerintah Indonesia",
+  title: "Mandaya Awards - 2025",
+  description: "Mandaya Awards 2025",
 };
 
 export default function RootLayout({
