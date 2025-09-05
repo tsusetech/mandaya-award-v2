@@ -96,51 +96,50 @@ export default function ReviewPage() {
   const fetchData = async () => {
     try {
       setLoading(true)
-      
+
       // Use the detail endpoint to get session information
       const sessionRes = await api.get(`/assessments/session/${id}/detail`)
-      console.log('Juri session detail response:', sessionRes.data)
-      
+
       if (!sessionRes.data?.data) {
         throw new Error('Session not found')
       }
-      
-             const sessionData: SessionData = sessionRes.data.data
-       setSubmission(sessionData)
-       setQuestions(sessionData.questions || [])
-       
-       // Extract unique subsections and set the first one as active
-       const uniqueSubsections = [...new Set(sessionData.questions?.map(q => q.subsection) || [])]
-       setSubsections(uniqueSubsections)
-       if (uniqueSubsections.length > 0) {
-         setActiveSubsection(uniqueSubsections[0])
-       }
-       
-       // Initialize overall comments from existing review comments
-       if (sessionData.reviewComments) {
-         setOverallComments(sessionData.reviewComments)
-       }
-       
-       // Initialize jury comments from existing jury review comments
-       if (sessionData.juryComments) {
-         setJuryComments(sessionData.juryComments)
-       }
-       
-       // Initialize existing scores and comments from questions
-       const existingScores: Record<number, number> = {}
-       const existingComments: Record<number, string> = {}
-       
-               sessionData.questions?.forEach(question => {
-          if (question.juryScores && question.juryScores.length > 0) {
-            // Get the latest score
-            const latestScore = question.juryScores[question.juryScores.length - 1]
-            existingScores[question.id] = latestScore.score
-            existingComments[question.id] = latestScore.comments || ''
-          }
-        })
-        
-        setScores(existingScores)
-        setComments(existingComments)
+
+      const sessionData: SessionData = sessionRes.data.data
+      setSubmission(sessionData)
+      setQuestions(sessionData.questions || [])
+
+      // Extract unique subsections and set the first one as active
+      const uniqueSubsections = [...new Set(sessionData.questions?.map(q => q.subsection) || [])]
+      setSubsections(uniqueSubsections)
+      if (uniqueSubsections.length > 0) {
+        setActiveSubsection(uniqueSubsections[0])
+      }
+
+      // Initialize overall comments from existing review comments
+      if (sessionData.reviewComments) {
+        setOverallComments(sessionData.reviewComments)
+      }
+
+      // Initialize jury comments from existing jury review comments
+      if (sessionData.juryComments) {
+        setJuryComments(sessionData.juryComments)
+      }
+
+      // Initialize existing scores and comments from questions
+      const existingScores: Record<number, number> = {}
+      const existingComments: Record<number, string> = {}
+
+      sessionData.questions?.forEach(question => {
+        if (question.juryScores && question.juryScores.length > 0) {
+          // Get the latest score
+          const latestScore = question.juryScores[question.juryScores.length - 1]
+          existingScores[question.id] = latestScore.score
+          existingComments[question.id] = latestScore.comments || ''
+        }
+      })
+
+      setScores(existingScores)
+      setComments(existingComments)
     } catch (err) {
       console.error('Error fetching review data:', err)
       toast.error('Failed to load submission')
@@ -154,6 +153,8 @@ export default function ReviewPage() {
   }, [id])
 
   const handleScoreChange = (questionId: number, score: number) => {
+    // Handle NaN case when input is empty
+    if (isNaN(score)) score = 0
     if (score < 0) score = 0
     if (score > 10) score = 10
     setScores(prev => ({ ...prev, [questionId]: score }))
@@ -210,7 +211,7 @@ export default function ReviewPage() {
 
   const renderResponse = (response: any, inputType: string, options?: any[]) => {
     if (!response) return 'No response'
-    
+
     switch (inputType) {
       case 'text-open':
         return typeof response === 'string' ? response : response.answer || response
@@ -252,18 +253,18 @@ export default function ReviewPage() {
                 <div key={index} className="flex items-center space-x-2">
                   <FileText className="h-4 w-4 text-gray-400" />
                   <div className="flex flex-col space-y-1">
-                    <a 
-                      href={url} 
-                      target="_blank" 
+                    <a
+                      href={url}
+                      target="_blank"
                       rel="noopener noreferrer"
                       className="text-blue-600 hover:text-blue-800 underline"
                     >
                       📄 View File {index + 1}
                     </a>
                     {isPdfUrl(url) && (
-                      <a 
+                      <a
                         href={createPdfViewerUrl(url)}
-                        target="_blank" 
+                        target="_blank"
                         rel="noopener noreferrer"
                         className="text-green-600 hover:text-green-800 underline text-sm"
                       >
@@ -282,18 +283,18 @@ export default function ReviewPage() {
             <div className="flex items-center space-x-2">
               <FileText className="h-4 w-4 text-gray-400" />
               <div className="flex flex-col space-y-1">
-                <a 
-                  href={response} 
-                  target="_blank" 
+                <a
+                  href={response}
+                  target="_blank"
                   rel="noopener noreferrer"
                   className="text-blue-600 hover:text-blue-800 underline"
                 >
                   📄 View Uploaded File
                 </a>
                 {isPdfUrl(response) && (
-                  <a 
+                  <a
                     href={createPdfViewerUrl(response)}
-                    target="_blank" 
+                    target="_blank"
                     rel="noopener noreferrer"
                     className="text-green-600 hover:text-green-800 underline text-sm"
                   >
@@ -313,18 +314,18 @@ export default function ReviewPage() {
   const handleCompleteReview = async () => {
     try {
       setSaving(true)
-      
+
       // Get current user profile to get jury ID
       const currentUser = await getProfile()
       const juryId = currentUser.id
-      
+
       // Prepare the payload for completing the assessment
       const questionScoresArray = Object.entries(scores).map(([questionId, score]) => {
         const question = questions.find(q => q.id === parseInt(questionId))
         const comment = comments[parseInt(questionId)] || ''
         const weight = question?.category?.weight || 1
         const scoreResult = Math.round((score * weight) * 100) / 100 // Round to 2 decimal places
-        
+
         return {
           questionId: parseInt(questionId),
           comment: comment,
@@ -346,10 +347,10 @@ export default function ReviewPage() {
         validationChecklist: [],
         updateExisting: true
       }
-      
+
       // Call the API to complete the review
       await api.post(`/assessments/jury/${id}/complete`, reviewPayload)
-      
+
       toast.success('Review completed successfully')
       router.push('/jury')
     } catch (err) {
@@ -363,7 +364,7 @@ export default function ReviewPage() {
   const handleSave = async (asDraft: boolean = true) => {
     try {
       setSaving(true)
-      
+
       // Prepare the payload for saving as draft
       const reviewPayload = {
         stage: 'jury_scoring',
@@ -385,15 +386,11 @@ export default function ReviewPage() {
         validationChecklist: [],
         updateExisting: true
       }
-      
-      console.log('=== SAVE DRAFT PAYLOAD ===')
-      console.log('Submission ID:', id)
-      console.log('Payload:', JSON.stringify(reviewPayload, null, 2))
-      console.log('=====================================')
-      
+
+
       // Call the API to save as draft
       await api.post(`/assessments/jury/${id}/review`, reviewPayload)
-      
+
       toast.success('Review saved as draft')
     } catch (err) {
       console.error('Error saving draft:', err)
@@ -403,14 +400,14 @@ export default function ReviewPage() {
     }
   }
 
-    const handleSaveQuestion = async (questionId: number) => {
+  const handleSaveQuestion = async (questionId: number) => {
     try {
       setSaving(true)
-      
+
       // Create a payload with just this question's data
       const questionScore = scores[questionId] || 0
       const questionComment = comments[questionId] || ''
-      
+
       const reviewPayload = {
         stage: 'jury_scoring',
         decision: 'needs_deliberation',
@@ -431,13 +428,12 @@ export default function ReviewPage() {
         validationChecklist: [],
         updateExisting: true
       }
-      
-      console.log('Saving individual question:', questionId, reviewPayload)
-      
+
+
       await api.post(`/assessments/jury/${id}/review`, reviewPayload)
-      
+
       // Update the question's juryScores in the local state to reflect the save
-      setQuestions(prevQuestions => 
+      setQuestions(prevQuestions =>
         prevQuestions.map(question => {
           if (question.id === questionId) {
             const newJuryScore = {
@@ -447,11 +443,11 @@ export default function ReviewPage() {
               comments: questionComment,
               createdAt: new Date().toISOString()
             }
-            
+
             // Replace existing scores or add new one
             const existingScores = question.juryScores || []
             const updatedScores = [...existingScores, newJuryScore]
-            
+
             return {
               ...question,
               juryScores: updatedScores
@@ -460,9 +456,9 @@ export default function ReviewPage() {
           return question
         })
       )
-      
 
-      
+
+
       toast.success('Pertanyaan berhasil disimpan')
     } catch (err) {
       console.error('Error saving question:', err)
@@ -507,8 +503,8 @@ export default function ReviewPage() {
           <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-6">
-                <Button 
-                  variant="ghost" 
+                <Button
+                  variant="ghost"
                   size="sm"
                   onClick={() => router.push('/jury')}
                   className="flex items-center space-x-2 bg-white/20 hover:bg-white/30 text-gray-900 dark:text-white backdrop-blur-sm border border-white/20"
@@ -553,23 +549,23 @@ export default function ReviewPage() {
 
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="max-w-5xl mx-auto space-y-6">
-          {/* Read-only Notice */}
-          {isReadOnly && (
-            <Card className="border-0 shadow-xl bg-green-50/90 dark:bg-green-900/20 backdrop-blur-sm relative overflow-hidden group hover:shadow-2xl transition-all duration-500">
-              <div className="absolute inset-0 bg-gradient-to-r from-green-500/5 to-green-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-              <CardContent className="pt-6 relative z-10">
-                <div className="flex items-center space-x-3">
-                  <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
-                  <div>
-                    <h3 className="text-sm font-medium text-green-800 dark:text-green-300">Tinjauan Selesai</h3>
-                    <p className="text-sm text-green-600 dark:text-green-400">Pengajuan ini telah ditinjau dan selesai. Semua field bersifat read-only.</p>
+            {/* Read-only Notice */}
+            {isReadOnly && (
+              <Card className="border-0 shadow-xl bg-green-50/90 dark:bg-green-900/20 backdrop-blur-sm relative overflow-hidden group hover:shadow-2xl transition-all duration-500">
+                <div className="absolute inset-0 bg-gradient-to-r from-green-500/5 to-green-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                <CardContent className="pt-6 relative z-10">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                    <div>
+                      <h3 className="text-sm font-medium text-green-800 dark:text-green-300">Tinjauan Selesai</h3>
+                      <p className="text-sm text-green-600 dark:text-green-400">Pengajuan ini telah ditinjau dan selesai. Semua field bersifat read-only.</p>
+                    </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-          )}
+                </CardContent>
+              </Card>
+            )}
 
-                     {/* Submission Info */}
+            {/* Submission Info */}
             <Card className="border-0 shadow-xl bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm relative overflow-hidden group hover:shadow-2xl transition-all duration-500">
               <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-blue-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
               <CardHeader className="relative z-10">
@@ -582,32 +578,32 @@ export default function ReviewPage() {
               </CardHeader>
               <CardContent className="relative z-10">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                     <div>
-                     <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Nama Kelompok</h3>
-                     <p className="mt-1 text-gray-900 dark:text-white font-medium">{submission?.groupName || 'N/A'}</p>
-                   </div>
-                   <div>
-                     <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Status</h3>
-                     <p className="mt-1 text-gray-900 dark:text-white capitalize font-medium">{submission?.status || 'N/A'}</p>
-                   </div>
-                   
-                   <div>
-                     <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Dikirim Pada</h3>
-                     <p className="mt-1 text-gray-900 dark:text-white">
-                       {submission?.submittedAt ? new Date(submission.submittedAt).toLocaleString() : 'Tanggal Tidak Valid'}
-                     </p>
-                   </div>
-                                     {isCompleted && submission?.reviewScore !== undefined && (
-                     <div>
-                       <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Skor Tinjauan</h3>
-                       <p className="mt-1 text-gray-900 dark:text-white font-semibold text-lg">{submission.reviewScore}</p>
-                     </div>
-                   )}
+                  <div>
+                    <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Nama Kelompok</h3>
+                    <p className="mt-1 text-gray-900 dark:text-white font-medium">{submission?.groupName || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Status</h3>
+                    <p className="mt-1 text-gray-900 dark:text-white capitalize font-medium">{submission?.status || 'N/A'}</p>
+                  </div>
+
+                  <div>
+                    <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Dikirim Pada</h3>
+                    <p className="mt-1 text-gray-900 dark:text-white">
+                      {submission?.submittedAt ? new Date(submission.submittedAt).toLocaleString() : 'Tanggal Tidak Valid'}
+                    </p>
+                  </div>
+                  {isCompleted && submission?.reviewScore !== undefined && (
+                    <div>
+                      <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Skor Tinjauan</h3>
+                      <p className="mt-1 text-gray-900 dark:text-white font-semibold text-lg">{submission.reviewScore}</p>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
 
-                       {/* Overall Comments (Readonly) */}
+            {/* Overall Comments (Readonly) */}
             <Card className="border-0 shadow-xl bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm relative overflow-hidden group hover:shadow-2xl transition-all duration-500">
               <div className="absolute inset-0 bg-gradient-to-r from-purple-500/5 to-purple-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
               <CardHeader className="relative z-10">
@@ -660,247 +656,250 @@ export default function ReviewPage() {
               </CardContent>
             </Card>
 
-                     {/* Subsection Filters */}
-           {subsections.length > 0 && (
-             <Card className="border-0 shadow-xl bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm relative overflow-hidden group hover:shadow-2xl transition-all duration-500">
-               <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/5 to-indigo-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-               <CardContent className="pt-6 relative z-10">
-                 <div className="flex flex-wrap gap-2">
-                   {subsections.map((subsection) => (
-                     <Button
-                       key={subsection}
-                       variant={activeSubsection === subsection ? 'default' : 'outline'}
-                       size="sm"
-                       onClick={() => setActiveSubsection(subsection)}
-                       className={`flex items-center space-x-2 ${
-                         activeSubsection === subsection 
-                           ? 'bg-gradient-to-r from-yellow-600 to-yellow-500 hover:from-yellow-700 hover:to-yellow-600 text-white shadow-lg shadow-yellow-500/25 hover:shadow-yellow-500/40' 
-                           : 'hover:bg-yellow-50 dark:hover:bg-yellow-900/20'
-                       } transition-all duration-200`}
-                     >
-                       <span>{subsection}</span>
-                       {shouldShowScoreCount(subsection) && (
-                         <span className="text-xs opacity-75">({getQuestionCount(subsection)} scored)</span>
-                       )}
-                     </Button>
-                   ))}
-                 </div>
-               </CardContent>
-             </Card>
-           )}
-
-           {/* Questions and Scoring */}
-           {activeSubsection && (
-             <>
-               <Card className="border-0 shadow-xl bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm relative overflow-hidden group hover:shadow-2xl transition-all duration-500">
-                 <div className="absolute inset-0 bg-gradient-to-r from-green-500/5 to-green-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                 <CardHeader className="relative z-10">
-                   <CardTitle className="flex items-center space-x-3 text-xl">
-                     <div className="p-2 rounded-lg bg-gradient-to-br from-green-100 to-green-200 dark:from-green-900/40 dark:to-green-800/40">
-                       <FileText className="h-5 w-5 text-green-600 dark:text-green-400" />
-                     </div>
-                     <span className="text-gray-900 dark:text-white font-bold">{activeSubsection}</span>
-                     {shouldShowScoreCount(activeSubsection) && (
-                       <div className="flex items-center space-x-2">
-                         <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                         <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">
-                           {getQuestionCount(activeSubsection)} pertanyaan dinilai
-                         </p>
-                       </div>
-                     )}
-                   </CardTitle>
-                 </CardHeader>
-               </Card>
-               {getQuestionsBySubsection(activeSubsection).map((question) => (
-            <Card key={question.id} className="border-0 shadow-xl bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm relative overflow-hidden group hover:shadow-2xl transition-all duration-500">
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-blue-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-              <CardHeader className="relative z-10">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-base text-gray-900 dark:text-white font-bold">{question.questionText}</CardTitle>
-                </div>
-                {question.description && (
-                  <p className="text-sm text-gray-500 dark:text-gray-400">{question.description}</p>
-                )}
-                {question.category && (
-                  <div className="mt-2">
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300">
-                      {question.category.name} (Bobot: {question.category.weight}, Min: {question.category.minValue}, Max: {question.category.maxValue}, Tipe: {question.category.scoreType})
-                    </span>
-                  </div>
-                )}
-              </CardHeader>
-               <CardContent className="space-y-4">
-                 {/* Response */}
-                 <div className="bg-gray-50 p-4 rounded-lg">
-                   <div className="flex items-start justify-between">
-                     <div className="flex-1">
-                       <h4 className="text-sm font-medium text-gray-500 mb-2">Jawaban</h4>
-                       <div className="text-gray-900">
-                         {renderResponse(question.response, question.inputType, question.options)}
-                       </div>
-                     </div>
-                     {question.category && question.response && (() => {
-                       const responseValue = typeof question.response === 'number' ? question.response :
-                                            typeof question.response === 'string' ? parseFloat(question.response) :
-                                            question.response.answer !== undefined ? parseFloat(question.response.answer) : null
-                       if (responseValue !== null && !isNaN(responseValue)) {
-                         const { minValue, maxValue } = question.category
-                         let resultText = ''
-                         let resultColor = ''
-                         
-                         // Handle cases where minValue > maxValue (inverted range)
-                         const actualMin = Math.min(minValue, maxValue)
-                         const actualMax = Math.max(minValue, maxValue)
-                         
-                         if (responseValue < actualMin) {
-                           resultText = `Di bawah minimum (${actualMin})`
-                           resultColor = 'bg-red-100 text-red-800'
-                         } else if (responseValue > actualMax) {
-                           resultText = `Di atas maksimum (${actualMax})`
-                           resultColor = 'bg-orange-100 text-orange-800'
-                         } else {
-                           resultText = `Dalam rentang (${actualMin}-${actualMax})`
-                           resultColor = 'bg-green-100 text-green-800'
-                         }
-                         
-                         return (
-                           <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${resultColor} ml-3 flex-shrink-0`}>
-                             {resultText}
-                           </span>
-                         )
-                       }
-                       return null
-                     })()}
-                   </div>
-                 </div>
-
-                                 {/* Review Comments */}
-                 {question.reviewComments && question.reviewComments.length > 0 && (
-                   <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-lg">
-                     <h4 className="text-sm font-medium text-yellow-800 mb-2">Komentar Tinjauan</h4>
-                     <div className="space-y-2">
-                       {question.reviewComments.map((comment) => (
-                         <div key={comment.id} className="text-sm">
-                           <div className="flex items-center justify-between">
-                             <span className="font-medium text-yellow-800">{comment.reviewerName}</span>
-                             <span className="text-yellow-600 text-xs">
-                               {new Date(comment.createdAt).toLocaleDateString()}
-                             </span>
-                           </div>
-                           <p className="text-yellow-700 mt-1">{comment.comment}</p>
-                           {comment.isCritical && (
-                             <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800 mt-1">
-                               Kritis
-                             </span>
-                           )}
-                         </div>
-                       ))}
-                     </div>
-                   </div>
-                 )}
-
-                 
-
-                                                                   {/* Scoring - Only show for non-Basic Information questions */}
-                  {activeSubsection !== 'Basic Information' && (
-                    <>
-                                             <div>
-                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                           Skor (0-10)
-                         </label>
-                         {isReadOnly ? (
-                           <div className="bg-gray-50 p-3 rounded border w-32">
-                             <span className="text-gray-900">{scores[question.id] || 'Belum dinilai'}</span>
-                           </div>
-                         ) : (
-                           <Input
-                             type="number"
-                             min={0}
-                             max={10}
-                             value={scores[question.id] || ''}
-                             onChange={(e) => handleScoreChange(question.id, parseFloat(e.target.value))}
-                             className="w-32"
-                           />
-                         )}
-                       </div>
-
-                      {/* Comments */}
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Komentar
-                        </label>
-                        {isReadOnly ? (
-                          <div className="bg-gray-50 p-4 rounded-lg min-h-[100px]">
-                            {comments[question.id] ? (
-                              <p className="text-gray-900 whitespace-pre-wrap">{comments[question.id]}</p>
-                            ) : (
-                              <p className="text-gray-500 italic">Tidak ada komentar</p>
-                            )}
-                          </div>
-                        ) : (
-                          <Textarea
-                            value={comments[question.id] || ''}
-                            onChange={(e) => handleCommentChange(question.id, e.target.value)}
-                            placeholder="Tambahkan komentar Anda tentang jawaban ini..."
-                            className="min-h-[100px]"
-                          />
+            {/* Subsection Filters */}
+            {subsections.length > 0 && (
+              <Card className="border-0 shadow-xl bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm relative overflow-hidden group hover:shadow-2xl transition-all duration-500">
+                <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/5 to-indigo-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                <CardContent className="pt-6 relative z-10">
+                  <div className="flex flex-wrap gap-2">
+                    {subsections.map((subsection) => (
+                      <Button
+                        key={subsection}
+                        variant={activeSubsection === subsection ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => setActiveSubsection(subsection)}
+                        className={`flex items-center space-x-2 ${activeSubsection === subsection
+                            ? 'bg-gradient-to-r from-yellow-600 to-yellow-500 hover:from-yellow-700 hover:to-yellow-600 text-white shadow-lg shadow-yellow-500/25 hover:shadow-yellow-500/40'
+                            : 'hover:bg-yellow-50 dark:hover:bg-yellow-900/20'
+                          } transition-all duration-200`}
+                      >
+                        <span>{subsection}</span>
+                        {shouldShowScoreCount(subsection) && (
+                          <span className="text-xs opacity-75">({getQuestionCount(subsection)} scored)</span>
                         )}
-                      </div>
+                      </Button>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
-                      {/* Save Button for Individual Question */}
-                      {!isReadOnly && (
-                        <div className="flex justify-end">
-                          <Button
-                            onClick={() => handleSaveQuestion(question.id)}
-                            disabled={saving}
-                            size="sm"
-                            className="flex items-center space-x-2"
-                          >
-                            <Save className="h-4 w-4" />
-                            <span>{saving ? 'Menyimpan...' : 'Simpan'}</span>
-                          </Button>
+            {/* Questions and Scoring */}
+            {activeSubsection && (
+              <>
+                <Card className="border-0 shadow-xl bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm relative overflow-hidden group hover:shadow-2xl transition-all duration-500">
+                  <div className="absolute inset-0 bg-gradient-to-r from-green-500/5 to-green-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                  <CardHeader className="relative z-10">
+                    <CardTitle className="flex items-center space-x-3 text-xl">
+                      <div className="p-2 rounded-lg bg-gradient-to-br from-green-100 to-green-200 dark:from-green-900/40 dark:to-green-800/40">
+                        <FileText className="h-5 w-5 text-green-600 dark:text-green-400" />
+                      </div>
+                      <span className="text-gray-900 dark:text-white font-bold">{activeSubsection}</span>
+                      {shouldShowScoreCount(activeSubsection) && (
+                        <div className="flex items-center space-x-2">
+                          <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                          <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">
+                            {getQuestionCount(activeSubsection)} pertanyaan dinilai
+                          </p>
                         </div>
                       )}
-                    </>
-                  )}
-               </CardContent>
-             </Card>
-           ))}
+                    </CardTitle>
+                  </CardHeader>
+                </Card>
+                {getQuestionsBySubsection(activeSubsection).map((question) => (
+                  <Card key={question.id} className="border-0 shadow-xl bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm relative overflow-hidden group hover:shadow-2xl transition-all duration-500">
+                    <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-blue-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                    <CardHeader className="relative z-10">
+                      <div className="flex items-center justify-between">
+                        <CardTitle className="text-base text-gray-900 dark:text-white font-bold">{question.questionText}</CardTitle>
+                      </div>
+                      {question.description && (
+                        <p className="text-sm text-gray-500 dark:text-gray-400">{question.description}</p>
+                      )}
+                      {question.category && (
+                        <div className="mt-2">
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300">
+                            {question.category.name} (Bobot: {question.category.weight}, Min: {question.category.minValue}, Max: {question.category.maxValue}, Tipe: {question.category.scoreType})
+                          </span>
+                        </div>
+                      )}
+                    </CardHeader>
+                    <CardContent className="space-y-4 relative z-10">
+                      {/* Response */}
+                      <div className="bg-gray-50 p-4 rounded-lg">
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <h4 className="text-sm font-medium text-gray-500 mb-2">Jawaban</h4>
+                            <div className="text-gray-900">
+                              {renderResponse(question.response, question.inputType, question.options)}
+                            </div>
+                          </div>
+                          {question.category && question.response && (() => {
+                            const responseValue = typeof question.response === 'number' ? question.response :
+                              typeof question.response === 'string' ? parseFloat(question.response) :
+                                question.response.answer !== undefined ? parseFloat(question.response.answer) : null
+                            if (responseValue !== null && !isNaN(responseValue)) {
+                              const { minValue, maxValue } = question.category
+                              let resultText = ''
+                              let resultColor = ''
 
-           {/* Subsection Navigation Buttons */}
-           {subsections.length > 1 && (
-             <Card>
-               <CardContent className="pt-6">
-                 <div className="flex items-center justify-between">
-                   <Button
-                     variant="outline"
-                     onClick={goToPreviousSubsection}
-                     disabled={isFirstSubsection}
-                     className="flex items-center space-x-2"
-                   >
-                     <ChevronLeft className="h-4 w-4" />
-                     <span>Bagian Sebelumnya</span>
-                   </Button>
-                   
-                   <div className="text-sm text-gray-500">
-                     Bagian {getCurrentSubsectionIndex() + 1} dari {subsections.length}
-                   </div>
-                   
-                   <Button
-                     variant="outline"
-                     onClick={goToNextSubsection}
-                     disabled={isLastSubsection}
-                     className="flex items-center space-x-2"
-                   >
-                     <span>Bagian Selanjutnya</span>
-                     <ChevronRight className="h-4 w-4" />
-                   </Button>
-                 </div>
-               </CardContent>
-             </Card>
-           )}
-                          </>
-           )}
+                              // Handle cases where minValue > maxValue (inverted range)
+                              const actualMin = Math.min(minValue, maxValue)
+                              const actualMax = Math.max(minValue, maxValue)
+
+                              if (responseValue < actualMin) {
+                                resultText = `Di bawah minimum (${actualMin})`
+                                resultColor = 'bg-red-100 text-red-800'
+                              } else if (responseValue > actualMax) {
+                                resultText = `Di atas maksimum (${actualMax})`
+                                resultColor = 'bg-orange-100 text-orange-800'
+                              } else {
+                                resultText = `Dalam rentang (${actualMin}-${actualMax})`
+                                resultColor = 'bg-green-100 text-green-800'
+                              }
+
+                              return (
+                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${resultColor} ml-3 flex-shrink-0`}>
+                                  {resultText}
+                                </span>
+                              )
+                            }
+                            return null
+                          })()}
+                        </div>
+                      </div>
+
+                      {/* Review Comments */}
+                      {question.reviewComments && question.reviewComments.length > 0 && (
+                        <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-lg">
+                          <h4 className="text-sm font-medium text-yellow-800 mb-2">Komentar Tinjauan</h4>
+                          <div className="space-y-2">
+                            {question.reviewComments.map((comment) => (
+                              <div key={comment.id} className="text-sm">
+                                <div className="flex items-center justify-between">
+                                  <span className="font-medium text-yellow-800">{comment.reviewerName}</span>
+                                  <span className="text-yellow-600 text-xs">
+                                    {new Date(comment.createdAt).toLocaleDateString()}
+                                  </span>
+                                </div>
+                                <p className="text-yellow-700 mt-1">{comment.comment}</p>
+                                {comment.isCritical && (
+                                  <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800 mt-1">
+                                    Kritis
+                                  </span>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+
+
+                      {/* Scoring - Only show for non-Basic Information questions */}
+                      {activeSubsection !== 'Basic Information' && (
+                        <>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Skor (0-10)
+                            </label>
+                            {isReadOnly ? (
+                              <div className="bg-gray-50 p-3 rounded border w-32">
+                                <span className="text-gray-900">{scores[question.id] || 'Belum dinilai'}</span>
+                              </div>
+                            ) : (
+                              <Input
+                                type="number"
+                                min={0}
+                                max={10}
+                                value={scores[question.id] || ''}
+                                onChange={(e) => {
+                                  const value = e.target.value
+                                  const numValue = value === '' ? 0 : parseFloat(value)
+                                  handleScoreChange(question.id, numValue)
+                                }}
+                                className="w-32 relative z-20"
+                              />
+                            )}
+                          </div>
+
+                          {/* Comments */}
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Komentar
+                            </label>
+                            {isReadOnly ? (
+                              <div className="bg-gray-50 p-4 rounded-lg min-h-[100px]">
+                                {comments[question.id] ? (
+                                  <p className="text-gray-900 whitespace-pre-wrap">{comments[question.id]}</p>
+                                ) : (
+                                  <p className="text-gray-500 italic">Tidak ada komentar</p>
+                                )}
+                              </div>
+                            ) : (
+                              <Textarea
+                                value={comments[question.id] || ''}
+                                onChange={(e) => handleCommentChange(question.id, e.target.value)}
+                                placeholder="Tambahkan komentar Anda tentang jawaban ini..."
+                                className="min-h-[100px] relative z-20"
+                              />
+                            )}
+                          </div>
+
+                          {/* Save Button for Individual Question */}
+                          {!isReadOnly && (
+                            <div className="flex justify-end">
+                              <Button
+                                onClick={() => handleSaveQuestion(question.id)}
+                                disabled={saving}
+                                size="sm"
+                                className="flex items-center space-x-2"
+                              >
+                                <Save className="h-4 w-4" />
+                                <span>{saving ? 'Menyimpan...' : 'Simpan'}</span>
+                              </Button>
+                            </div>
+                          )}
+                        </>
+                      )}
+                    </CardContent>
+                  </Card>
+                ))}
+
+                {/* Subsection Navigation Buttons */}
+                {subsections.length > 1 && (
+                  <Card>
+                    <CardContent className="pt-6 relative z-10">
+                      <div className="flex items-center justify-between">
+                        <Button
+                          variant="outline"
+                          onClick={goToPreviousSubsection}
+                          disabled={isFirstSubsection}
+                          className="flex items-center space-x-2"
+                        >
+                          <ChevronLeft className="h-4 w-4" />
+                          <span>Bagian Sebelumnya</span>
+                        </Button>
+
+                        <div className="text-sm text-gray-500">
+                          Bagian {getCurrentSubsectionIndex() + 1} dari {subsections.length}
+                        </div>
+
+                        <Button
+                          variant="outline"
+                          onClick={goToNextSubsection}
+                          disabled={isLastSubsection}
+                          className="flex items-center space-x-2"
+                        >
+                          <span>Bagian Selanjutnya</span>
+                          <ChevronRight className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+              </>
+            )}
           </div>
         </div>
       </div>
