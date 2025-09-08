@@ -13,6 +13,22 @@ import AuthenticatedLayout from '@/components/AuthenticatedLayout'
 import { getProfile } from '@/lib/auth'
 import { isPdfUrl, createPdfViewerUrl } from '@/lib/upload'
 
+// Helper functions for weighted scoring
+function clamp01to10(n: number) {
+  const x = Number.isFinite(n) ? n : 0;
+  if (x < 0) return 0;
+  if (x > 10) return 10;
+  return x;
+}
+
+function calcWeighted(score: number, weight: number) {
+  return (clamp01to10(score) / 10) * (Number(weight) || 0);
+}
+
+function round2(n: number) {
+  return Math.round(n * 100) / 100;
+}
+
 interface Question {
   id: number
   questionText: string
@@ -109,7 +125,9 @@ export default function ReviewPage() {
       setQuestions(sessionData.questions || [])
 
       // Extract unique subsections and set the first one as active
-      const uniqueSubsections = [...new Set(sessionData.questions?.map(q => q.subsection) || [])]
+      const uniqueSubsections = [...new Set((sessionData.questions ?? [])
+        .map(q => q.subsection)
+        .filter(Boolean))];
       setSubsections(uniqueSubsections)
       if (uniqueSubsections.length > 0) {
         setActiveSubsection(uniqueSubsections[0])
@@ -320,33 +338,31 @@ export default function ReviewPage() {
       const juryId = currentUser.id
 
       // Prepare the payload for completing the assessment
-      const questionScoresArray = Object.entries(scores).map(([questionId, score]) => {
-        const question = questions.find(q => q.id === parseInt(questionId))
-        const comment = comments[parseInt(questionId)] || ''
-        const weight = question?.category?.weight || 1
-        const scoreResult = Math.round((score * weight) * 100) / 100 // Round to 2 decimal places
-
+      const questionScoresArray = Object.entries(scores).map(([qid, score]) => {
+        const q = questions.find(x => x.id === Number(qid));
+        const weight = q?.category?.weight ?? 1; // e.g. 1.75, 5, 7
+        const sr = round2(calcWeighted(score, weight));
         return {
-          questionId: parseInt(questionId),
-          comment: comment,
-          score: score,
-          weight: weight,
-          scoreResult: scoreResult
-        }
-      })
+          questionId: Number(qid),
+          comment: comments[Number(qid)] || '',
+          score: clamp01to10(score), // raw 0..10
+          weight,
+          scoreResult: sr,           // weighted
+        };
+      });
 
       const reviewPayload = {
         stage: 'jury_scoring',
         decision: 'completed',
         sessionId: parseInt(id),
-        juryId: juryId,
-        overallComments: overallComments,
-        juryComments: juryComments,
+        juryId,
+        overallComments,
+        juryComments,
         questionScores: questionScoresArray,
-        totalScore: Math.round(questionScoresArray.reduce((sum, question) => sum + question.scoreResult, 0)),
+        totalScore: round2(questionScoresArray.reduce((s, q) => s + q.scoreResult, 0)),
         validationChecklist: [],
-        updateExisting: true
-      }
+        updateExisting: true,
+      };
 
       // Call the API to complete the review
       await api.post(`/assessments/jury/${id}/complete`, reviewPayload)
@@ -366,26 +382,32 @@ export default function ReviewPage() {
       setSaving(true)
 
       // Prepare the payload for saving as draft
+      const weightedTotals = Object.entries(scores).map(([qid, score]) => {
+        const q = questions.find(x => x.id === Number(qid));
+        const weight = q?.category?.weight ?? 1;
+        return calcWeighted(score, weight);
+      });
+
       const reviewPayload = {
         stage: 'jury_scoring',
         decision: 'needs_deliberation',
-        overallComments: overallComments,
-        juryComments: juryComments,
-        questionComments: Object.entries(comments).map(([questionId, comment]) => ({
-          questionId: parseInt(questionId),
-          comment: comment,
+        overallComments,
+        juryComments,
+        questionComments: Object.entries(comments).map(([qid, comment]) => ({
+          questionId: Number(qid),
+          comment,
           isCritical: false,
-          stage: 'jury_scoring'
+          stage: 'jury_scoring',
         })),
-        juryScores: Object.entries(scores).map(([questionId, score]) => ({
-          questionId: parseInt(questionId),
-          score: score,
-          comments: comments[parseInt(questionId)] || ''
+        juryScores: Object.entries(scores).map(([qid, score]) => ({
+          questionId: Number(qid),
+          score: clamp01to10(score),
+          comments: comments[Number(qid)] || '',
         })),
-        totalScore: Object.values(scores).reduce((sum, score) => sum + score, 0),
+        totalScore: round2(weightedTotals.reduce((a, b) => a + b, 0)),
         validationChecklist: [],
-        updateExisting: true
-      }
+        updateExisting: true,
+      };
 
 
       // Call the API to save as draft
@@ -405,29 +427,32 @@ export default function ReviewPage() {
       setSaving(true)
 
       // Create a payload with just this question's data
-      const questionScore = scores[questionId] || 0
-      const questionComment = comments[questionId] || ''
+      const q = questions.find(x => x.id === questionId);
+      const weight = q?.category?.weight ?? 1;
+      const questionScore = clamp01to10(scores[questionId] || 0);
+      const questionComment = comments[questionId] || '';
+      const weighted = round2(calcWeighted(questionScore, weight));
 
       const reviewPayload = {
         stage: 'jury_scoring',
         decision: 'needs_deliberation',
-        overallComments: overallComments,
-        juryComments: juryComments,
+        overallComments,
+        juryComments,
         questionComments: questionComment ? [{
-          questionId: questionId,
+          questionId,
           comment: questionComment,
           isCritical: false,
-          stage: 'jury_scoring'
+          stage: 'jury_scoring',
         }] : [],
         juryScores: [{
-          questionId: questionId,
+          questionId,
           score: questionScore,
-          comments: questionComment
+          comments: questionComment,
         }],
-        totalScore: questionScore,
+        totalScore: weighted, // weighted, not raw
         validationChecklist: [],
-        updateExisting: true
-      }
+        updateExisting: true,
+      };
 
 
       await api.post(`/assessments/jury/${id}/review`, reviewPayload)
