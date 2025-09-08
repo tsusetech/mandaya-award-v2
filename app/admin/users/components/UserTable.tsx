@@ -78,8 +78,8 @@ export function UserTable({ users, onEdit, onDelete }: UserTableProps) {
         </thead>
         <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
           {users.map((user, index) => (
-            <tr 
-              key={user.id} 
+            <tr
+              key={user.id}
               className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-200 group"
             >
               <td className="px-6 py-4 whitespace-nowrap">
@@ -126,13 +126,6 @@ export function UserTable({ users, onEdit, onDelete }: UserTableProps) {
                     className="h-8 w-8 p-0 hover:bg-red-100 dark:hover:bg-red-900/30 text-red-600 dark:text-red-400 transition-all duration-200"
                   >
                     <Trash2 className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    className="h-8 w-8 p-0 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400 transition-all duration-200"
-                  >
-                    <MoreHorizontal className="h-4 w-4" />
                   </Button>
                 </div>
               </td>
