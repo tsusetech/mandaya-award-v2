@@ -4,7 +4,8 @@ import { useEffect, useState } from "react"
 import { useParams, useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { ArrowLeft, Users, UserPlus, Mail, Calendar } from "lucide-react"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { ArrowLeft, Users, UserPlus, Mail, Calendar, Trash2 } from "lucide-react"
 import { toast } from "sonner"
 import api from "@/lib/api"
 import AddMembersModal from "./components/AddMembersModal"
@@ -31,6 +32,8 @@ export default function GroupDetailPage() {
   const [members, setMembers] = useState<User[]>([])
   const [showModal, setShowModal] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [showRemoveDialog, setShowRemoveDialog] = useState(false)
+  const [userToRemove, setUserToRemove] = useState<{ id: number; name: string } | null>(null)
 
   const fetchGroupDetails = async () => {
     try {
@@ -53,6 +56,26 @@ export default function GroupDetailPage() {
       toast.error("Gagal memuat data kelompok.")
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleRemoveUser = (userId: number, userName: string) => {
+    setUserToRemove({ id: userId, name: userName })
+    setShowRemoveDialog(true)
+  }
+
+  const confirmRemoveUser = async () => {
+    if (!userToRemove) return
+
+    try {
+      await api.delete(`/groups/${groupId}/users/${userToRemove.id}`)
+      toast.success(`${userToRemove.name} berhasil dihapus dari kelompok`)
+      fetchGroupDetails() // Refresh the data
+      setShowRemoveDialog(false)
+      setUserToRemove(null)
+    } catch (err) {
+      console.error('Error removing user from group:', err)
+      toast.error("Gagal menghapus pengguna dari kelompok")
     }
   }
 
@@ -205,13 +228,23 @@ export default function GroupDetailPage() {
                         </div>
                       </div>
                     </div>
-                    <div className="text-sm text-gray-500 dark:text-gray-400">
-                      {user.createdAt && (
-                        <div className="flex items-center space-x-2 bg-gray-100 dark:bg-gray-700 px-3 py-2 rounded-full">
-                          <Calendar className="h-4 w-4" />
-                          <span>Bergabung {new Date(user.createdAt).toLocaleDateString()}</span>
-                        </div>
-                      )}
+                    <div className="flex items-center space-x-3">
+                      <div className="text-sm text-gray-500 dark:text-gray-400">
+                        {user.createdAt && (
+                          <div className="flex items-center space-x-2 bg-gray-100 dark:bg-gray-700 px-3 py-2 rounded-full">
+                            <Calendar className="h-4 w-4" />
+                            <span>Bergabung {new Date(user.createdAt).toLocaleDateString()}</span>
+                          </div>
+                        )}
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleRemoveUser(user.id, user.name)}
+                        className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-900/20 cursor-pointer"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
                     </div>
                   </div>
                 ))}
@@ -229,6 +262,37 @@ export default function GroupDetailPage() {
           fetchGroupDetails()
         }}
       />
+
+      {/* Remove User Confirmation Dialog */}
+      <Dialog open={showRemoveDialog} onOpenChange={setShowRemoveDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Hapus Anggota</DialogTitle>
+            <DialogDescription>
+              Apakah Anda yakin ingin menghapus <strong>{userToRemove?.name}</strong> dari kelompok ini?
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowRemoveDialog(false)
+                setUserToRemove(null)
+              }}
+              className="cursor-pointer"
+            >
+              Batal
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={confirmRemoveUser}
+              className="text-white cursor-pointer"
+            >
+              Hapus
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
