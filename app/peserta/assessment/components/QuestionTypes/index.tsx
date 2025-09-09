@@ -536,12 +536,12 @@ export function QuestionInput({
               onBlur={handleBlur}
               onFocus={handleFocus}
             />
-            {localValue && localValue !== 'Mengunggah...' && localValue !== 'Gagal mengunggah' && !localValue.startsWith('Error:') && (
+            {localValue && localValue !== 'Mengunggah...' && localValue !== 'Gagal mengunggah' && !String(localValue).startsWith('Error:') && (
               <div className="mt-2">
-                {localValue.startsWith('http') ? (
+                {String(localValue).startsWith('http') ? (
                   <div className="space-y-2">
                     <p className="text-sm text-green-600">✓ File berhasil diunggah</p>
-                    {isPdfUrl(localValue) ? (
+                    {isPdfUrl(String(localValue)) ? (
                       <Button
                         variant="default"
                         size="sm"
@@ -566,7 +566,7 @@ export function QuestionInput({
                 )}
               </div>
             )}
-            {localValue && localValue.startsWith('Error:') && (
+            {localValue && String(localValue).startsWith('Error:') && (
               <div className="mt-2">
                 <p className="text-sm text-red-600">{localValue}</p>
               </div>
@@ -668,11 +668,11 @@ export function QuestionInput({
       </div>
 
       {/* PDF Modal for file uploads */}
-      {localValue && localValue.startsWith('http') && isPdfUrl(localValue) && (
+      {localValue && String(localValue).startsWith('http') && isPdfUrl(String(localValue)) && (
         <PdfModal
           isOpen={pdfModalOpen}
           onClose={() => setPdfModalOpen(false)}
-          pdfUrl={localValue}
+          pdfUrl={String(localValue)}
           title={questionText}
         />
       )}
