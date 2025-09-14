@@ -64,12 +64,23 @@ export default function AdminSubmissionsPage() {
       try {
         sessionsRes = await api.get('/assessments/user-sessions', {
           params: {
-            page: 1,
-            limit: 50,
             status: statusFilter !== 'all' ? statusFilter : undefined
           }
         })
         console.log('User sessions response:', sessionsRes.data)
+        console.log('Response structure analysis:', {
+          hasData: !!sessionsRes.data,
+          dataType: typeof sessionsRes.data,
+          isDataArray: Array.isArray(sessionsRes.data),
+          hasDataData: !!sessionsRes.data?.data,
+          dataDataType: typeof sessionsRes.data?.data,
+          isDataDataArray: Array.isArray(sessionsRes.data?.data),
+          hasDataDataData: !!sessionsRes.data?.data?.data,
+          dataDataDataType: typeof sessionsRes.data?.data?.data,
+          isDataDataDataArray: Array.isArray(sessionsRes.data?.data?.data),
+          dataKeys: sessionsRes.data ? Object.keys(sessionsRes.data) : 'no data',
+          dataDataKeys: sessionsRes.data?.data ? Object.keys(sessionsRes.data.data) : 'no data.data'
+        })
       } catch (userSessionsError) {
         console.log('user-sessions endpoint not available, using mock data:', userSessionsError)
         // If the endpoint doesn't exist, we'll use mock data
@@ -78,10 +89,22 @@ export default function AdminSubmissionsPage() {
       
       let allSubmissions: Submission[] = []
       
-      if (sessionsRes.data?.data?.data && Array.isArray(sessionsRes.data.data.data)) {
-        console.log('Processing sessions data:', sessionsRes.data.data.data)
+      // Check multiple possible response structures
+      let sessionsData = null
+      if (sessionsRes.data?.data && Array.isArray(sessionsRes.data.data)) {
+        sessionsData = sessionsRes.data.data
+        console.log('Using nested data.data structure:', sessionsData)
+      } else if (sessionsRes.data && Array.isArray(sessionsRes.data)) {
+        sessionsData = sessionsRes.data
+        console.log('Using direct data array structure:', sessionsData)
+      } else {
+        console.log('No valid data structure found in response')
+      }
+      
+      if (sessionsData && Array.isArray(sessionsData)) {
+        console.log('Processing sessions data:', sessionsData)
         // Transform the user sessions data to match our Submission interface
-        allSubmissions = sessionsRes.data.data.data.map((session: any) => {
+        allSubmissions = sessionsData.map((session: any) => {
           const submission = {
             id: session.id,
             groupId: session.groupId,
@@ -100,23 +123,8 @@ export default function AdminSubmissionsPage() {
           return submission
         })
         console.log('Total submissions created:', allSubmissions.length)
-      } else if (sessionsRes.data && Array.isArray(sessionsRes.data)) {
-        allSubmissions = sessionsRes.data.map((session: any) => ({
-          id: session.id,
-          groupId: session.groupId,
-          groupName: session.groupName,
-          userName: session.userName || 'Unknown User',
-          userEmail: session.userEmail || 'unknown@example.com',
-          status: session.status,
-          combinedStatus: session.status,
-          submittedAt: session.submittedAt || session.lastActivityAt,
-          updatedAt: session.lastActivityAt,
-          progressPercentage: session.progressPercentage || 0,
-          feedback: session.reviewComments,
-          revisionCount: 0
-        }))
       } else {
-        console.log('Unexpected user-sessions response structure:', sessionsRes.data)
+        console.log('No valid sessions data found in response structure:', sessionsRes.data)
       }
       
       // If no submissions found (either endpoint failed or returned no data), use mock data for demonstration

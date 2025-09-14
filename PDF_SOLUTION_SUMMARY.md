@@ -89,3 +89,9 @@ export function isPdfUrl(url: string): boolean {
 
 The solution is now complete and should handle PDF uploads and display correctly! 🎉
 
+
+
+
+
+
+

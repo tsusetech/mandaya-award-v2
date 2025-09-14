@@ -82,8 +82,6 @@ export default function SubmissionsPage() {
         try {
           sessionsRes = await api.get('/assessments/user-sessions', {
             params: {
-              page: 1,
-              limit: 50,
               status: statusFilter !== 'all' ? statusFilter : undefined
             }
           })
@@ -93,18 +91,36 @@ export default function SubmissionsPage() {
           throw new Error('user-sessions endpoint not available')
         }
         console.log('User sessions response:', sessionsRes.data)
-        console.log('Response structure:', {
+        console.log('Response structure analysis:', {
           hasData: !!sessionsRes.data,
+          dataType: typeof sessionsRes.data,
           isDataArray: Array.isArray(sessionsRes.data),
           hasDataData: !!sessionsRes.data?.data,
+          dataDataType: typeof sessionsRes.data?.data,
           isDataDataArray: Array.isArray(sessionsRes.data?.data),
-          dataLength: sessionsRes.data?.data?.length
+          hasDataDataData: !!sessionsRes.data?.data?.data,
+          dataDataDataType: typeof sessionsRes.data?.data?.data,
+          isDataDataDataArray: Array.isArray(sessionsRes.data?.data?.data),
+          dataKeys: sessionsRes.data ? Object.keys(sessionsRes.data) : 'no data',
+          dataDataKeys: sessionsRes.data?.data ? Object.keys(sessionsRes.data.data) : 'no data.data'
         })
         
-                 if (sessionsRes.data?.data && Array.isArray(sessionsRes.data.data)) {
+        // Check multiple possible response structures
+        let sessionsData = null
+        if (sessionsRes.data?.data && Array.isArray(sessionsRes.data.data)) {
+          sessionsData = sessionsRes.data.data
+          console.log('Using nested data.data structure:', sessionsData)
+        } else if (sessionsRes.data && Array.isArray(sessionsRes.data)) {
+          sessionsData = sessionsRes.data
+          console.log('Using direct data array structure:', sessionsData)
+        } else {
+          console.log('No valid data structure found in response')
+        }
+        
+        if (sessionsData && Array.isArray(sessionsData)) {
            console.log('Starting to map sessions data...')
            // Transform the user sessions data to match our Submission interface
-           allSubmissions = await Promise.all(sessionsRes.data.data.map(async (session: any) => {
+           allSubmissions = await Promise.all(sessionsData.map(async (session: any) => {
              // If there's a review, fetch review data
              let sessionReviews = []
              if (session.status === 'needs_revision' || session.reviewStage === 'needs_revision') {

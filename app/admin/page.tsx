@@ -51,7 +51,7 @@ export default function AdminDashboardPage() {
       const [usersRes, groupsRes, submissionsRes, juryStatsRes] = await Promise.allSettled([
         api.get('/users'),
         api.get('/groups'),
-        api.get('/assessments/user-sessions', { params: { page: 1, limit: 1000 } }),
+        api.get('/assessments/user-sessions'),
         api.get('/assessments/jury/dashboard')
       ])
 
