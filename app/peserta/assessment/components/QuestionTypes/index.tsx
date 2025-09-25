@@ -87,8 +87,8 @@ export function QuestionInput({
   autoSave = true,
   isPrefilledFromAuth = false
 }: QuestionProps) {
-  // Check if this question needs a URL input based on description keywords
-  const needsUrlInput = description && (
+  // Check if this question needs a URL input based on description and questionText keywords
+  const needsUrlInput = (description && (
     description.toLowerCase().includes('tautan') ||
     description.toLowerCase().includes('link') ||
     description.toLowerCase().includes('bukti') ||
@@ -97,7 +97,16 @@ export function QuestionInput({
     description.toLowerCase().includes('url') ||
     description.toLowerCase().includes('website') ||
     description.toLowerCase().includes('situs')
-  )
+  )) || (questionText && (
+    questionText.toLowerCase().includes('tautan') ||
+    questionText.toLowerCase().includes('link') ||
+    questionText.toLowerCase().includes('bukti') ||
+    questionText.toLowerCase().includes('bukti dukung') ||
+    questionText.toLowerCase().includes('lampirkan') ||
+    questionText.toLowerCase().includes('url') ||
+    questionText.toLowerCase().includes('website') ||
+    questionText.toLowerCase().includes('situs')
+  ))
   const [localValue, setLocalValue] = useState(() => {
     // Ensure checkbox questions always have array values
     // Multiple-choice questions (except province) should be single values
