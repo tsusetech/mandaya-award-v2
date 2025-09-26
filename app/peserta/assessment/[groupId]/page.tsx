@@ -121,12 +121,6 @@ export default function AssessmentPage() {
 
     const progress = Math.round((completedQuestions.length / questions.length) * 100)
 
-    console.log('Progress calculation:', {
-      totalQuestions: questions.length,
-      completedQuestions: completedQuestions.length,
-      progress: progress + '%',
-      responses: Object.keys(responses).length
-    })
 
     return progress
   }
@@ -136,7 +130,6 @@ export default function AssessmentPage() {
     if (!session) return
 
     try {
-      console.log('Progress calculated:', progress, '%')
 
       // Update local session state to reflect the new progress
       setSession(prev => prev ? { ...prev, progressPercentage: progress } : null)
@@ -152,12 +145,6 @@ export default function AssessmentPage() {
 
 
       const response = await api.get(`/assessments/session/${groupId}`)
-      console.log('Session data:', response.data)
-      console.log('Questions with review comments:', response.data?.questions?.map((q: Question) => ({
-        questionId: q.id,
-        reviewComments: q.reviewComments,
-        reviewCommentsLength: q.reviewComments?.length || 0
-      })))
 
       if (!response.data) {
         throw new Error('Session not found')
@@ -198,7 +185,15 @@ export default function AssessmentPage() {
               // For object responses, extract the appropriate value
               // Handle combined response structure (answer + url)
               if (question.response.answer !== undefined) {
-                processedValue = question.response.answer
+                // If answer is also an object, extract the string value
+                if (typeof question.response.answer === 'object' && question.response.answer !== null) {
+                  processedValue = question.response.answer.answer || 
+                    question.response.answer.textValue || 
+                    question.response.answer.numericValue?.toString() ||
+                    JSON.stringify(question.response.answer)
+                } else {
+                  processedValue = question.response.answer
+                }
               } else {
                 processedValue = question.response.textValue ||
                   question.response.numericValue ||
@@ -278,16 +273,8 @@ export default function AssessmentPage() {
             sessionProgress: actualProgress // Add this as an additional field
           }
 
-          console.log('Sending answer with progress:', {
-            questionId: questionId,
-            progressPercentage: actualProgress,
-            payload: answerPayload
-          })
 
           const response = await api.post(`/assessments/session/${session.id}/answer`, answerPayload)
-          console.log('Answer save response:', response.data)
-
-          console.log('Auto-saved response for question', questionId)
 
           // Update progress after saving answer
           await updateSessionProgress(actualProgress)
@@ -298,8 +285,6 @@ export default function AssessmentPage() {
             if (refreshResponse.data) {
               setSession(refreshResponse.data)
               setQuestions(refreshResponse.data.questions || [])
-              console.log('Session refreshed, new progress:', refreshResponse.data.progressPercentage)
-              console.log('Full session data after refresh:', refreshResponse.data)
             }
           } catch (refreshErr) {
             console.error('Error refreshing session data:', refreshErr)
@@ -379,14 +364,8 @@ export default function AssessmentPage() {
         sessionProgress: actualProgress // Add this as an additional field
       }
 
-      console.log('Sending batch answer with progress:', {
-        progressPercentage: actualProgress,
-        answersCount: responsesToSave.length,
-        payload: batchPayload
-      })
 
       const response = await api.post(`/assessments/session/${session?.id}/batch-answer`, batchPayload)
-      console.log('Batch answer save response:', response.data)
 
       // Update progress after saving section
       await updateSessionProgress(actualProgress)
@@ -397,7 +376,6 @@ export default function AssessmentPage() {
         if (refreshResponse.data) {
           setSession(refreshResponse.data)
           setQuestions(refreshResponse.data.questions || [])
-          console.log('Session refreshed after section save, new progress:', refreshResponse.data.progressPercentage)
         }
       } catch (refreshErr) {
         console.error('Error refreshing session data:', refreshErr)
@@ -424,13 +402,6 @@ export default function AssessmentPage() {
       // Check if this is a resubmission (has review comments)
       const isResubmission = questions.some(q => q.reviewComments && q.reviewComments.length > 0)
 
-      console.log('Submitting assessment:', {
-        sessionId: session?.id,
-        isResubmission,
-        hasReviewComments: questions.filter(q => q.reviewComments && q.reviewComments.length > 0).length,
-        currentStatus: session?.status,
-        currentCombinedStatus: currentStatus.combinedStatus
-      })
 
       // Use the same endpoint but include resubmission flag if needed
       const submitPayload = {
@@ -441,7 +412,6 @@ export default function AssessmentPage() {
         ...submitPayload,
         progressPercentage: 100
       })
-      console.log('Submit response:', submitResponse.data)
 
       // Update progress to 100% when submitted
       await updateSessionProgress(100)
@@ -449,14 +419,6 @@ export default function AssessmentPage() {
       // Force a refresh of the session data to see if status changed
       try {
         const refreshResponse = await api.get(`/assessments/session/${groupId}`)
-        console.log('Status after submission:', {
-          status: refreshResponse.data.status,
-          combinedStatus: getAssessmentStatus(
-            refreshResponse.data.status,
-            refreshResponse.data.review?.status,
-            refreshResponse.data.review?.stage
-          ).combinedStatus
-        })
       } catch (refreshErr) {
         console.error('Error refreshing session data:', refreshErr)
       }
@@ -1028,102 +990,119 @@ export default function AssessmentPage() {
                       .filter(q => q.sectionTitle === getSectionTitleFromCombined(currentSection || ''))
                       .map((question) => (
                         <div key={question.id} className="p-6 border border-gray-200 rounded-lg bg-gradient-to-r from-gray-50 to-gray-100 hover:shadow-md transition-all duration-200">
-                          {(() => {
-                            console.log(`Question ${question.id} response data:`, {
-                              questionId: question.id,
-                              response: question.response,
-                              responseType: typeof question.response,
-                              isArray: Array.isArray(question.response)
-                            })
-                            return null
-                          })()}
                           <h3 className="font-semibold mb-3 text-gray-800">{question.questionText}</h3>
                           <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
-                            <p className="text-sm text-gray-700">
-                              {(() => {
-                                // Handle different response formats
-                                if (typeof question.response === 'string') {
-                                  // Check if it's a file upload response (URL)
-                                  if (question.response.startsWith('http') && isPdfUrl(question.response)) {
-                                    return (
-                                      <div className="space-y-2">
-                                        <div className="flex items-center space-x-2">
-                                          <div className="p-1 bg-green-100 rounded-full">
-                                            <span className="text-green-600 text-xs">✓</span>
-                                          </div>
-                                          <span className="text-sm font-medium text-gray-700">PDF Document uploaded</span>
+                            {(() => {
+                              // Handle different response formats
+                              if (typeof question.response === 'string') {
+                                // Check if it's a file upload response (URL)
+                                if (question.response.startsWith('http') && isPdfUrl(question.response)) {
+                                  return (
+                                    <div className="space-y-2">
+                                      <div className="flex items-center space-x-2">
+                                        <div className="p-1 bg-green-100 rounded-full">
+                                          <span className="text-green-600 text-xs">✓</span>
                                         </div>
-                                        <Button
-                                          variant="default"
-                                          size="sm"
-                                          onClick={() => openPdfModal(question.response, question.questionText)}
-                                          className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm hover:shadow-md transition-all duration-200"
-                                        >
-                                          📄 View PDF
-                                        </Button>
+                                        <span className="text-sm font-medium text-gray-700">PDF Document uploaded</span>
                                       </div>
-                                    )
-                                  } else if (question.response.startsWith('http')) {
-                                    return (
-                                      <div className="space-y-2">
-                                        <div className="flex items-center space-x-2">
-                                          <div className="p-1 bg-green-100 rounded-full">
-                                            <span className="text-green-600 text-xs">✓</span>
-                                          </div>
-                                          <span className="text-sm font-medium text-gray-700">File uploaded</span>
+                                      <Button
+                                        variant="default"
+                                        size="sm"
+                                        onClick={() => openPdfModal(question.response, question.questionText)}
+                                        className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm hover:shadow-md transition-all duration-200"
+                                      >
+                                        📄 View PDF
+                                      </Button>
+                                    </div>
+                                  )
+                                } else if (question.response.startsWith('http')) {
+                                  return (
+                                    <div className="space-y-2">
+                                      <div className="flex items-center space-x-2">
+                                        <div className="p-1 bg-green-100 rounded-full">
+                                          <span className="text-green-600 text-xs">✓</span>
                                         </div>
-                                        <Button
-                                          variant="outline"
-                                          size="sm"
-                                          onClick={() => window.open(question.response, '_blank', 'noopener,noreferrer')}
-                                          className="border-blue-200 text-blue-600 hover:bg-blue-50 hover:border-blue-300 transition-colors"
-                                        >
-                                          📄 View File
-                                        </Button>
+                                        <span className="text-sm font-medium text-gray-700">File uploaded</span>
                                       </div>
-                                    )
-                                  }
-                                  return question.response
-                                } else if (typeof question.response === 'number') {
-                                  return question.response.toString()
-                                } else if (Array.isArray(question.response)) {
-                                  // Handle checkbox and multiple-choice responses with proper formatting
-                                  return question.response.map((item: any) => {
-                                    if (typeof item === 'string') {
-                                      // For multiple-choice questions, find the optionText that matches the optionValue
-                                      if (question.options && question.options.length > 0) {
-                                        const matchingOption = question.options.find((option: any) => option.optionValue === item)
-                                        if (matchingOption) {
-                                          return matchingOption.optionText
-                                        }
+                                      <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => window.open(question.response, '_blank', 'noopener,noreferrer')}
+                                        className="border-blue-200 text-blue-600 hover:bg-blue-50 hover:border-blue-300 transition-colors"
+                                      >
+                                        📄 View File
+                                      </Button>
+                                    </div>
+                                  )
+                                } else {
+                                  return <p className="text-sm text-gray-700">{question.response}</p>
+                                }
+                              } else if (typeof question.response === 'number') {
+                                return <p className="text-sm text-gray-700">{question.response.toString()}</p>
+                              } else if (Array.isArray(question.response)) {
+                                // Handle checkbox and multiple-choice responses with proper formatting
+                                const formattedResponse = question.response.map((item: any) => {
+                                  if (typeof item === 'string') {
+                                    // For multiple-choice questions, find the optionText that matches the optionValue
+                                    if (question.options && question.options.length > 0) {
+                                      const matchingOption = question.options.find((option: any) => option.optionValue === item)
+                                      if (matchingOption) {
+                                        return matchingOption.optionText
                                       }
-                                      return item
-                                    } else if (typeof item === 'object' && item.value === 'other' && item.otherText) {
-                                      return item.otherText
                                     }
                                     return item
-                                  }).join(', ')
-                                } else if (typeof question.response === 'object' && question.response !== null) {
-                                  // Handle object response format with URL support
-                                  const answer = question.response.answer !== undefined ? question.response.answer :
-                                    question.response.textValue ||
-                                    question.response.numericValue?.toString() ||
-                                    (Array.isArray(question.response.arrayValue)
-                                      ? question.response.arrayValue.join(', ')
-                                      : question.response.arrayValue) ||
-                                    (question.response.booleanValue ? 'Ya' : 'Tidak') ||
-                                    'Tidak ada jawaban'
+                                  } else if (typeof item === 'object' && item.value === 'other' && item.otherText) {
+                                    return item.otherText
+                                  } else if (typeof item === 'object' && item !== null) {
+                                    // Handle other object types by converting to string
+                                    return JSON.stringify(item)
+                                  }
+                                  return String(item)
+                                }).join(', ')
+                                return <p className="text-sm text-gray-700">{formattedResponse}</p>
+                              } else if (typeof question.response === 'object' && question.response !== null) {
+                                // Handle object response format with URL support
+                                let answer = question.response.answer !== undefined ? question.response.answer :
+                                  question.response.textValue ||
+                                  question.response.numericValue?.toString() ||
+                                  (Array.isArray(question.response.arrayValue)
+                                    ? question.response.arrayValue.join(', ')
+                                    : question.response.arrayValue) ||
+                                  (question.response.booleanValue ? 'Ya' : 'Tidak') ||
+                                  'Tidak ada jawaban'
 
-                                  return answer
-                                } else if (question.response === true) {
-                                  return 'Ya'
-                                } else if (question.response === false) {
-                                  return 'Tidak'
-                                } else {
-                                  return 'Tidak ada jawaban'
+                                // Ensure we return a string, not an object
+                                if (typeof answer === 'object' && answer !== null) {
+                                  // If answer is an object, try to extract a meaningful string value
+                                  if (answer.answer !== undefined) {
+                                    answer = answer.answer
+                                  } else if (answer.textValue !== undefined) {
+                                    answer = answer.textValue
+                                  } else if (answer.numericValue !== undefined) {
+                                    answer = answer.numericValue.toString()
+                                  } else {
+                                    answer = JSON.stringify(answer)
+                                  }
                                 }
-                              })()}
-                            </p>
+                                
+                                // Final safety check - ensure answer is a string
+                                if (typeof answer !== 'string') {
+                                  answer = String(answer)
+                                }
+                                
+                                return <p className="text-sm text-gray-700">{answer}</p>
+                              } else if (question.response === true) {
+                                return <p className="text-sm text-gray-700">Ya</p>
+                              } else if (question.response === false) {
+                                return <p className="text-sm text-gray-700">Tidak</p>
+                              } else {
+                                // Handle any other type by converting to string
+                                if (question.response !== null && question.response !== undefined) {
+                                  return <p className="text-sm text-gray-700">{String(question.response)}</p>
+                                }
+                                return <p className="text-sm text-gray-700">Tidak ada jawaban</p>
+                              }
+                            })()}
 
                             {/* Show URL if it exists in the response */}
                             {(() => {

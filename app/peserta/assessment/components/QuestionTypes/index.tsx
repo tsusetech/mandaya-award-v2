@@ -116,6 +116,22 @@ export function QuestionInput({
     if (inputType === 'checkbox' && !Array.isArray(value)) {
       return []
     }
+    
+    // Handle object values - extract the appropriate property
+    if (typeof value === 'object' && value !== null) {
+      if (value.answer !== undefined) {
+        return value.answer
+      } else if (value.textValue !== undefined) {
+        return value.textValue
+      } else if (value.numericValue !== undefined) {
+        return value.numericValue
+      } else if (value.arrayValue !== undefined) {
+        return value.arrayValue
+      } else if (value.booleanValue !== undefined) {
+        return value.booleanValue
+      }
+    }
+    
     return value
   })
   
@@ -143,7 +159,24 @@ export function QuestionInput({
       if (inputType === 'checkbox' && !Array.isArray(value)) {
         setLocalValue([])
       } else {
-        setLocalValue(value)
+        // Handle object values - extract the appropriate property
+        if (typeof value === 'object' && value !== null) {
+          if (value.answer !== undefined) {
+            setLocalValue(value.answer)
+          } else if (value.textValue !== undefined) {
+            setLocalValue(value.textValue)
+          } else if (value.numericValue !== undefined) {
+            setLocalValue(value.numericValue)
+          } else if (value.arrayValue !== undefined) {
+            setLocalValue(value.arrayValue)
+          } else if (value.booleanValue !== undefined) {
+            setLocalValue(value.booleanValue)
+          } else {
+            setLocalValue('')
+          }
+        } else {
+          setLocalValue(value)
+        }
       }
       setUrlValue('')
     }
@@ -206,16 +239,6 @@ export function QuestionInput({
     const isProvinceQuestion = questionText.toLowerCase().includes('nama provinsi') || 
                               questionText.toLowerCase().includes('provinsi')
     
-    // Debug logging for troubleshooting
-    if (process.env.NODE_ENV === 'development') {
-      console.log('Rendering input for type:', { 
-        inputType, 
-        normalizedInputType, 
-        optionsLength: options?.length,
-        questionText: questionText.substring(0, 50) + '...',
-        isProvinceQuestion
-      })
-    }
 
     // Special case for Indonesian provinces - single selection dropdown
     if (isProvinceQuestion && (normalizedInputType === 'multiple-choice' || normalizedInputType === 'multiple choice' || normalizedInputType === 'multiple_choice')) {
@@ -368,19 +391,8 @@ export function QuestionInput({
       case 'multiple-choice':
       case 'multiple choice':
       case 'multiple_choice':
-        // Debug logging for multiple choice questions
-        if (process.env.NODE_ENV === 'development') {
-          console.log('Multiple choice question:', { 
-            optionsLength: options?.length,
-            inputType, 
-            questionText: questionText.substring(0, 50) + '...'
-          })
-        }
         if (!options || options.length === 0) {
           // If it's a multiple-choice question with no options, treat it as text
-          if (process.env.NODE_ENV === 'development') {
-            console.log('Multiple choice with no options, treating as text input')
-          }
           return (
             <Textarea
               value={localValue || ''}
