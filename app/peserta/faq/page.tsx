@@ -45,6 +45,20 @@ const faqData: FAQItem[] = [
     tags: ['auto-save', 'progress', 'logout', 'login']
   },
   {
+    id: 'evidence-requirements',
+    question: 'Apakah pencantuman bukti memerlukan pembuktian keterlibatan Bantuan sosial?',
+    answer: 'Jangan terlalu terpaku dengan program yang sudah Bapak Ibu lakukan tetapi, gunakan saja data yang sudah ada. Intinya terdapat effort pemberdayaan masyarakat yang terlibat dan ada hasilnya. Connected atau tidaknya diabaikan dulu sementara.',
+    category: 'general',
+    tags: ['bukti', 'bantuan sosial', 'pemberdayaan', 'data']
+  },
+  {
+    id: 'program-policies',
+    question: 'Apakah kebijakan-kebijakan atau program antara dimensi hasil dan dimensi proses itu harus merupakan satu kegiatan atau satu program yang sama?',
+    answer: 'Jangan terlalu terpaku dengan program yang sudah Bapak Ibu lakukan tetapi, gunakan saja data yang sudah ada. Intinya terdapat effort pemberdayaan masyarakat yang terlibat dan ada hasilnya. Connected atau tidaknya diabaikan dulu sementara.',
+    category: 'general',
+    tags: ['kebijakan', 'program', 'dimensi', 'kegiatan']
+  },
+  {
     id: 'time-limit',
     question: 'Berapa lama waktu yang diberikan untuk menyelesaikan assessment?',
     answer: 'Biasanya Anda memiliki waktu 3 hari sejak pertama kali memulai assessment. Sistem akan menampilkan countdown timer di halaman assessment untuk membantu Anda melacak waktu yang tersisa.',
@@ -64,6 +78,27 @@ const faqData: FAQItem[] = [
     answer: 'Jangan khawatir! Jawaban Anda sudah tersimpan otomatis di server berkat fitur auto-save. Setelah koneksi internet kembali normal, Anda bisa melanjutkan mengisi form dari tempat terakhir.',
     category: 'general',
     tags: ['internet', 'koneksi', 'auto-save', 'offline']
+  },
+  {
+    id: 'missing-data-empty',
+    question: 'Jika terdapat data yang tidak ada, apa bisa dikosongkan?',
+    answer: 'Dikosongkan saja. Dalam keterangan jika tidak bisa menulis karena opsi hanya berupa angka, maka bisa mengisi angka "0" untuk kekosongan data.',
+    category: 'general',
+    tags: ['data kosong', 'angka 0', 'keterangan', 'opsi']
+  },
+  {
+    id: 'poverty-policy-data',
+    question: 'Terkait kemiskinan point 19, disebutkan kebijakan kemiskinan. Kami masukan beban pengeluaran ke pertanyaan 19 tersebut karena di dimensi hasil 2 tidak ada pertanyaan terkait program kebijakan.',
+    answer: 'Di dimensi 2 tidak menanyakan program, jadi betul programnya dimasukan ke dimensi hasil 1. Kemudian dimensi hasil 2, jawabannya mengikuti pertanyaannya saja. (jadi bila ada operasi pasar, dan semacamnya. Itu dapat dimasukan pada dimensi hasil 1 penurunan kantong-kantong kemiskinan)',
+    category: 'general',
+    tags: ['kemiskinan', 'dimensi hasil', 'program', 'beban pengeluaran']
+  },
+  {
+    id: 'bansos-activities',
+    question: 'Untuk bansos dimensi hasil 2, terdapat kegiatan diluar bansos, perlu dimasukan kebagian mana sebaiknya.',
+    answer: 'Mengenai kekurangan data, bagaimana dengan sasaran orang yang terdampak bila jumlahnya tidak diketahui secara individu, maka diharapkan setidaknya ibu dapat memberi informasi mengenai terjadi di berapa kecamatan. Bila programnya banyak maka bisa di list dalam bentuk link, yang mencantumkan setiap program dan sasarannya.',
+    category: 'general',
+    tags: ['bansos', 'kegiatan', 'sasaran', 'kecamatan', 'link']
   },
 
   // Technical Issues
@@ -121,6 +156,13 @@ const faqData: FAQItem[] = [
     tags: ['opsional', 'pengusulan', 'tokoh', 'skip']
   },
   {
+    id: 'individual-nomination',
+    question: 'Dari kategori kabupaten, ada pertanyaan terkait pengusulan individu, seperti apa maksudnya?',
+    answer: 'Sifatnya tidak wajib untuk disampaikan, tetapi bila ada yang menurut ibu atau tim untuk dinominasikan, boleh dinominasikan, mungkin ditambah dengan data apa dari prestasinya, sehingga dapat kita tindaklanjuti.',
+    category: 'troubleshooting',
+    tags: ['pengusulan individu', 'kabupaten', 'nominasi', 'prestasi', 'opsional']
+  },
+  {
     id: 'multiple-devices',
     question: 'Bolehkah saya mengisi assessment di beberapa device berbeda?',
     answer: 'Boleh, asalkan login dengan akun yang sama. Data akan tersinkronisasi otomatis antar device berkat fitur cloud sync. Pastikan logout dari device lama sebelum login di device baru untuk keamanan.',
@@ -133,7 +175,112 @@ const faqData: FAQItem[] = [
     answer: 'Tidak ada batasan karakter yang ketat, tapi disarankan memberikan jawaban yang relevan dan tidak terlalu panjang. Fokus pada kualitas jawaban daripada kuantitas. Sistem dapat menangani jawaban hingga beberapa ribu karakter.',
     category: 'troubleshooting',
     tags: ['karakter', 'batasan', 'text', 'panjang jawaban']
-  }
+  },
+  {
+    id: 'innovation-submission',
+    question: 'Kami ingin memastikan inovasi yang kami daftarkan bisa juga memasukan inovasi dari OPD atau instansi lain, misal melalui akun admin DPMD prov Sultra. Tapi dalam lingkup pemerintah provinsi.',
+    answer: 'Iya, tidak apa. Selama itu adalah institusi di provinsi masih boleh mewakili.',
+    category: 'general',
+    tags: ['inovasi', 'OPD', 'instansi', 'provinsi', 'DPMD']
+  },
+  {
+    id: 'pbd-bansos-data',
+    question: 'Terkait PBD untuk bansos, bila kami tidak mendapat informasi sampai tengat waktu apa boleh dikosongkan?',
+    answer: 'Boleh, silahkan diisi angka nol saja.',
+    category: 'general',
+    tags: ['PBD', 'bansos', 'data kosong', 'tengat waktu', 'angka nol']
+  },
+  {
+    id: 'village-registration',
+    question: 'Untuk desa, apakah masih boleh melakukan pendaftaran?',
+    answer: 'Jika mengikuti pendaftaran di situasi sekarang saya khawatir ibu tak dapat mengikuti assessementnya sampai selesai. Karena ini perlu data-data. Sehingga kami tutup.',
+    category: 'general',
+    tags: ['desa', 'pendaftaran', 'data', 'assessment']
+  },
+  {
+    id: 'data-loss-error',
+    question: 'Untuk kabupaten, kami sudah selesai. Namun untuk pengisian data pendukung ada eror yang mengakibatkan hilang setelah diisi.',
+    answer: 'Untuk data yang hilang setelah di upload, tidak usah khawatir karena sebenarnya sudah masuk ke sistem, jadi tidak hilang.',
+    category: 'technical',
+    tags: ['data hilang', 'upload', 'error', 'sistem']
+  },
+  {
+    id: 'program-dimensions',
+    question: 'Ada dimensi yang menanyakan khusus suatu program, tapi ada dimensi yang secara eksplisit program-program yang dilakukan.',
+    answer: 'Kalau programnya banyak, maka sebutkan dulu saja semua di pertanyaan yang umum. Lalu jika banyak maka dibuatkan tabel saja, dari mulai perencanaan, keterlibatan masyarakat, sasaran. Nanti dibuat dalam link saja. Dirangkum jadi satu lebih baik. Nanti ada pertanyaan spesifik tidak apa-apa. Nanti bapak tinggal menyupliknaja dari link yang sudah ada.',
+    category: 'general',
+    tags: ['dimensi', 'program', 'tabel', 'link', 'perencanaan']
+  },
+  {
+    id: 'cross-dimension-programs',
+    question: 'Pertanyaan terkait tindak masalah antar dimensi, jika memang program yang maki sajikan berbeda-beda, tergantung dengan konteks pertanyaan.',
+    answer: 'Kalau programnya banyak, maka sebutkan dulu saja semua di pertanyaan yang umum. Lalu jika banyak maka dibuatkan tabel saja, dari mulai perencanaan, keterlibatan masyarakat, sasaran. Nanti dibuat dalam link saja. Dirangkum jadi satu lebih baik. Nanti ada pertanyaan spesifik tidak apa-apa. Nanti bapak tinggal menyupliknaja dari link yang sudah ada.',
+    category: 'general',
+    tags: ['dimensi', 'program', 'tabel', 'link', 'perencanaan']
+  },
+  {
+    id: 'supporting-evidence-links',
+    question: 'Terkait dengan bukti dukung yang kami sampaikan itu kalau swasta kan dibuat laporan atau unggahan itu. Apakah kemudian terkait link atau tautan yang disampaikan kami ini boleh berupa link pemberitaan ataupun link Google Drive yang isinya foto-foto atau video?',
+    answer: 'Karena harapannya untuk laporan lengkap, maka boleh dalam bentuk link Google Drive saja. Namun karena kadang ada kendala tidak terlihat maka boleh dalam bentuk Link. Mengenai apakah boleh tidaknya link pemberitaan, itu boleh sebagai bukti dukung untuk membuktikan bahwa kegiatan itu ada.',
+    category: 'general',
+    tags: ['bukti dukung', 'link', 'Google Drive', 'pemberitaan', 'laporan']
+  },
+  {
+    id: 'result-dimension-limits',
+    question: 'Pada dimensi hasil apakah tidak ada batasan seberapa banyak yang dimasukan?',
+    answer: 'Seluruh program, bisa di kerjakan seperti jawaban pada pertanyaan sebelumnya.',
+    category: 'general',
+    tags: ['dimensi hasil', 'batasan', 'program', 'jumlah']
+  },
+  {
+    id: 'assessment-revision',
+    question: 'Apakah data yang sudah dikirim assessment bisa di revisi?',
+    answer: 'Bisa direvisi, pak. Menunggu feedback admin.',
+    category: 'process',
+    tags: ['revisi', 'assessment', 'feedback', 'admin']
+  },
+  {
+    id: 'presentation-format',
+    question: 'Untuk presentasi apakah akan dilaksanakan langsung?',
+    answer: 'Untuk yang dekat di dalam Jakarta akan dilaksanakan langsung, namun untuk yang berada jauh diluar dapat dilakukan secara online saja.',
+    category: 'process',
+    tags: ['presentasi', 'Jakarta', 'online', 'offline']
+  },
+  {
+    id: 'document-upload-links',
+    question: 'Terkait dengan melampirkan bukti dalam kuesioner seperti apa?',
+    answer: 'Karena penapload dokumen kesistem lama makan boleh tolong buat link saja untuk penyerahan.',
+    category: 'technical',
+    tags: ['dokumen', 'upload', 'link', 'kuesioner', 'bukti']
+  },
+  {
+    id: 'process-dimension-5',
+    question: 'Mengenai pertanyaan pada dimensi proses 3 nomor 5 adakah program pemeliharaan, pemulihan atau bahkan peningkatan sumber daya alam atau sumber daya manusia lokal yang digunakan tersebut?',
+    answer: 'Untuk dimensi proses individu nomor 5. Yang dimaksud adalah pemulihan seperti apa dari alam tersebut, untuk yang dimaksud pemeliharaan.',
+    category: 'general',
+    tags: ['dimensi proses', 'pemeliharaan', 'pemulihan', 'sumber daya alam', 'sumber daya manusia']
+  },
+  {
+    id: 'virtual-verification',
+    question: 'Untuk verifikasi virtual mohon bisa diperkenankan untuk tidak dibatasi untuk sebagai kami dari provinsi. Dan diwakili satu orang.',
+    answer: 'Di 3 dinas itu standby saja di tempat masing-masing.....',
+    category: 'process',
+    tags: ['verifikasi virtual', 'provinsi', 'dinas', 'standby']
+  },
+  {
+    id: 'multiple-programs',
+    question: 'Program yang didaftarkan boleh beberapa program?',
+    answer: 'Ya, boleh saja. Minimal 3 tahun berkelanjutan.',
+    category: 'general',
+    tags: ['program', 'beberapa', '3 tahun', 'berkelanjutan']
+  },
+  {
+    id: 'education-vs-economy-focus',
+    question: 'Ada program pendidikan, lebihke peningkatan literasi berbasis masyarakat. Sedangkan Mandaya ini terlihat lebih ke ekonomi.',
+    answer: 'Untuk Mandaya ini kami lebih berfokus ke pengatasan kemiskinan yang memang berarti pada bidang ekonominya. Tapi tidak menutup kemungkinan bapa memasukan semua data pendukung yang bapak harapkan disini. Namun dari keterangan bapa sepertinya perlu usaha untuk memenuhi semua dalam 5 hari.',
+    category: 'general',
+    tags: ['pendidikan', 'literasi', 'ekonomi', 'kemiskinan', 'data pendukung']
+  },
 ]
 
 const categories = [
