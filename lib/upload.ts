@@ -19,10 +19,23 @@ export async function uploadToCloudinary(file: File): Promise<string> {
   formData.append('file', file)
   formData.append('upload_preset', uploadPreset)
 
-  // Use RAW for non-images
+  // Add optimization parameters for images
   const isImage = file.type.startsWith('image/')
+  if (isImage) {
+    // Enable automatic format selection (WebP, AVIF, etc.)
+    formData.append('format', 'auto')
+    // Enable automatic quality optimization
+    formData.append('quality', 'auto')
+    // Resize large images to reasonable dimensions
+    formData.append('width', '1920')
+    formData.append('height', '1080')
+    formData.append('crop', 'limit') // Maintain aspect ratio while limiting dimensions
+    // Enable progressive JPEG for better loading experience
+    formData.append('flags', 'progressive')
+  }
+
   const endpoint = isImage ? 'image' : 'raw'
-  console.log(`Uploading ${file.type} file to ${endpoint} endpoint`)
+  console.log(`Uploading ${file.type} file to ${endpoint} endpoint${isImage ? ' with optimization' : ''}`)
 
   try {
     const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/${endpoint}/upload`, {
@@ -157,6 +170,47 @@ export function validateFile(file: File): { valid: boolean; error?: string } {
   }
 
   return { valid: true }
+}
+
+// Helper function to create optimized image URL for display
+export function createOptimizedImageUrl(imageUrl: string, width?: number, height?: number, quality: 'auto' | number = 'auto'): string {
+  // Only apply optimizations to Cloudinary URLs
+  if (!imageUrl.includes('cloudinary.com')) {
+    return imageUrl
+  }
+
+  // Extract the base URL and transformation parameters
+  const url = new URL(imageUrl)
+  const pathParts = url.pathname.split('/')
+  
+  // Find the upload part in the path
+  const uploadIndex = pathParts.findIndex(part => part === 'upload')
+  if (uploadIndex === -1) {
+    return imageUrl // Not a standard Cloudinary URL
+  }
+
+  // Build transformation parameters
+  const transformations = []
+  
+  if (width) transformations.push(`w_${width}`)
+  if (height) transformations.push(`h_${height}`)
+  if (quality === 'auto') {
+    transformations.push('q_auto')
+  } else if (typeof quality === 'number') {
+    transformations.push(`q_${quality}`)
+  }
+  
+  // Always add format optimization for images
+  transformations.push('f_auto')
+  
+  // Insert transformations into the URL path
+  const newPathParts = [...pathParts]
+  if (transformations.length > 0) {
+    newPathParts.splice(uploadIndex + 1, 0, transformations.join(','))
+  }
+  
+  url.pathname = newPathParts.join('/')
+  return url.toString()
 }
 
 // Helper function to create PDF viewer URL with proper parameters

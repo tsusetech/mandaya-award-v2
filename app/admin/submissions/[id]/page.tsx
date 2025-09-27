@@ -15,6 +15,7 @@ import {
 } from 'lucide-react'
 import { toast } from 'sonner'
 import api from '@/lib/api'
+import { PdfModal } from '@/components/ui/pdf-modal'
 
 interface Question {
   id: number
@@ -80,6 +81,21 @@ export default function AdminSubmissionReviewPage() {
   const [saving, setSaving] = useState(false)
   const [generalFeedback, setGeneralFeedback] = useState('')
   const [currentSection, setCurrentSection] = useState<string>('')
+  const [pdfModalOpen, setPdfModalOpen] = useState(false)
+  const [pdfModalUrl, setPdfModalUrl] = useState('')
+  const [pdfModalTitle, setPdfModalTitle] = useState('')
+
+  const openPdfModal = (url: string, title: string = 'Document') => {
+    setPdfModalUrl(url)
+    setPdfModalTitle(title)
+    setPdfModalOpen(true)
+  }
+
+  const closePdfModal = () => {
+    setPdfModalOpen(false)
+    setPdfModalUrl('')
+    setPdfModalTitle('')
+  }
 
     const fetchSubmission = async () => {
     try {
@@ -598,8 +614,136 @@ export default function AdminSubmissionReviewPage() {
     if (response.textValue !== undefined && response.textValue !== null) return response.textValue.toString()
     if (response.numericValue !== undefined && response.numericValue !== null) return response.numericValue.toString()
     if (response.booleanValue !== undefined && response.booleanValue !== null) return response.booleanValue ? 'Ya' : 'Tidak'
-    if (response.arrayValue && response.arrayValue.length > 0) return response.arrayValue.join(', ')
+    if (response.arrayValue && response.arrayValue.length > 0) {
+      // Handle file upload responses
+      if (response.arrayValue.some((item: any) => typeof item === 'object' && (item.url || item.answer))) {
+        return renderFileUploadResponse(response.arrayValue)
+      }
+      return response.arrayValue.join(', ')
+    }
     return 'Tidak ada jawaban'
+  }
+
+  const renderFileUploadResponse = (fileResponses: any[]) => {
+    return (
+      <div className="space-y-3">
+        {fileResponses.map((fileResponse: any, index: number) => {
+          const isError = fileResponse.answer && fileResponse.answer.includes('Error:')
+          
+          return (
+            <div key={index} className="space-y-3">
+              {/* Answer Text - Following participant assessment page pattern */}
+              <div className="flex items-center space-x-3 p-3 border rounded-lg bg-gray-50 dark:bg-gray-800">
+                <div className="flex-1">
+                  {isError ? (
+                    <div className="flex items-center space-x-2">
+                      <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+                      <span className="text-orange-600 dark:text-orange-400 text-sm font-medium">
+                        File Uploaded with Warning
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center space-x-2">
+                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                      <span className="text-green-600 dark:text-green-400 text-sm font-medium">
+                        File berhasil diunggah
+                      </span>
+                    </div>
+                  )}
+                  
+                  <div className="mt-2">
+                    {/* Check if the answer contains a Cloudinary URL and make it clickable */}
+                    {fileResponse.answer && fileResponse.answer.includes('cloudinary.com') ? (
+                      <div className="space-y-2">
+                        <p className="text-sm text-gray-700 dark:text-gray-300 break-words">
+                          {fileResponse.answer}
+                        </p>
+                        <button
+                          onClick={() => openPdfModal(fileResponse.answer, 'Uploaded File')}
+                          className="inline-flex items-center space-x-2 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                          </svg>
+                          <span>View File</span>
+                        </button>
+                      </div>
+                    ) : (
+                      <p className="text-sm text-gray-700 dark:text-gray-300 break-words">
+                        {fileResponse.answer}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* File Access - Keep existing admin interface style for ALL URLs */}
+              {fileResponse.url && (
+                <div className="flex items-center space-x-3 p-3 border border-blue-200 rounded-lg bg-blue-50 dark:bg-blue-900/20">
+                  <div className="flex-1">
+                    <div className="flex items-center space-x-2 mb-2">
+                      <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                      <span className="text-blue-800 dark:text-blue-200 text-sm font-medium">
+                        Submitted File (Admin View)
+                      </span>
+                    </div>
+                    
+                    <div className="flex flex-wrap gap-2">
+                      {/* Check if it's a Cloudinary URL for modal display */}
+                      {fileResponse.url && fileResponse.url.includes('cloudinary.com') ? (
+                        <button
+                          onClick={() => openPdfModal(fileResponse.url, 'Uploaded File')}
+                          className="inline-flex items-center space-x-2 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                          </svg>
+                          <span>View File</span>
+                        </button>
+                      ) : (
+                        <a
+                          href={fileResponse.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center space-x-2 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                          </svg>
+                          <span>View File</span>
+                        </a>
+                      )}
+                      
+                      <a
+                        href={fileResponse.url}
+                        download
+                        className="inline-flex items-center space-x-2 px-3 py-2 bg-gray-600 hover:bg-gray-700 text-white text-sm font-medium rounded-lg transition-colors"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        <span>Download</span>
+                      </a>
+                      
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                          {fileResponse.url}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )
+        })}
+      </div>
+    )
   }
 
   if (loading) {
@@ -950,13 +1094,17 @@ export default function AdminSubmissionReviewPage() {
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
                           <p className="text-sm text-gray-600 dark:text-gray-400 mb-3 font-medium">Jawaban:</p>
-                          <p className="font-medium break-words text-gray-900 dark:text-white">
-                            {response ? getResponseValue(response) : (
+                          <div className="font-medium break-words text-gray-900 dark:text-white">
+                            {response ? (
+                              typeof getResponseValue(response) === 'object' ? 
+                                getResponseValue(response) : 
+                                <p>{getResponseValue(response)}</p>
+                            ) : (
                               <span className="text-gray-500 dark:text-gray-400 italic">
                                 Belum ada jawaban. Jawaban akan muncul di sini setelah pengguna mengirimkan penilaian mereka.
                               </span>
                             )}
-                          </p>
+                          </div>
                         </div>
                         {question.category && response && (() => {
                           const responseValue = response.numericValue !== undefined ? response.numericValue : 
@@ -1173,6 +1321,14 @@ export default function AdminSubmissionReviewPage() {
           </Card>
         )}
       </div>
+      
+      {/* PDF Modal for Cloudinary files */}
+      <PdfModal
+        isOpen={pdfModalOpen}
+        onClose={closePdfModal}
+        pdfUrl={pdfModalUrl}
+        title={pdfModalTitle}
+      />
     </div>
   )
 }

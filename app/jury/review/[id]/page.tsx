@@ -266,32 +266,63 @@ export default function ReviewPage() {
       case 'file-upload':
         if (Array.isArray(response)) {
           return (
-            <div className="space-y-2">
-              {response.map((url: string, index: number) => (
-                <div key={index} className="flex items-center space-x-2">
-                  <FileText className="h-4 w-4 text-gray-400" />
-                  <div className="flex flex-col space-y-1">
-                    <a
-                      href={url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-600 hover:text-blue-800 underline"
-                    >
-                      📄 View File {index + 1}
-                    </a>
-                    {isPdfUrl(url) && (
-                      <a
-                        href={createPdfViewerUrl(url)}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-green-600 hover:text-green-800 underline text-sm"
-                      >
-                        📖 Open PDF in new tab
-                      </a>
-                    )}
+            <div className="space-y-3">
+              {response.map((fileResponse: any, index: number) => {
+                const isError = fileResponse.answer && fileResponse.answer.includes('Error:')
+                const fileName = fileResponse.answer && !isError ? fileResponse.answer : `File ${index + 1}`
+                
+                return (
+                  <div key={index} className="flex items-center space-x-3 p-3 border rounded-lg bg-gray-50 dark:bg-gray-800">
+                    <div className="flex-1">
+                      {isError ? (
+                        <div className="flex items-center space-x-2">
+                          <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                          <span className="text-red-600 dark:text-red-400 text-sm font-medium">
+                            Upload Error
+                          </span>
+                        </div>
+                      ) : (
+                        <div className="flex items-center space-x-2">
+                          <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                          <span className="text-green-600 dark:text-green-400 text-sm font-medium">
+                            File berhasil diunggah
+                          </span>
+                        </div>
+                      )}
+                      
+                      <div className="mt-2">
+                        <p className="text-sm text-gray-700 dark:text-gray-300 break-words">
+                          {fileResponse.answer}
+                        </p>
+                      </div>
+                      
+                      {fileResponse.url && !isError && (
+                        <div className="mt-2 space-y-1">
+                          <a
+                            href={fileResponse.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center space-x-2 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 text-sm font-medium"
+                          >
+                            <FileText className="h-4 w-4" />
+                            <span>View File</span>
+                          </a>
+                          {isPdfUrl(fileResponse.url) && (
+                            <a
+                              href={createPdfViewerUrl(fileResponse.url)}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center space-x-2 text-green-600 hover:text-green-800 dark:text-green-400 dark:hover:text-green-300 text-sm font-medium ml-4"
+                            >
+                              <span>📖 Open PDF in new tab</span>
+                            </a>
+                          )}
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
-              ))}
+                )
+              })}
             </div>
           )
         }

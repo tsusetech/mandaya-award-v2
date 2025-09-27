@@ -260,10 +260,72 @@ export default function SubmissionDetailPage() {
   }
 
   const getResponseValue = (response: Response) => {
-    return response.textValue || 
-           response.numericValue || 
-           response.booleanValue || 
-           (response.arrayValue ? response.arrayValue.join(', ') : '')
+    if (response.textValue !== undefined && response.textValue !== null) return response.textValue.toString()
+    if (response.numericValue !== undefined && response.numericValue !== null) return response.numericValue.toString()
+    if (response.booleanValue !== undefined && response.booleanValue !== null) return response.booleanValue ? 'Ya' : 'Tidak'
+    if (response.arrayValue && response.arrayValue.length > 0) {
+      // Handle file upload responses
+      if (response.arrayValue.some((item: any) => typeof item === 'object' && (item.url || item.answer))) {
+        return renderFileUploadResponse(response.arrayValue)
+      }
+      return response.arrayValue.join(', ')
+    }
+    return 'Tidak ada jawaban'
+  }
+
+  const renderFileUploadResponse = (fileResponses: any[]) => {
+    return (
+      <div className="space-y-3">
+        {fileResponses.map((fileResponse: any, index: number) => {
+          const isError = fileResponse.answer && fileResponse.answer.includes('Error:')
+          const fileName = fileResponse.answer && !isError ? fileResponse.answer : `File ${index + 1}`
+          
+          return (
+            <div key={index} className="flex items-center space-x-3 p-3 border rounded-lg bg-gray-50 dark:bg-gray-800">
+              <div className="flex-1">
+                {isError ? (
+                  <div className="flex items-center space-x-2">
+                    <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                    <span className="text-red-600 dark:text-red-400 text-sm font-medium">
+                      Upload Error
+                    </span>
+                  </div>
+                ) : (
+                  <div className="flex items-center space-x-2">
+                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    <span className="text-green-600 dark:text-green-400 text-sm font-medium">
+                      File berhasil diunggah
+                    </span>
+                  </div>
+                )}
+                
+                <div className="mt-2">
+                  <p className="text-sm text-gray-700 dark:text-gray-300 break-words">
+                    {fileResponse.answer}
+                  </p>
+                </div>
+                
+                {fileResponse.url && !isError && (
+                  <div className="mt-2">
+                    <a
+                      href={fileResponse.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center space-x-2 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 text-sm font-medium"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                      <span>View File</span>
+                    </a>
+                  </div>
+                )}
+              </div>
+            </div>
+          )
+        })}
+      </div>
+    )
   }
 
   if (loading) {
@@ -456,9 +518,15 @@ export default function SubmissionDetailPage() {
                         )}
                         <div className="bg-white rounded-lg p-4 border border-gray-200 shadow-sm">
                           <p className="text-sm text-gray-600 mb-2 font-medium">Jawaban Anda:</p>
-                          <p className="font-medium text-gray-900">
-                            {response ? getResponseValue(response) : 'Tidak ada jawaban'}
-                          </p>
+                          <div className="font-medium text-gray-900">
+                            {response ? (
+                              typeof getResponseValue(response) === 'object' ? 
+                                getResponseValue(response) : 
+                                <p>{getResponseValue(response)}</p>
+                            ) : (
+                              <span className="text-gray-500 italic">Tidak ada jawaban</span>
+                            )}
+                          </div>
                         </div>
                       </div>
 
