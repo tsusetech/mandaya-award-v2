@@ -307,7 +307,22 @@ export function QuestionInput({
           <Input
             type="number"
             value={localValue !== undefined && localValue !== null ? localValue : ''}
-            onChange={(e) => handleChange(parseFloat(e.target.value))}
+            onChange={(e) => {
+              const inputValue = e.target.value;
+              // Handle empty input
+              if (inputValue === "") {
+                handleChange("");
+              }
+              // Store "0" as string "0"
+              else if (inputValue === "0") {
+                handleChange("0");
+              } 
+              // Parse other numeric values
+              else {
+                const parsed = parseFloat(inputValue);
+                handleChange(isNaN(parsed) ? "" : parsed);
+              }
+            }}
             onBlur={handleBlur}
             onFocus={handleFocus}
             placeholder="Masukkan angka"
