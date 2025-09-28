@@ -109,12 +109,14 @@ export function QuestionInput({
   ))
   const [localValue, setLocalValue] = useState(() => {
     // Ensure checkbox questions always have array values
-    // Multiple-choice questions (except province) should be single values
-    const isProvinceQuestion = questionText.toLowerCase().includes('nama provinsi') || 
-                              questionText.toLowerCase().includes('provinsi')
-    
-    if (inputType === 'checkbox' && !Array.isArray(value)) {
-      return []
+    if (inputType === 'checkbox') {
+      if (Array.isArray(value)) {
+        return value
+      } else if (typeof value === 'object' && value !== null && value.arrayValue) {
+        return value.arrayValue
+      } else {
+        return []
+      }
     }
     
     // Handle object values - extract the appropriate property
@@ -149,15 +151,24 @@ export function QuestionInput({
 
   // Update local value when prop value changes
   useEffect(() => {
-    // Handle combined value structure (answer + url)
-    if (needsUrlInput && typeof value === 'object' && value !== null) {
+    // Handle combined value structure (answer + url) - this should always be checked first
+    if (typeof value === 'object' && value !== null && value.url !== undefined) {
       setLocalValue(value.answer || '')
       setUrlValue(value.url || '')
+    } else if (needsUrlInput && typeof value === 'object' && value !== null) {
+      // Fallback for other object structures that might have URL
+      setLocalValue(value.answer || value.textValue || value.numericValue || value.arrayValue || value.booleanValue || '')
+      setUrlValue(value.url || '')
     } else {
-      // Ensure checkbox questions always have array values
-      // Multiple-choice questions (except province) should be single values
-      if (inputType === 'checkbox' && !Array.isArray(value)) {
-        setLocalValue([])
+      // Handle checkbox questions specially
+      if (inputType === 'checkbox') {
+        if (Array.isArray(value)) {
+          setLocalValue(value)
+        } else if (typeof value === 'object' && value !== null && value.arrayValue) {
+          setLocalValue(value.arrayValue)
+        } else {
+          setLocalValue([])
+        }
       } else {
         // Handle object values - extract the appropriate property
         if (typeof value === 'object' && value !== null) {
@@ -178,7 +189,10 @@ export function QuestionInput({
           setLocalValue(value)
         }
       }
-      setUrlValue('')
+      // Only clear URL if it doesn't need URL input or if there's no URL in the value
+      if (!needsUrlInput) {
+        setUrlValue('')
+      }
     }
   }, [value, inputType, needsUrlInput])
 

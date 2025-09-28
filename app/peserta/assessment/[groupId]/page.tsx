@@ -166,25 +166,28 @@ export default function AssessmentPage() {
               // For file uploads, use the first file URL or empty string
               processedValue = question.response.length > 0 ? question.response[0] : ''
             } else if (question.inputType === 'checkbox') {
-              // For checkboxes, convert boolean to array of selected values
-              if (typeof question.response === 'boolean') {
-                // If it's a simple boolean, we need to determine which options are selected
-                // For now, we'll use an empty array and let the user re-select
-                processedValue = []
-              } else if (Array.isArray(question.response)) {
-                // If it's already an array, use it directly
+              // For checkboxes, ensure we have an array of selected values
+              if (Array.isArray(question.response)) {
                 processedValue = question.response
               } else {
-                // Fallback to empty array
+                // If it's not an array, convert to empty array
                 processedValue = []
               }
-            } else if (Array.isArray(question.response)) {
-              // For arrays (multiple choice), use the array directly
-              processedValue = question.response
+            } else if (question.inputType === 'multiple-choice') {
+              // For multiple-choice, handle both array and single values
+              if (Array.isArray(question.response)) {
+                // If it's an array, take the first value (single selection)
+                processedValue = question.response.length > 0 ? question.response[0] : ''
+              } else {
+                // If it's already a single value, use it directly
+                processedValue = question.response
+              }
             } else if (typeof question.response === 'object' && question.response !== null) {
-              // For object responses, extract the appropriate value
-              // Handle combined response structure (answer + url)
-              if (question.response.answer !== undefined) {
+              // For object responses, check if it's a combined structure (answer + url)
+              if (question.response.answer !== undefined && question.response.url !== undefined) {
+                // This is a combined response structure - keep the whole object
+                processedValue = question.response
+              } else if (question.response.answer !== undefined) {
                 // If answer is also an object, extract the string value
                 if (typeof question.response.answer === 'object' && question.response.answer !== null) {
                   processedValue = question.response.answer.answer || 
