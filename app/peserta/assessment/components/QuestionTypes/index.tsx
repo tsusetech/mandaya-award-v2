@@ -306,7 +306,7 @@ export function QuestionInput({
         return (
           <Input
             type="number"
-            value={localValue || ''}
+            value={localValue !== undefined && localValue !== null ? localValue : ''}
             onChange={(e) => handleChange(parseFloat(e.target.value))}
             onBlur={handleBlur}
             onFocus={handleFocus}
