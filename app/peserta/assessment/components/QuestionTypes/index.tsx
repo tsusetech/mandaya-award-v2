@@ -87,6 +87,29 @@ export function QuestionInput({
   autoSave = true,
   isPrefilledFromAuth = false
 }: QuestionProps) {
+  
+  // Helper function to safely extract string values from objects
+  const safeStringify = (val: any): string => {
+    if (val === null || val === undefined) return ''
+    if (typeof val === 'string') return val
+    if (typeof val === 'number') return val.toString()
+    if (typeof val === 'boolean') return val ? 'Ya' : 'Tidak'
+    if (Array.isArray(val)) return val.join(', ')
+    if (typeof val === 'object') {
+      // Handle nested objects
+      if (val.answer !== undefined) {
+        return safeStringify(val.answer)
+      } else if (val.textValue !== undefined) {
+        return safeStringify(val.textValue)
+      } else if (val.numericValue !== undefined) {
+        return safeStringify(val.numericValue)
+      } else if (val.url !== undefined) {
+        return safeStringify(val.url)
+      }
+      return JSON.stringify(val)
+    }
+    return String(val)
+  }
   // Check if this question needs a URL input based on description and questionText keywords
   const needsUrlInput = (description && (
     description.toLowerCase().includes('tautan') ||
@@ -122,6 +145,10 @@ export function QuestionInput({
     // Handle object values - extract the appropriate property
     if (typeof value === 'object' && value !== null) {
       if (value.answer !== undefined) {
+        // Ensure answer is not an object
+        if (typeof value.answer === 'object' && value.answer !== null) {
+          return value.answer.textValue || value.answer.numericValue?.toString() || JSON.stringify(value.answer)
+        }
         return value.answer
       } else if (value.textValue !== undefined) {
         return value.textValue
@@ -131,6 +158,9 @@ export function QuestionInput({
         return value.arrayValue
       } else if (value.booleanValue !== undefined) {
         return value.booleanValue
+      } else if (value.url !== undefined) {
+        // If it's just a URL object, return the URL string
+        return value.url
       }
     }
     
@@ -173,7 +203,12 @@ export function QuestionInput({
         // Handle object values - extract the appropriate property
         if (typeof value === 'object' && value !== null) {
           if (value.answer !== undefined) {
-            setLocalValue(value.answer)
+            // Ensure answer is not an object
+            if (typeof value.answer === 'object' && value.answer !== null) {
+              setLocalValue(value.answer.textValue || value.answer.numericValue?.toString() || JSON.stringify(value.answer))
+            } else {
+              setLocalValue(value.answer)
+            }
           } else if (value.textValue !== undefined) {
             setLocalValue(value.textValue)
           } else if (value.numericValue !== undefined) {
@@ -182,6 +217,9 @@ export function QuestionInput({
             setLocalValue(value.arrayValue)
           } else if (value.booleanValue !== undefined) {
             setLocalValue(value.booleanValue)
+          } else if (value.url !== undefined) {
+            // If it's just a URL object, set the URL string
+            setLocalValue(value.url)
           } else {
             setLocalValue('')
           }
@@ -612,13 +650,13 @@ export function QuestionInput({
                     )}
                   </div>
                 ) : (
-                  <p className="text-sm text-gray-500">Selected file: {localValue}</p>
+                  <p className="text-sm text-gray-500">Selected file: {safeStringify(localValue)}</p>
                 )}
               </div>
             )}
             {localValue && String(localValue).startsWith('Error:') && (
               <div className="mt-2">
-                <p className="text-sm text-red-600">{localValue}</p>
+                <p className="text-sm text-red-600">{safeStringify(localValue)}</p>
               </div>
             )}
             {localValue === 'Mengunggah...' && (
@@ -722,7 +760,7 @@ export function QuestionInput({
         <PdfModal
           isOpen={pdfModalOpen}
           onClose={() => setPdfModalOpen(false)}
-          pdfUrl={String(localValue)}
+          pdfUrl={safeStringify(localValue)}
           title={questionText}
         />
       )}

@@ -83,6 +83,16 @@ interface AssessmentSession {
 export default function AssessmentPage() {
   const router = useRouter()
   const { groupId } = useParams() as { groupId: string }
+  
+  // Helper function to safely extract values for rendering
+  const safeValue = (val: any): any => {
+    if (val === null || val === undefined) return val
+    if (typeof val === 'object' && val.url !== undefined) {
+      // This is a combined response object, pass it as-is to QuestionInput
+      return val
+    }
+    return val
+  }
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [questions, setQuestions] = useState<Question[]>([])
@@ -857,7 +867,7 @@ export default function AssessmentPage() {
                             <QuestionInput
                               {...question}
                               isRequired={isPengusulanSection ? false : question.isRequired}
-                              value={responses[question.id]}
+                              value={safeValue(responses[question.id])}
                               onChange={(value) => handleResponseChange(question.id, value)}
                               validationError={validationErrors[question.id]}
                             />
@@ -1038,7 +1048,8 @@ export default function AssessmentPage() {
                                     </div>
                                   )
                                 } else {
-                                  return <p className="text-sm text-gray-700">{question.response}</p>
+                                  // Ensure we convert to string to avoid object rendering issues
+                                  return <p className="text-sm text-gray-700">{String(question.response)}</p>
                                 }
                               } else if (typeof question.response === 'number') {
                                 return <p className="text-sm text-gray-700">{question.response.toString()}</p>
@@ -1083,14 +1094,22 @@ export default function AssessmentPage() {
                                     answer = answer.textValue
                                   } else if (answer.numericValue !== undefined) {
                                     answer = answer.numericValue.toString()
+                                  } else if (answer.url !== undefined) {
+                                    // If it's just a URL object, extract the URL string
+                                    answer = answer.url
                                   } else {
                                     answer = JSON.stringify(answer)
                                   }
                                 }
                                 
-                                // Final safety check - ensure answer is a string
+                                // Final safety check - ensure answer is a string and not null/undefined
                                 if (typeof answer !== 'string') {
-                                  answer = String(answer)
+                                  answer = answer !== null && answer !== undefined ? String(answer) : 'Tidak ada jawaban'
+                                }
+                                
+                                // Additional check for empty strings
+                                if (answer === '' || answer === 'undefined' || answer === 'null') {
+                                  answer = 'Tidak ada jawaban'
                                 }
                                 
                                 return <p className="text-sm text-gray-700">{answer}</p>
