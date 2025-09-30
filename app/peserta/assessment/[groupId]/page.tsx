@@ -176,11 +176,19 @@ export default function AssessmentPage() {
               // For file uploads, use the first file URL or empty string
               processedValue = question.response.length > 0 ? question.response[0] : ''
             } else if (question.inputType === 'checkbox') {
-              // For checkboxes, ensure we have an array of selected values
+              // For checkboxes, handle both array and object responses
               if (Array.isArray(question.response)) {
                 processedValue = question.response
+              } else if (typeof question.response === 'object' && question.response !== null) {
+                // Handle the combined structure {answer: [...], url: "..."}
+                if (question.response.answer !== undefined && Array.isArray(question.response.answer)) {
+                  processedValue = question.response
+                } else {
+                  // If it's not the expected structure, convert to empty array
+                  processedValue = []
+                }
               } else {
-                // If it's not an array, convert to empty array
+                // If it's not an array or object, convert to empty array
                 processedValue = []
               }
             } else if (question.inputType === 'multiple-choice') {
@@ -208,11 +216,22 @@ export default function AssessmentPage() {
                   processedValue = question.response.answer
                 }
               } else {
-                processedValue = question.response.textValue ||
+                // Handle the new structure where data is in specific fields and URL is in metadata
+                let mainValue = question.response.textValue ||
                   question.response.numericValue ||
                   question.response.arrayValue ||
                   question.response.booleanValue ||
                   ''
+                
+                // If there's a URL in metadata, combine it with the main value
+                if (question.response.metadata && question.response.metadata.url) {
+                  processedValue = {
+                    answer: mainValue,
+                    url: question.response.metadata.url
+                  }
+                } else {
+                  processedValue = mainValue
+                }
               }
             } else {
               // For simple types (string, number), use directly
@@ -1084,6 +1103,30 @@ export default function AssessmentPage() {
                                     : question.response.arrayValue) ||
                                   (question.response.booleanValue ? 'Ya' : 'Tidak') ||
                                   'Tidak ada jawaban'
+
+                                // Handle checkbox arrays specially
+                                if (Array.isArray(answer)) {
+                                  // For checkbox arrays, format them properly
+                                  const formattedResponse = answer.map((item: any) => {
+                                    if (typeof item === 'string') {
+                                      // For checkbox questions, find the optionText that matches the optionValue
+                                      if (question.options && question.options.length > 0) {
+                                        const matchingOption = question.options.find((option: any) => option.optionValue === item)
+                                        if (matchingOption) {
+                                          return matchingOption.optionText
+                                        }
+                                      }
+                                      return item
+                                    } else if (typeof item === 'object' && item.value === 'other' && item.otherText) {
+                                      return item.otherText
+                                    } else if (typeof item === 'object' && item !== null) {
+                                      // Handle other object types by converting to string
+                                      return JSON.stringify(item)
+                                    }
+                                    return String(item)
+                                  }).join(', ')
+                                  return <p className="text-sm text-gray-700">{formattedResponse}</p>
+                                }
 
                                 // Ensure we return a string, not an object
                                 if (typeof answer === 'object' && answer !== null) {

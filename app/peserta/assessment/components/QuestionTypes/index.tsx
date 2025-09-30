@@ -135,11 +135,15 @@ export function QuestionInput({
     if (inputType === 'checkbox') {
       if (Array.isArray(value)) {
         return value
-      } else if (typeof value === 'object' && value !== null && value.arrayValue) {
-        return value.arrayValue
-      } else {
-        return []
+      } else if (typeof value === 'object' && value !== null) {
+        // Handle the new combined structure {answer: [...], url: "..."}
+        if (value.answer !== undefined && Array.isArray(value.answer)) {
+          return value.answer
+        } else if (value.arrayValue) {
+          return value.arrayValue
+        }
       }
+      return []
     }
     
     // Handle object values - extract the appropriate property
@@ -181,8 +185,24 @@ export function QuestionInput({
 
   // Update local value when prop value changes
   useEffect(() => {
-    // Handle combined value structure (answer + url) - this should always be checked first
-    if (typeof value === 'object' && value !== null && value.url !== undefined) {
+    // Handle checkbox questions first, regardless of URL input requirements
+    if (inputType === 'checkbox') {
+      if (typeof value === 'object' && value !== null && value.answer !== undefined && Array.isArray(value.answer)) {
+        // Handle the new combined structure {answer: [...], url: "..."}
+        setLocalValue(value.answer)
+        setUrlValue(value.url || '')
+      } else if (Array.isArray(value)) {
+        setLocalValue(value)
+        setUrlValue('')
+      } else if (typeof value === 'object' && value !== null && value.arrayValue) {
+        setLocalValue(value.arrayValue)
+        setUrlValue(value.url || '')
+      } else {
+        setLocalValue([])
+        setUrlValue('')
+      }
+    } else if (typeof value === 'object' && value !== null && value.url !== undefined) {
+      // Handle combined value structure (answer + url) for non-checkbox questions
       setLocalValue(value.answer || '')
       setUrlValue(value.url || '')
     } else if (needsUrlInput && typeof value === 'object' && value !== null) {
@@ -190,42 +210,31 @@ export function QuestionInput({
       setLocalValue(value.answer || value.textValue || value.numericValue || value.arrayValue || value.booleanValue || '')
       setUrlValue(value.url || '')
     } else {
-      // Handle checkbox questions specially
-      if (inputType === 'checkbox') {
-        if (Array.isArray(value)) {
-          setLocalValue(value)
-        } else if (typeof value === 'object' && value !== null && value.arrayValue) {
+      // Handle object values - extract the appropriate property for non-checkbox questions
+      if (typeof value === 'object' && value !== null) {
+        if (value.answer !== undefined) {
+          // Ensure answer is not an object
+          if (typeof value.answer === 'object' && value.answer !== null) {
+            setLocalValue(value.answer.textValue || value.answer.numericValue?.toString() || JSON.stringify(value.answer))
+          } else {
+            setLocalValue(value.answer)
+          }
+        } else if (value.textValue !== undefined) {
+          setLocalValue(value.textValue)
+        } else if (value.numericValue !== undefined) {
+          setLocalValue(value.numericValue)
+        } else if (value.arrayValue !== undefined) {
           setLocalValue(value.arrayValue)
+        } else if (value.booleanValue !== undefined) {
+          setLocalValue(value.booleanValue)
+        } else if (value.url !== undefined) {
+          // If it's just a URL object, set the URL string
+          setLocalValue(value.url)
         } else {
-          setLocalValue([])
+          setLocalValue('')
         }
       } else {
-        // Handle object values - extract the appropriate property
-        if (typeof value === 'object' && value !== null) {
-          if (value.answer !== undefined) {
-            // Ensure answer is not an object
-            if (typeof value.answer === 'object' && value.answer !== null) {
-              setLocalValue(value.answer.textValue || value.answer.numericValue?.toString() || JSON.stringify(value.answer))
-            } else {
-              setLocalValue(value.answer)
-            }
-          } else if (value.textValue !== undefined) {
-            setLocalValue(value.textValue)
-          } else if (value.numericValue !== undefined) {
-            setLocalValue(value.numericValue)
-          } else if (value.arrayValue !== undefined) {
-            setLocalValue(value.arrayValue)
-          } else if (value.booleanValue !== undefined) {
-            setLocalValue(value.booleanValue)
-          } else if (value.url !== undefined) {
-            // If it's just a URL object, set the URL string
-            setLocalValue(value.url)
-          } else {
-            setLocalValue('')
-          }
-        } else {
-          setLocalValue(value)
-        }
+        setLocalValue(value)
       }
       // Only clear URL if it doesn't need URL input or if there's no URL in the value
       if (!needsUrlInput) {
