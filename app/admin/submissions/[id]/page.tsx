@@ -57,6 +57,7 @@ interface Response {
   feedback?: string
   needsRevision?: boolean
   isResolved?: boolean
+  url?: string
 }
 
 interface Submission {
@@ -271,7 +272,7 @@ export default function AdminSubmissionReviewPage() {
                  const response = question.response
                  if (response.answer !== undefined) {
                    // Handle combined response structure { answer: ..., url: ... }
-                                       if (typeof response.answer === 'string') {
+                   if (typeof response.answer === 'string') {
                       return {
                         questionId: question.id,
                         textValue: response.answer,
@@ -283,7 +284,7 @@ export default function AdminSubmissionReviewPage() {
                         needsRevision: needsRevision,
                         isResolved: isResolved
                       }
-                                       } else if (typeof response.answer === 'number') {
+                   } else if (typeof response.answer === 'number') {
                       return {
                         questionId: question.id,
                         textValue: undefined,
@@ -294,6 +295,20 @@ export default function AdminSubmissionReviewPage() {
                         feedback: feedback,
                         needsRevision: needsRevision,
                         isResolved: isResolved
+                      }
+                   } else if (Array.isArray(response.answer)) {
+                      // Handle array answer (checkbox responses)
+                      return {
+                        questionId: question.id,
+                        textValue: undefined,
+                        numericValue: undefined,
+                        booleanValue: undefined,
+                        arrayValue: response.answer,
+                        isComplete: true,
+                        feedback: feedback,
+                        needsRevision: needsRevision,
+                        isResolved: isResolved,
+                        url: response.url // Store the URL if present
                       }
                    }
                                    } else {
@@ -619,7 +634,71 @@ export default function AdminSubmissionReviewPage() {
       if (response.arrayValue.some((item: any) => typeof item === 'object' && (item.url || item.answer))) {
         return renderFileUploadResponse(response.arrayValue)
       }
-      return response.arrayValue.join(', ')
+      // Handle checkbox responses - format them nicely
+      const checkboxText = response.arrayValue.map((item: any) => {
+        if (typeof item === 'object' && item.value && item.otherText) {
+          // Handle "other" option with custom text
+          return `${item.value}: ${item.otherText}`
+        }
+        return item.toString()
+      }).join(', ')
+      
+      // If there's a URL, include it in the response
+      if (response.url) {
+        return (
+          <div className="space-y-3">
+            <div className="font-medium break-words text-gray-900 dark:text-white">
+              {checkboxText}
+            </div>
+            <div className="flex items-center space-x-3 p-3 border border-blue-200 rounded-lg bg-blue-50 dark:bg-blue-900/20">
+              <div className="flex-1">
+                <div className="flex items-center space-x-2 mb-2">
+                  <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  <span className="text-blue-800 dark:text-blue-200 text-sm font-medium">
+                    Supporting Evidence
+                  </span>
+                </div>
+                
+                <div className="flex flex-wrap gap-2">
+                  <a
+                    href={response.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center space-x-2 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                    <span>View Evidence</span>
+                  </a>
+                  
+                  <a
+                    href={response.url}
+                    download
+                    className="inline-flex items-center space-x-2 px-3 py-2 bg-gray-600 hover:bg-gray-700 text-white text-sm font-medium rounded-lg transition-colors"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    <span>Download</span>
+                  </a>
+                  
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                      {response.url}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )
+      }
+      
+      return checkboxText
     }
     return 'Tidak ada jawaban'
   }
