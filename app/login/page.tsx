@@ -12,6 +12,7 @@ import { Label } from '@/components/ui/label'
 import { Award, Mail, Lock, Eye, EyeOff } from 'lucide-react'
 import { toast } from 'sonner'
 import { loginUser } from '@/lib/auth'
+import api from '@/lib/api'
 
 const loginSchema = z.object({
   email: z.string().email('Alamat email tidak valid'),
@@ -44,12 +45,14 @@ export default function LoginPage() {
       // Redirect based on user role - handle different possible role structures
       const role = user.userRoles?.[0]?.role?.name || user.userRoles?.[0]?.name || 'PESERTA'
       console.log('User role:', role)
+      
       if (role === 'ADMIN' || role === 'SUPERADMIN') {
         router.push('/admin')
       } else if (role === 'JURI') {
         router.push('/jury')
       } else {
-        router.push('/peserta')
+        // For PESERTA users, redirect directly to thank you page for testing
+        router.push('/peserta/thank-you')
       }
     } catch (error: any) {
       console.error('Login error details:', {
@@ -61,6 +64,48 @@ export default function LoginPage() {
       toast.error(error.response?.data?.message || 'Kredensial tidak valid')
     } finally {
       setIsLoading(false)
+    }
+  }
+
+  const checkPesertaSubmissionStatus = async () => {
+    try {
+      // Check if user has any completed submissions using the existing API
+      const sessionsRes = await api.get('/user-sessions')
+      
+      if (sessionsRes.data) {
+        // Handle different possible response structures
+        let sessionsData = null
+        if (sessionsRes.data?.data && Array.isArray(sessionsRes.data.data)) {
+          sessionsData = sessionsRes.data.data
+        } else if (sessionsRes.data && Array.isArray(sessionsRes.data)) {
+          sessionsData = sessionsRes.data
+        }
+        
+        if (sessionsData && Array.isArray(sessionsData)) {
+          // Check if user has any submitted/completed sessions
+          const hasCompletedSubmission = sessionsData.some((session: any) => 
+            session.status === 'submitted' || 
+            session.status === 'approved' || 
+            session.status === 'completed'
+          )
+          
+          if (hasCompletedSubmission) {
+            router.push('/peserta/thank-you')
+          } else {
+            router.push('/peserta')
+          }
+        } else {
+          // Fallback to regular peserta dashboard
+          router.push('/peserta')
+        }
+      } else {
+        // Fallback to regular peserta dashboard
+        router.push('/peserta')
+      }
+    } catch (error) {
+      console.error('Error checking submission status:', error)
+      // Fallback to regular peserta dashboard
+      router.push('/peserta')
     }
   }
 
