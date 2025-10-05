@@ -112,7 +112,11 @@ export default function DashboardPage() {
                 </CardHeader>
                 <CardContent>
                   <p className="text-gray-600 text-sm">Tinjau dan nilai pengajuan</p>
-                  <Button className="mt-4 w-full" variant="outline">
+                  <Button 
+                    onClick={() => router.push('/jury/judgment')}
+                    className="mt-4 w-full" 
+                    variant="outline"
+                  >
                     Mulai Meninjau
                   </Button>
                 </CardContent>

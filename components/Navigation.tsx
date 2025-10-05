@@ -80,7 +80,7 @@ export default function Navigation({ className = '' }: NavigationProps) {
       case 'JURI':
         return [
           { href: '/jury', label: 'Beranda', icon: Home },
-          { href: '/jury/review', label: 'Penilaian', icon: Award },
+          { href: '/jury/judgment', label: 'Penilaian', icon: Award },
           { href: '/jury/rankings', label: 'Peringkat Penghargaan', icon: Trophy },
         ]
       case 'PESERTA':

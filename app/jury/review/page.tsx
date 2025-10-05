@@ -392,7 +392,7 @@ export default function JuriReviewPage() {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => router.push(`/jury/review/${review.sessionId}`)}
+                          onClick={() => router.push('/jury/judgment')}
                           className="flex items-center space-x-2 bg-gradient-to-r from-yellow-600 to-yellow-500 hover:from-yellow-700 hover:to-yellow-600 text-white border-0 shadow-lg shadow-yellow-500/25 hover:shadow-yellow-500/40 transition-all duration-200 transform hover:scale-105 px-6 py-3"
                         >
                           <Eye className="h-5 w-5" />

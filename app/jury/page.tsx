@@ -1,46 +1,31 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import { 
-  Search, 
-  ClipboardList, 
   CheckCircle, 
   Clock, 
   AlertTriangle, 
   Award, 
   FileText, 
-  ArrowRight,
   TrendingUp,
   Activity,
   Star,
   Zap,
   Users,
   BarChart3,
-  Eye,
   Play,
   Target,
   Trophy,
   Brain,
-  Filter
+  ClipboardList,
+  Eye
 } from 'lucide-react'
 import { toast } from 'sonner'
 import api from '@/lib/api'
 import AuthenticatedLayout from '@/components/AuthenticatedLayout'
-
-interface Review {
-  id: number
-  sessionId: number
-  groupName: string
-  userName: string
-  userEmail: string
-  submittedAt: string
-  status: string
-  progressPercentage: number
-}
 
 interface ReviewStats {
   totalAssigned: number
@@ -51,80 +36,39 @@ interface ReviewStats {
 
 interface DashboardData {
   statistics: ReviewStats
-  recentReviews: Review[]
-  pagination: {
-    total: number
-    page: number
-    limit: number
-    totalPages: number
-    hasNext: boolean
-    hasPrev: boolean
-  }
 }
 
 export default function JuriDashboard() {
   const router = useRouter()
-  const [reviews, setReviews] = useState<Review[]>([])
-  const [filteredReviews, setFilteredReviews] = useState<Review[]>([])
   const [stats, setStats] = useState<ReviewStats>({
     totalAssigned: 0,
     reviewed: 0,
     pending: 0,
     inProgress: 0
   })
-  const [searchTerm, setSearchTerm] = useState('')
   const [loading, setLoading] = useState(true)
-  const [currentPage, setCurrentPage] = useState(1)
-  const [pageSize] = useState(10)
-  const [searchTimeout, setSearchTimeout] = useState<NodeJS.Timeout | null>(null)
 
-  const fetchData = async (page = 1, search = '') => {
+  const fetchData = async () => {
     try {
       setLoading(true)
       
-      // Build query parameters
-      const params = new URLSearchParams()
-      if (page > 1) params.append('page', page.toString())
-      if (search.trim()) params.append('search', search.trim())
-      params.append('limit', pageSize.toString())
-      
-      // Get jury dashboard data from new endpoint
-      const dashboardRes = await api.get(`/assessments/jury/dashboard?${params.toString()}`)
+      // Get jury dashboard statistics
+      const dashboardRes = await api.get('/assessments/jury/dashboard')
       const dashboardData: DashboardData = dashboardRes.data.data || {
-        statistics: { totalAssigned: 0, reviewed: 0, pending: 0, inProgress: 0 },
-        recentReviews: [],
-        pagination: { total: 0, page: 1, limit: 10, totalPages: 0, hasNext: false, hasPrev: false }
+        statistics: { totalAssigned: 0, reviewed: 0, pending: 0, inProgress: 0 }
       }
 
-      setReviews(dashboardData.recentReviews)
-      setFilteredReviews(dashboardData.recentReviews)
       setStats(dashboardData.statistics)
-      setCurrentPage(dashboardData.pagination.page)
     } catch (err) {
       console.error('Error fetching juri data:', err)
       toast.error('Gagal memuat data dashboard')
       
       // Use mock data for demonstration
-      const mockReviews = [
-        {
-          id: 1,
-          sessionId: 1,
-          groupName: 'Sample Organization A',
-          userName: 'John Doe',
-          userEmail: 'john@example.com',
-          submittedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-          status: 'approved',
-          progressPercentage: 100
-        }
-      ]
-      
-      setReviews(mockReviews)
-      setFilteredReviews(mockReviews)
       setStats({
-        totalAssigned: 1,
+        totalAssigned: 0,
         reviewed: 0,
         pending: 0,
-        inProgress: 1
+        inProgress: 0
       })
     } finally {
       setLoading(false)
@@ -132,63 +76,11 @@ export default function JuriDashboard() {
   }
 
   useEffect(() => {
-    fetchData(1, '')
+    fetchData()
   }, [])
 
-  useEffect(() => {
-    return () => {
-      if (searchTimeout) {
-        clearTimeout(searchTimeout)
-      }
-    }
-  }, [searchTimeout])
 
-  const handleSearch = useCallback((term: string) => {
-    setSearchTerm(term)
-    // Reset to page 1 when searching
-    setCurrentPage(1)
-    // Fetch data with search term
-    fetchData(1, term)
-  }, [])
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'completed':
-        return 'text-green-600 bg-green-100 dark:bg-green-900/40'
-      case 'in_progress':
-        return 'text-blue-600 bg-blue-100 dark:bg-blue-900/40'
-      case 'pending':
-        return 'text-orange-600 bg-orange-100 dark:bg-orange-900/40'
-      default:
-        return 'text-gray-600 bg-gray-100 dark:bg-gray-900/40'
-    }
-  }
-
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'completed':
-        return <CheckCircle className="h-5 w-5" />
-      case 'in_progress':
-        return <Clock className="h-5 w-5" />
-      case 'pending':
-        return <AlertTriangle className="h-5 w-5" />
-      default:
-        return <ClipboardList className="h-5 w-5" />
-    }
-  }
-
-  const getStatusLabel = (status: string) => {
-    switch (status) {
-      case 'completed':
-        return 'Selesai'
-      case 'in_progress':
-        return 'Sedang Berlangsung'
-      case 'pending':
-        return 'Menunggu'
-      default:
-        return status
-    }
-  }
 
   if (loading) {
     return (
@@ -318,7 +210,7 @@ export default function JuriDashboard() {
 
           {/* Quick Actions */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-            <Card className="group cursor-pointer hover:shadow-2xl transition-all duration-500 transform hover:scale-[1.02] border-0 shadow-xl bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm relative overflow-hidden" onClick={() => router.push('/jury/review')}>
+            <Card className="group cursor-pointer hover:shadow-2xl transition-all duration-500 transform hover:scale-[1.02] border-0 shadow-xl bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm relative overflow-hidden" onClick={() => router.push('/jury/judgment')}>
               <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-blue-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
               <CardContent className="relative z-10 p-6">
                 <div className="flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-lg mb-4">
@@ -326,7 +218,10 @@ export default function JuriDashboard() {
                 </div>
                 <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Tinjau Pengajuan</h3>
                 <p className="text-gray-600 dark:text-gray-300 mb-4">Tinjau dan nilai pengajuan yang ditetapkan dengan evaluasi ahli</p>
-                <Button className="w-full bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-all duration-200 transform hover:scale-105">
+                <Button 
+                  onClick={() => router.push('/jury/judgment')}
+                  className="w-full bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-all duration-200 transform hover:scale-105"
+                >
                   <Eye className="h-4 w-4 mr-2" />
                   Mulai Meninjau
                 </Button>
@@ -364,116 +259,6 @@ export default function JuriDashboard() {
             </Card>
           </div>
 
-          {/* Search and Filters */}
-          <Card className="border-0 shadow-2xl bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm relative overflow-hidden mb-8">
-            <div className="absolute inset-0 bg-gradient-to-r from-gray-500/5 to-gray-600/5"></div>
-            <CardContent className="relative z-10 pt-8">
-              <div className="flex items-center space-x-4">
-                <div className="relative flex-1">
-                  <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
-                  <Input
-                    placeholder="Cari tinjauan berdasarkan nama kelompok, peserta, atau email..."
-                    value={searchTerm}
-                    onChange={(e) => {
-                      const value = e.target.value
-                      setSearchTerm(value)
-                      
-                      // Clear existing timeout
-                      if (searchTimeout) {
-                        clearTimeout(searchTimeout)
-                      }
-                      
-                      // Set new timeout for debounced search
-                      const timeoutId = setTimeout(() => {
-                        handleSearch(value)
-                      }, 500)
-                      setSearchTimeout(timeoutId)
-                    }}
-                    className="pl-12 h-12 border-gray-300 focus:border-yellow-500 focus:ring-yellow-500/20 dark:border-gray-600 dark:bg-gray-800 dark:focus:border-yellow-400 transition-all duration-200"
-                  />
-                </div>
-                <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400 bg-white/50 dark:bg-gray-800/50 px-4 py-2 rounded-full backdrop-blur-sm border border-yellow-200/50 dark:border-yellow-800/50">
-                  <Filter className="h-4 w-4" />
-                  <span className="font-medium">{filteredReviews.length} dari {reviews.length} pengajuan</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Recent Reviews */}
-          <Card className="border-0 shadow-2xl bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm relative overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-r from-gray-500/5 to-gray-600/5"></div>
-            <CardHeader className="relative z-10">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-2xl font-bold text-gray-900 dark:text-white">Tinjauan Terbaru</CardTitle>
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => router.push('/jury/review')}
-                  className="flex items-center space-x-2 bg-gradient-to-r from-yellow-600 to-yellow-500 hover:from-yellow-700 hover:to-yellow-600 text-white border-0 shadow-lg shadow-yellow-500/25 hover:shadow-yellow-500/40 transition-all duration-200"
-                >
-                  <span>Lihat Semua</span>
-                  <ArrowRight className="h-4 w-4" />
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent className="relative z-10">
-              {filteredReviews.length === 0 ? (
-                <div className="text-center py-16">
-                  <div className="w-32 h-32 mx-auto mb-8 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 to-gray-700 flex items-center justify-center">
-                    <ClipboardList className="h-16 w-16 text-gray-400" />
-                  </div>
-                  <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Tidak ada tinjauan ditemukan</h3>
-                  <p className="text-gray-500 dark:text-gray-400 mb-6 text-lg">
-                    {searchTerm ? 'Coba sesuaikan pencarian Anda' : 'Anda belum memiliki tinjauan yang ditetapkan'}
-                  </p>
-                  <div className="flex items-center justify-center space-x-2">
-                    <div className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse"></div>
-                    <div className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse delay-150"></div>
-                    <div className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse delay-300"></div>
-                  </div>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {filteredReviews.slice(0, 5).map((review) => (
-                    <div
-                      key={review.id}
-                      className="group flex items-center justify-between p-6 border border-gray-200/50 dark:border-gray-700/50 rounded-xl hover:bg-gradient-to-r hover:from-yellow-50/50 hover:to-yellow-100/50 dark:hover:from-yellow-900/20 dark:hover:to-yellow-800/20 cursor-pointer transition-all duration-300 transform hover:scale-[1.01]"
-                      onClick={() => router.push(`/jury/review/${review.sessionId}`)}
-                    >
-                      <div className="flex items-center space-x-4">
-                        <div className={`p-4 rounded-2xl ${getStatusColor(review.status)} group-hover:scale-110 transition-all duration-300`}>
-                          {getStatusIcon(review.status)}
-                        </div>
-                        <div>
-                          <h3 className="text-xl font-bold text-gray-900 dark:text-white">{review.groupName}</h3>
-                          <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-300 mt-1">
-                            <Users className="h-4 w-4" />
-                            <span>{review.userName}</span>
-                            <span>•</span>
-                            <span>{review.userEmail}</span>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="flex items-center space-x-4">
-                        <div className="text-sm text-gray-500 dark:text-gray-400">
-                          Dikirim {new Date(review.submittedAt).toLocaleDateString()}
-                        </div>
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          className="bg-gradient-to-r from-yellow-600 to-yellow-500 hover:from-yellow-700 hover:to-yellow-600 text-white border-0 shadow-lg shadow-yellow-500/25 hover:shadow-yellow-500/40 transition-all duration-200 transform hover:scale-105"
-                        >
-                          <Eye className="h-4 w-4 mr-2" />
-                          Tinjau
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
         </div>
       </div>
     </AuthenticatedLayout>

@@ -5,24 +5,36 @@ import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
 import { 
   ArrowLeft, 
   Search, 
   FileText, 
-  Trophy, 
+  Clock, 
+  CheckCircle, 
+  AlertTriangle, 
   Star, 
-  Target,
+  RefreshCw,
   TrendingUp,
-  Users,
+  Activity,
   Zap,
+  Users,
+  BarChart3,
+  Eye,
+  Play,
+  Target,
+  Trophy,
   Brain,
+  Filter,
   Award,
   MessageSquare,
-  RefreshCw,
-  BarChart3,
-  Activity,
-  Filter
+  Scale,
+  Gavel,
+  ThumbsUp,
+  ThumbsDown,
+  Send,
+  XCircle
 } from 'lucide-react'
 import { toast } from 'sonner'
 import api from '@/lib/api'
@@ -69,13 +81,18 @@ interface AwardRankingsData {
   data: AwardRanking[]
 }
 
-export default function JuryRankingsPage() {
+export default function JuryJudgmentPage() {
   const router = useRouter()
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [groupFilter, setGroupFilter] = useState('all')
   const [rankings, setRankings] = useState<AwardRanking[]>([])
   const [allGroups, setAllGroups] = useState<string[]>([])
+  const [selectedRanking, setSelectedRanking] = useState<AwardRanking | null>(null)
+  const [judgmentScore, setJudgmentScore] = useState<number>(0)
+  const [judgmentComments, setJudgmentComments] = useState('')
+  const [judgmentDecision, setJudgmentDecision] = useState<'approved' | 'rejected' | 'needs_revision'>('approved')
+  const [saving, setSaving] = useState(false)
 
   const extractGroupsFromRankings = (rankings: AwardRanking[]) => {
     const uniqueGroups = [...new Set(rankings.map(ranking => ranking.groupName))]
@@ -127,12 +144,12 @@ export default function JuryRankingsPage() {
       setAllGroups(extractGroupsFromRankings(rankingsData.data))
     } catch (err) {
       console.error('Error fetching award rankings:', err)
-      toast.error('Gagal memuat data peringkat')
+      toast.error('Gagal memuat data penilaian')
     } finally {
       if (showLoading) {
-      setLoading(false)
+        setLoading(false)
+      }
     }
-  }
   }
 
   useEffect(() => {
@@ -158,29 +175,6 @@ export default function JuryRankingsPage() {
     return matchesGroup && matchesSearch
   })
 
-  const calculateWeightedScore = (ranking: AwardRanking) => {
-    // Define weights for each criterion (as percentages)
-    const weights = {
-      relevansiProgram: 0.15,      // 15%
-      dampakCapaianNyata: 0.20,    // 20%
-      inklusivitas: 0.15,          // 15%
-      keberlanjutan: 0.15,         // 15%
-      inovasiPotensiReplikasi: 0.20, // 20%
-      kualitasPresentasi: 0.15     // 15%
-    }
-
-    // Calculate weighted score (each score out of 5, weighted by percentage)
-    const weightedScore = 
-      (ranking.averageScores.relevansiProgram * weights.relevansiProgram) +
-      (ranking.averageScores.dampakCapaianNyata * weights.dampakCapaianNyata) +
-      (ranking.averageScores.inklusivitas * weights.inklusivitas) +
-      (ranking.averageScores.keberlanjutan * weights.keberlanjutan) +
-      (ranking.averageScores.inovasiPotensiReplikasi * weights.inovasiPotensiReplikasi) +
-      (ranking.averageScores.kualitasPresentasi * weights.kualitasPresentasi)
-
-    return weightedScore
-  }
-
   const calculateTotalScore = (ranking: AwardRanking) => {
     return ranking.averageScores.relevansiProgram + 
            ranking.averageScores.dampakCapaianNyata + 
@@ -190,40 +184,69 @@ export default function JuryRankingsPage() {
            ranking.averageScores.kualitasPresentasi
   }
 
-  const getScoreBadge = (ranking: AwardRanking) => {
-    const weightedScore = calculateWeightedScore(ranking)
-    const maxWeightedScore = 5 // Maximum possible weighted score (all criteria at 5)
-    
-    let color = 'bg-gray-100 text-gray-800'
-    let icon = BarChart3
-    
-    if (weightedScore >= 4.0) {
-      color = 'bg-green-100 text-green-800'
-      icon = Trophy
-    } else if (weightedScore >= 3.0) {
-      color = 'bg-blue-100 text-blue-800'
-      icon = Star
-    } else if (weightedScore >= 2.0) {
-      color = 'bg-yellow-100 text-yellow-800'
-      icon = TrendingUp
-    } else if (weightedScore > 0) {
-      color = 'bg-orange-100 text-orange-800'
-      icon = Activity
+  const getScoringStatus = (ranking: AwardRanking) => {
+    if (!ranking.scoringDetails || ranking.scoringDetails.length === 0) {
+      return {
+        status: 'belum',
+        label: 'Belum Memberi Penilaian',
+        color: 'bg-gray-100 text-gray-800',
+        icon: Clock
+      }
+    } else {
+      return {
+        status: 'sudah',
+        label: 'Sudah Memberi Penilaian',
+        color: 'bg-green-100 text-green-800',
+        icon: CheckCircle
+      }
     }
+  }
 
-    const IconComponent = icon
-    const percentage = Math.round((weightedScore / maxWeightedScore) * 100)
+  const getScoreBadge = (ranking: AwardRanking) => {
+    const scoringStatus = getScoringStatus(ranking)
+    const IconComponent = scoringStatus.icon
 
     return (
-      <Badge className={`${color} flex items-center space-x-1`}>
+      <Badge className={`${scoringStatus.color} flex items-center space-x-1`}>
         <IconComponent className="h-3 w-3" />
-        <span>{weightedScore.toFixed(2)}/{maxWeightedScore} ({percentage}%)</span>
+        <span>{scoringStatus.label}</span>
       </Badge>
     )
   }
 
-  // Sort rankings by weighted score (highest first)
-  const sortedRankings = [...filteredRankings].sort((a, b) => calculateWeightedScore(b) - calculateWeightedScore(a))
+  const handleSubmitJudgment = async () => {
+    if (!selectedRanking) return
+
+    try {
+      setSaving(true)
+
+      const judgmentPayload = {
+        sessionId: selectedRanking.sessionId,
+        decision: judgmentDecision,
+        score: judgmentScore,
+        comments: judgmentComments,
+        stage: 'final_judgment'
+      }
+
+      await api.post(`/assessments/jury/${selectedRanking.sessionId}/judgment`, judgmentPayload)
+
+      toast.success('Keputusan berhasil dikirim')
+      setSelectedRanking(null)
+      fetchRankings() // Refresh the list
+    } catch (err) {
+      console.error('Error submitting judgment:', err)
+      toast.error('Gagal mengirim keputusan')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const openJudgmentModal = (ranking: AwardRanking) => {
+    setSelectedRanking(ranking)
+    setJudgmentScore(calculateTotalScore(ranking))
+    setJudgmentComments('')
+    setJudgmentDecision('approved')
+  }
 
   if (loading) {
     return (
@@ -260,8 +283,8 @@ export default function JuryRankingsPage() {
           <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-6">
-                <Button 
-                  variant="ghost" 
+                <Button
+                  variant="ghost"
                   size="sm"
                   onClick={() => router.push('/jury')}
                   className="flex items-center space-x-2 bg-white/20 hover:bg-white/30 text-gray-900 dark:text-white backdrop-blur-sm border border-white/20"
@@ -271,32 +294,32 @@ export default function JuryRankingsPage() {
                 </Button>
                 <div className="flex items-center space-x-4">
                   <div className="flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-yellow-500 to-yellow-600 shadow-lg border-2 border-yellow-400/50">
-                    <Trophy className="h-8 w-8 text-white" />
+                    <Gavel className="h-8 w-8 text-white" />
                   </div>
                   <div>
                     <h1 className="text-3xl font-bold bg-gradient-to-r from-yellow-600 via-yellow-500 to-yellow-400 bg-clip-text text-transparent">
-                      Peringkat Penilaian
+                      Keputusan Juri
                     </h1>
                     <p className="text-gray-600 dark:text-gray-300 mt-1">
-                      Lihat peringkat berdasarkan total skor penilaian
+                      Berikan keputusan akhir dan penilaian terakhir
                     </p>
                   </div>
                 </div>
               </div>
               <div className="flex items-center space-x-3">
-              <Button
-                variant="outline"
-                size="sm"
+                <Button
+                  variant="outline"
+                  size="sm"
                   onClick={() => fetchRankings(true)}
                   className="flex items-center space-x-2 bg-white/20 hover:bg-white/30 text-gray-900 dark:text-white backdrop-blur-sm border border-white/20"
-              >
+                >
                   <RefreshCw className="h-4 w-4" />
                   <span>Segarkan</span>
-              </Button>
+                </Button>
                 <div className="flex items-center space-x-2 bg-white/20 px-4 py-2 rounded-full backdrop-blur-sm border border-white/20">
-                  <Trophy className="h-5 w-5 text-yellow-600" />
+                  <Scale className="h-5 w-5 text-yellow-600" />
                   <span className="text-sm text-gray-700 dark:text-gray-300 font-medium">
-                    {filteredRankings.length} Peserta
+                    {filteredRankings.length} Pengajuan
                   </span>
                 </div>
               </div>
@@ -312,11 +335,11 @@ export default function JuryRankingsPage() {
                 <div className="flex items-center space-x-3">
                   <div className="p-2 rounded-lg bg-gradient-to-br from-yellow-100 to-yellow-200 dark:from-yellow-900/40 dark:to-yellow-800/40">
                     <Filter className="h-5 w-5 text-yellow-600 dark:text-yellow-400" />
-                </div>
+                  </div>
                   <div>
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Filter & Pencarian</h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Cari dan filter peringkat berdasarkan kelompok</p>
-                </div>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Cari dan filter pengajuan berdasarkan kelompok</p>
+                  </div>
                 </div>
               </CardHeader>
               <CardContent className="space-y-6">
@@ -341,9 +364,9 @@ export default function JuryRankingsPage() {
                   <div className="space-y-3">
                     {/* All Groups Button */}
                     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
-                  <Button
+                      <Button
                         variant={groupFilter === 'all' ? 'default' : 'outline'}
-                    size="sm"
+                        size="sm"
                         onClick={() => setGroupFilter('all')}
                         className={`px-4 py-3 text-sm font-medium transition-all duration-200 whitespace-nowrap rounded-lg ${
                           groupFilter === 'all' 
@@ -352,12 +375,12 @@ export default function JuryRankingsPage() {
                         }`}
                       >
                         Semua Kelompok
-                  </Button>
+                      </Button>
                       {getUniqueGroups().map((groupName) => (
-                  <Button
+                        <Button
                           key={groupName}
                           variant={groupFilter === groupName ? 'default' : 'outline'}
-                    size="sm"
+                          size="sm"
                           onClick={() => setGroupFilter(groupName)}
                           className={`px-4 py-3 text-sm font-medium transition-all duration-200 whitespace-nowrap rounded-lg ${
                             groupFilter === groupName 
@@ -366,32 +389,32 @@ export default function JuryRankingsPage() {
                           }`}
                         >
                           {groupName}
-                  </Button>
+                        </Button>
                       ))}
                     </div>
+                  </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
 
             {/* Rankings List */}
             <div className="grid gap-6">
-              {sortedRankings.length === 0 ? (
+              {filteredRankings.length === 0 ? (
                 <Card className="border-0 shadow-xl bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm">
                   <CardContent className="pt-6 text-center py-12">
                     <div className="flex flex-col items-center space-y-4">
                       <div className="w-16 h-16 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
                         <FileText className="h-8 w-8 text-gray-400" />
-                </div>
+                      </div>
                       <div>
-                        <h3 className="text-lg font-medium text-gray-900 dark:text-white">Tidak ada peringkat</h3>
-                        <p className="text-gray-500 dark:text-gray-400">Belum ada penilaian yang tersedia</p>
-                </div>
-                  </div>
+                        <h3 className="text-lg font-medium text-gray-900 dark:text-white">Tidak ada penilaian</h3>
+                        <p className="text-gray-500 dark:text-gray-400">Belum ada penilaian yang tersedia untuk ditinjau</p>
+                      </div>
+                    </div>
                   </CardContent>
                 </Card>
               ) : (
-                sortedRankings.map((ranking, index) => (
+                filteredRankings.map((ranking) => (
                   <Card
                     key={ranking.id}
                     className="border-0 shadow-xl bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm relative overflow-hidden group hover:shadow-2xl transition-all duration-500"
@@ -400,30 +423,27 @@ export default function JuryRankingsPage() {
                     <CardContent className="pt-6 relative z-10">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-6">
-                          {/* Ranking Position */}
-                          <div className="flex items-center justify-center w-16 h-16 rounded-xl bg-gradient-to-br from-yellow-100 to-yellow-200 dark:from-yellow-900/40 dark:to-yellow-800/40">
-                            <span className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">
-                              #{index + 1}
-                            </span>
-                                  </div>
+                          <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900/40 dark:to-blue-800/40">
+                            <Users className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                          </div>
                           <div className="flex-1">
                             <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">{ranking.groupName}</h3>
                             <div className="flex items-center space-x-4 text-sm text-gray-600 dark:text-gray-300 mb-2">
                               <div className="flex items-center space-x-2">
                                 <Users className="h-4 w-4" />
                                 <span>Peserta: {ranking.userName}</span>
-                                    </div>
+                              </div>
                               <div className="flex items-center space-x-2">
                                 <MessageSquare className="h-4 w-4" />
                                 <span>{ranking.userEmail}</span>
-                                  </div>
-                                </div>
+                              </div>
+                            </div>
                             {/* Scoring Criteria with Weighted Calculations */}
                             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-3">
                               <div className="flex items-center space-x-2 text-xs">
                                 <Target className="h-3 w-3 text-green-600" />
                                 <span>Relevansi: {(ranking.averageScores.relevansiProgram * 0.15).toFixed(2)}</span>
-                                </div>
+                              </div>
                               <div className="flex items-center space-x-2 text-xs">
                                 <TrendingUp className="h-3 w-3 text-blue-600" />
                                 <span>Dampak: {(ranking.averageScores.dampakCapaianNyata * 0.20).toFixed(2)}</span>
@@ -431,33 +451,171 @@ export default function JuryRankingsPage() {
                               <div className="flex items-center space-x-2 text-xs">
                                 <Users className="h-3 w-3 text-purple-600" />
                                 <span>Inklusivitas: {(ranking.averageScores.inklusivitas * 0.15).toFixed(2)}</span>
-                                  </div>
+                              </div>
                               <div className="flex items-center space-x-2 text-xs">
                                 <Zap className="h-3 w-3 text-orange-600" />
                                 <span>Keberlanjutan: {(ranking.averageScores.keberlanjutan * 0.15).toFixed(2)}</span>
-                                </div>
+                              </div>
                               <div className="flex items-center space-x-2 text-xs">
                                 <Brain className="h-3 w-3 text-indigo-600" />
                                 <span>Inovasi: {(ranking.averageScores.inovasiPotensiReplikasi * 0.20).toFixed(2)}</span>
-                                  </div>
+                              </div>
                               <div className="flex items-center space-x-2 text-xs">
                                 <Award className="h-3 w-3 text-red-600" />
                                 <span>Presentasi: {(ranking.averageScores.kualitasPresentasi * 0.15).toFixed(2)}</span>
-                                </div>
-                                </div>
                               </div>
                             </div>
+                          </div>
+                        </div>
                         <div className="flex items-center space-x-4">
                           {getScoreBadge(ranking)}
+                          <Button
+                            onClick={() => router.push(`/jury/judgment/${ranking.id}`)}
+                            className="flex items-center space-x-2 bg-gradient-to-r from-yellow-600 to-yellow-500 hover:from-yellow-700 hover:to-yellow-600 text-white shadow-lg shadow-yellow-500/25 hover:shadow-yellow-500/40 transition-all duration-200 transform hover:scale-105 px-6 py-3"
+                          >
+                            <Gavel className="h-5 w-5" />
+                            <span className="font-semibold">Beri Keputusan</span>
+                          </Button>
                         </div>
                       </div>
-            </CardContent>
-          </Card>
-                    ))
+                    </CardContent>
+                  </Card>
+                ))
               )}
             </div>
           </div>
         </div>
+
+        {/* Judgment Modal */}
+        {selectedRanking && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+            <Card className="w-full max-w-2xl border-0 shadow-2xl">
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-3">
+                  <div className="p-2 rounded-lg bg-gradient-to-br from-yellow-100 to-yellow-200">
+                    <Gavel className="h-6 w-6 text-yellow-600" />
+                  </div>
+                  <span>Keputusan Juri - {selectedRanking.groupName}</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* Current Scores Display */}
+                <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
+                  <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Skor Penilaian Saat Ini</h4>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-600 dark:text-gray-400">Relevansi Program:</span>
+                      <span className="font-medium text-gray-900 dark:text-white">{selectedRanking.averageScores.relevansiProgram}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-600 dark:text-gray-400">Dampak & Capaian Nyata:</span>
+                      <span className="font-medium text-gray-900 dark:text-white">{selectedRanking.averageScores.dampakCapaianNyata}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-600 dark:text-gray-400">Inklusivitas:</span>
+                      <span className="font-medium text-gray-900 dark:text-white">{selectedRanking.averageScores.inklusivitas}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-600 dark:text-gray-400">Keberlanjutan:</span>
+                      <span className="font-medium text-gray-900 dark:text-white">{selectedRanking.averageScores.keberlanjutan}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-600 dark:text-gray-400">Inovasi & Potensi Replikasi:</span>
+                      <span className="font-medium text-gray-900 dark:text-white">{selectedRanking.averageScores.inovasiPotensiReplikasi}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-600 dark:text-gray-400">Kualitas Presentasi:</span>
+                      <span className="font-medium text-gray-900 dark:text-white">{selectedRanking.averageScores.kualitasPresentasi}</span>
+                    </div>
+                  </div>
+                  <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
+                    <div className="flex items-center justify-between">
+                      <span className="text-base font-medium text-gray-700 dark:text-gray-300">Total Skor:</span>
+                      <span className="text-lg font-bold text-gray-900 dark:text-white">{calculateTotalScore(selectedRanking)}/600</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Decision Selection */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-3">Keputusan</label>
+                  <div className="grid grid-cols-3 gap-3">
+                    <Button
+                      variant={judgmentDecision === 'approved' ? 'default' : 'outline'}
+                      onClick={() => setJudgmentDecision('approved')}
+                      className={judgmentDecision === 'approved' ? 'bg-green-600 hover:bg-green-700' : 'border-green-300 text-green-600 hover:bg-green-50'}
+                    >
+                      <ThumbsUp className="h-4 w-4 mr-2" />
+                      Disetujui
+                    </Button>
+                    <Button
+                      variant={judgmentDecision === 'rejected' ? 'default' : 'outline'}
+                      onClick={() => setJudgmentDecision('rejected')}
+                      className={judgmentDecision === 'rejected' ? 'bg-red-600 hover:bg-red-700' : 'border-red-300 text-red-600 hover:bg-red-50'}
+                    >
+                      <ThumbsDown className="h-4 w-4 mr-2" />
+                      Ditolak
+                    </Button>
+                    <Button
+                      variant={judgmentDecision === 'needs_revision' ? 'default' : 'outline'}
+                      onClick={() => setJudgmentDecision('needs_revision')}
+                      className={judgmentDecision === 'needs_revision' ? 'bg-orange-600 hover:bg-orange-700' : 'border-orange-300 text-orange-600 hover:bg-orange-50'}
+                    >
+                      <AlertTriangle className="h-4 w-4 mr-2" />
+                      Perlu Revisi
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Score */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Skor Akhir (0-100)
+                  </label>
+                  <Input
+                    type="number"
+                    min={0}
+                    max={100}
+                    value={judgmentScore}
+                    onChange={(e) => setJudgmentScore(Number(e.target.value))}
+                    placeholder="Masukkan skor akhir"
+                  />
+                </div>
+
+                {/* Comments */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Komentar Keputusan
+                  </label>
+                  <Textarea
+                    value={judgmentComments}
+                    onChange={(e) => setJudgmentComments(e.target.value)}
+                    placeholder="Berikan komentar dan alasan keputusan Anda..."
+                    className="min-h-[120px]"
+                  />
+                </div>
+
+                {/* Actions */}
+                <div className="flex justify-end space-x-3">
+                  <Button
+                    variant="outline"
+                    onClick={() => setSelectedRanking(null)}
+                  >
+                    Batal
+                  </Button>
+                  <Button
+                    onClick={handleSubmitJudgment}
+                    disabled={saving}
+                    className="flex items-center space-x-2 bg-gradient-to-r from-yellow-600 to-yellow-500 hover:from-yellow-700 hover:to-yellow-600"
+                  >
+                    <Send className="h-4 w-4" />
+                    <span>{saving ? 'Mengirim...' : 'Kirim Keputusan'}</span>
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
       </div>
     </AuthenticatedLayout>
   )
