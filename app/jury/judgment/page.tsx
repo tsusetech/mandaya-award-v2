@@ -39,6 +39,7 @@ import {
 import { toast } from 'sonner'
 import api from '@/lib/api'
 import AuthenticatedLayout from '@/components/AuthenticatedLayout'
+import { getProfile } from '@/lib/auth'
 
 interface AwardRanking {
   id: number
@@ -93,6 +94,16 @@ export default function JuryJudgmentPage() {
   const [judgmentComments, setJudgmentComments] = useState('')
   const [judgmentDecision, setJudgmentDecision] = useState<'approved' | 'rejected' | 'needs_revision'>('approved')
   const [saving, setSaving] = useState(false)
+  const [currentUserId, setCurrentUserId] = useState<number | null>(null)
+
+  const fetchUserProfile = async () => {
+    try {
+      const user = await getProfile()
+      setCurrentUserId(user.id)
+    } catch (err) {
+      console.error('Error fetching user profile:', err)
+    }
+  }
 
   const extractGroupsFromRankings = (rankings: AwardRanking[]) => {
     const uniqueGroups = [...new Set(rankings.map(ranking => ranking.groupName))]
@@ -153,6 +164,7 @@ export default function JuryJudgmentPage() {
   }
 
   useEffect(() => {
+    fetchUserProfile()
     fetchRankings(true)
   }, [])
 
@@ -185,19 +197,23 @@ export default function JuryJudgmentPage() {
   }
 
   const getScoringStatus = (ranking: AwardRanking) => {
-    if (!ranking.scoringDetails || ranking.scoringDetails.length === 0) {
-      return {
-        status: 'belum',
-        label: 'Belum Memberi Penilaian',
-        color: 'bg-gray-100 text-gray-800',
-        icon: Clock
-      }
-    } else {
+    // Check if current user has already scored this submission
+    const hasCurrentUserScored = ranking.scoringDetails && 
+      ranking.scoringDetails.some(detail => detail.juryId === currentUserId)
+    
+    if (hasCurrentUserScored) {
       return {
         status: 'sudah',
         label: 'Sudah Memberi Penilaian',
         color: 'bg-green-100 text-green-800',
         icon: CheckCircle
+      }
+    } else {
+      return {
+        status: 'belum',
+        label: 'Belum Memberi Penilaian',
+        color: 'bg-gray-100 text-gray-800',
+        icon: Clock
       }
     }
   }
@@ -438,31 +454,67 @@ export default function JuryJudgmentPage() {
                                 <span>{ranking.userEmail}</span>
                               </div>
                             </div>
-                            {/* Scoring Criteria with Weighted Calculations */}
+                            {/* Scoring Criteria with Conditional Display */}
                             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-3">
                               <div className="flex items-center space-x-2 text-xs">
                                 <Target className="h-3 w-3 text-green-600" />
-                                <span>Relevansi: {(ranking.averageScores.relevansiProgram * 0.15).toFixed(2)}</span>
+                                <span>
+                                  Relevansi: {
+                                    ranking.scoringDetails && ranking.scoringDetails.some(detail => detail.juryId === currentUserId)
+                                      ? (ranking.averageScores.relevansiProgram * 0.15).toFixed(2)
+                                      : '---'
+                                  }
+                                </span>
                               </div>
                               <div className="flex items-center space-x-2 text-xs">
                                 <TrendingUp className="h-3 w-3 text-blue-600" />
-                                <span>Dampak: {(ranking.averageScores.dampakCapaianNyata * 0.20).toFixed(2)}</span>
+                                <span>
+                                  Dampak: {
+                                    ranking.scoringDetails && ranking.scoringDetails.some(detail => detail.juryId === currentUserId)
+                                      ? (ranking.averageScores.dampakCapaianNyata * 0.20).toFixed(2)
+                                      : '---'
+                                  }
+                                </span>
                               </div>
                               <div className="flex items-center space-x-2 text-xs">
                                 <Users className="h-3 w-3 text-purple-600" />
-                                <span>Inklusivitas: {(ranking.averageScores.inklusivitas * 0.15).toFixed(2)}</span>
+                                <span>
+                                  Inklusivitas: {
+                                    ranking.scoringDetails && ranking.scoringDetails.some(detail => detail.juryId === currentUserId)
+                                      ? (ranking.averageScores.inklusivitas * 0.15).toFixed(2)
+                                      : '---'
+                                  }
+                                </span>
                               </div>
                               <div className="flex items-center space-x-2 text-xs">
                                 <Zap className="h-3 w-3 text-orange-600" />
-                                <span>Keberlanjutan: {(ranking.averageScores.keberlanjutan * 0.15).toFixed(2)}</span>
+                                <span>
+                                  Keberlanjutan: {
+                                    ranking.scoringDetails && ranking.scoringDetails.some(detail => detail.juryId === currentUserId)
+                                      ? (ranking.averageScores.keberlanjutan * 0.15).toFixed(2)
+                                      : '---'
+                                  }
+                                </span>
                               </div>
                               <div className="flex items-center space-x-2 text-xs">
                                 <Brain className="h-3 w-3 text-indigo-600" />
-                                <span>Inovasi: {(ranking.averageScores.inovasiPotensiReplikasi * 0.20).toFixed(2)}</span>
+                                <span>
+                                  Inovasi: {
+                                    ranking.scoringDetails && ranking.scoringDetails.some(detail => detail.juryId === currentUserId)
+                                      ? (ranking.averageScores.inovasiPotensiReplikasi * 0.20).toFixed(2)
+                                      : '---'
+                                  }
+                                </span>
                               </div>
                               <div className="flex items-center space-x-2 text-xs">
                                 <Award className="h-3 w-3 text-red-600" />
-                                <span>Presentasi: {(ranking.averageScores.kualitasPresentasi * 0.15).toFixed(2)}</span>
+                                <span>
+                                  Presentasi: {
+                                    ranking.scoringDetails && ranking.scoringDetails.some(detail => detail.juryId === currentUserId)
+                                      ? (ranking.averageScores.kualitasPresentasi * 0.15).toFixed(2)
+                                      : '---'
+                                  }
+                                </span>
                               </div>
                             </div>
                           </div>

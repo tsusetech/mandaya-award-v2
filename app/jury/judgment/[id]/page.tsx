@@ -102,14 +102,31 @@ export default function JudgmentDetailPage() {
       const rankingData: AwardRanking = response.data?.data || response.data
       
       setRanking(rankingData)
-      setScores({
-        relevansiProgram: rankingData.averageScores.relevansiProgram,
-        dampakCapaianNyata: rankingData.averageScores.dampakCapaianNyata,
-        inklusivitas: rankingData.averageScores.inklusivitas,
-        keberlanjutan: rankingData.averageScores.keberlanjutan,
-        inovasiPotensiReplikasi: rankingData.averageScores.inovasiPotensiReplikasi,
-        kualitasPresentasi: rankingData.averageScores.kualitasPresentasi
-      })
+      
+      // Find current user's scoring details
+      const currentUserScoring = rankingData.scoringDetails?.find(detail => detail.juryId === juryId)
+      
+      if (currentUserScoring) {
+        // Use current user's specific scores
+        setScores({
+          relevansiProgram: currentUserScoring.relevansiProgram,
+          dampakCapaianNyata: currentUserScoring.dampakCapaianNyata,
+          inklusivitas: currentUserScoring.inklusivitas,
+          keberlanjutan: currentUserScoring.keberlanjutan,
+          inovasiPotensiReplikasi: currentUserScoring.inovasiPotensiReplikasi,
+          kualitasPresentasi: currentUserScoring.kualitasPresentasi
+        })
+      } else {
+        // Initialize with zeros if user hasn't scored yet
+        setScores({
+          relevansiProgram: 0,
+          dampakCapaianNyata: 0,
+          inklusivitas: 0,
+          keberlanjutan: 0,
+          inovasiPotensiReplikasi: 0,
+          kualitasPresentasi: 0
+        })
+      }
     } catch (err) {
       console.error('Error fetching ranking detail:', err)
       toast.error('Gagal memuat detail penilaian')
@@ -178,13 +195,15 @@ export default function JudgmentDetailPage() {
         return
       }
 
-      // Check if scoring already exists
-      const hasExistingScoring = ranking.scoringDetails && ranking.scoringDetails.length > 0
+      // Check if current user has already scored this submission
+      const hasCurrentUserScored = ranking.scoringDetails && 
+        ranking.scoringDetails.some(detail => detail.juryId === juryId)
 
-      // Use different endpoints and payloads based on scoring status
-      if (hasExistingScoring) {
+      // Use different endpoints and payloads based on current user's scoring status
+      if (hasCurrentUserScored) {
         // Update existing scoring - only send scoring criteria
-        const scoringDetailId = ranking.scoringDetails[0].id
+        const currentUserScoring = ranking.scoringDetails.find(detail => detail.juryId === juryId)
+        const scoringDetailId = currentUserScoring?.id
         const updatePayload = {
           relevansiProgram: scores.relevansiProgram,
           dampakCapaianNyata: scores.dampakCapaianNyata,
@@ -223,9 +242,14 @@ export default function JudgmentDetailPage() {
   useEffect(() => {
     if (rankingId) {
       fetchUserProfile()
-      fetchRankingDetail()
     }
   }, [rankingId])
+
+  useEffect(() => {
+    if (rankingId && juryId) {
+      fetchRankingDetail()
+    }
+  }, [rankingId, juryId])
 
   if (loading) {
     return (
@@ -383,7 +407,13 @@ export default function JudgmentDetailPage() {
                         <Target className="h-5 w-5 text-green-600" />
                         <span className="font-medium text-gray-700 dark:text-gray-300">Relevansi Program</span>
                       </div>
-                      <span className="text-sm text-gray-500 dark:text-gray-400">Skor: {scores.relevansiProgram}/5</span>
+                      <span className="text-sm text-gray-500 dark:text-gray-400">
+                        Skor: {
+                          ranking?.scoringDetails && ranking.scoringDetails.some(detail => detail.juryId === juryId)
+                            ? `${scores.relevansiProgram}/5`
+                            : '---/5'
+                        }
+                      </span>
                     </div>
                     <div className="flex space-x-2">
                       {[1, 2, 3, 4, 5].map((value) => (
@@ -411,7 +441,13 @@ export default function JudgmentDetailPage() {
                         <TrendingUp className="h-5 w-5 text-blue-600" />
                         <span className="font-medium text-gray-700 dark:text-gray-300">Dampak & Capaian Nyata</span>
                       </div>
-                      <span className="text-sm text-gray-500 dark:text-gray-400">Skor: {scores.dampakCapaianNyata}/5</span>
+                      <span className="text-sm text-gray-500 dark:text-gray-400">
+                        Skor: {
+                          ranking?.scoringDetails && ranking.scoringDetails.some(detail => detail.juryId === juryId)
+                            ? `${scores.dampakCapaianNyata}/5`
+                            : '---/5'
+                        }
+                      </span>
                     </div>
                     <div className="flex space-x-2">
                       {[1, 2, 3, 4, 5].map((value) => (
@@ -439,7 +475,13 @@ export default function JudgmentDetailPage() {
                         <Users className="h-5 w-5 text-purple-600" />
                         <span className="font-medium text-gray-700 dark:text-gray-300">Inklusivitas</span>
                       </div>
-                      <span className="text-sm text-gray-500 dark:text-gray-400">Skor: {scores.inklusivitas}/5</span>
+                      <span className="text-sm text-gray-500 dark:text-gray-400">
+                        Skor: {
+                          ranking?.scoringDetails && ranking.scoringDetails.some(detail => detail.juryId === juryId)
+                            ? `${scores.inklusivitas}/5`
+                            : '---/5'
+                        }
+                      </span>
                     </div>
                     <div className="flex space-x-2">
                       {[1, 2, 3, 4, 5].map((value) => (
@@ -467,7 +509,13 @@ export default function JudgmentDetailPage() {
                         <Zap className="h-5 w-5 text-orange-600" />
                         <span className="font-medium text-gray-700 dark:text-gray-300">Keberlanjutan</span>
                       </div>
-                      <span className="text-sm text-gray-500 dark:text-gray-400">Skor: {scores.keberlanjutan}/5</span>
+                      <span className="text-sm text-gray-500 dark:text-gray-400">
+                        Skor: {
+                          ranking?.scoringDetails && ranking.scoringDetails.some(detail => detail.juryId === juryId)
+                            ? `${scores.keberlanjutan}/5`
+                            : '---/5'
+                        }
+                      </span>
                     </div>
                     <div className="flex space-x-2">
                       {[1, 2, 3, 4, 5].map((value) => (
@@ -495,7 +543,13 @@ export default function JudgmentDetailPage() {
                         <Brain className="h-5 w-5 text-indigo-600" />
                         <span className="font-medium text-gray-700 dark:text-gray-300">Inovasi & Potensi Replikasi</span>
                       </div>
-                      <span className="text-sm text-gray-500 dark:text-gray-400">Skor: {scores.inovasiPotensiReplikasi}/5</span>
+                      <span className="text-sm text-gray-500 dark:text-gray-400">
+                        Skor: {
+                          ranking?.scoringDetails && ranking.scoringDetails.some(detail => detail.juryId === juryId)
+                            ? `${scores.inovasiPotensiReplikasi}/5`
+                            : '---/5'
+                        }
+                      </span>
                     </div>
                     <div className="flex space-x-2">
                       {[1, 2, 3, 4, 5].map((value) => (
@@ -523,7 +577,13 @@ export default function JudgmentDetailPage() {
                         <Award className="h-5 w-5 text-red-600" />
                         <span className="font-medium text-gray-700 dark:text-gray-300">Kualitas Presentasi</span>
                       </div>
-                      <span className="text-sm text-gray-500 dark:text-gray-400">Skor: {scores.kualitasPresentasi}/5</span>
+                      <span className="text-sm text-gray-500 dark:text-gray-400">
+                        Skor: {
+                          ranking?.scoringDetails && ranking.scoringDetails.some(detail => detail.juryId === juryId)
+                            ? `${scores.kualitasPresentasi}/5`
+                            : '---/5'
+                        }
+                      </span>
                     </div>
                     <div className="flex space-x-2">
                       {[1, 2, 3, 4, 5].map((value) => (
