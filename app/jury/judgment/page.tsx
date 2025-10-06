@@ -146,8 +146,12 @@ export default function JuryJudgmentPage() {
         setLoading(true)
       }
       
-      // Use the award-rankings endpoint
-      const response = await api.get('/award-rankings')
+      // Use the award-rankings endpoint with pagination parameters
+      const params = new URLSearchParams()
+      params.append('limit', '100') // Increase limit to get more results
+      params.append('page', '1')
+      
+      const response = await api.get(`/award-rankings?${params.toString()}`)
       const rankingsData: AwardRankingsData = response.data || { data: [] }
       
       setRankings(rankingsData.data)

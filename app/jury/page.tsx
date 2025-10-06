@@ -52,8 +52,12 @@ export default function JuriDashboard() {
     try {
       setLoading(true)
       
-      // Get jury dashboard statistics
-      const dashboardRes = await api.get('/assessments/jury/dashboard')
+      // Get jury dashboard statistics with pagination parameters
+      const params = new URLSearchParams()
+      params.append('limit', '100') // Increase limit to get more accurate statistics
+      params.append('page', '1')
+      
+      const dashboardRes = await api.get(`/assessments/jury/dashboard?${params.toString()}`)
       const dashboardData: DashboardData = dashboardRes.data.data || {
         statistics: { totalAssigned: 0, reviewed: 0, pending: 0, inProgress: 0 }
       }
