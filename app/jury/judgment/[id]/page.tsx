@@ -23,7 +23,8 @@ import {
   BarChart3,
   Activity,
   Clock,
-  CheckCircle
+  CheckCircle,
+  TreePine
 } from 'lucide-react'
 import { toast } from 'sonner'
 import api from '@/lib/api'
@@ -44,6 +45,8 @@ interface AwardRanking {
     dampakCapaianNyata: number
     inklusivitas: number
     keberlanjutan: number
+    socialEnvironmentEngagement: number
+    biokulturalEngagement: number
     inovasiPotensiReplikasi: number
     kualitasPresentasi: number
     overall: number
@@ -58,6 +61,8 @@ interface AwardRanking {
     dampakCapaianNyata: number
     inklusivitas: number
     keberlanjutan: number
+    socialEnvironmentEngagement: number
+    biokulturalEngagement: number
     inovasiPotensiReplikasi: number
     kualitasPresentasi: number
     createdAt: string
@@ -77,6 +82,8 @@ export default function JudgmentDetailPage() {
     dampakCapaianNyata: 0,
     inklusivitas: 0,
     keberlanjutan: 0,
+    socialEnvironmentEngagement: 0,
+    biokulturalEngagement: 0,
     inovasiPotensiReplikasi: 0,
     kualitasPresentasi: 0
   })
@@ -113,6 +120,8 @@ export default function JudgmentDetailPage() {
           dampakCapaianNyata: currentUserScoring.dampakCapaianNyata,
           inklusivitas: currentUserScoring.inklusivitas,
           keberlanjutan: currentUserScoring.keberlanjutan,
+          socialEnvironmentEngagement: currentUserScoring.socialEnvironmentEngagement,
+          biokulturalEngagement: currentUserScoring.biokulturalEngagement,
           inovasiPotensiReplikasi: currentUserScoring.inovasiPotensiReplikasi,
           kualitasPresentasi: currentUserScoring.kualitasPresentasi
         })
@@ -123,6 +132,8 @@ export default function JudgmentDetailPage() {
           dampakCapaianNyata: 0,
           inklusivitas: 0,
           keberlanjutan: 0,
+          socialEnvironmentEngagement: 0,
+          biokulturalEngagement: 0,
           inovasiPotensiReplikasi: 0,
           kualitasPresentasi: 0
         })
@@ -141,6 +152,8 @@ export default function JudgmentDetailPage() {
            ranking.averageScores.dampakCapaianNyata + 
            ranking.averageScores.inklusivitas + 
            ranking.averageScores.keberlanjutan + 
+           ranking.averageScores.socialEnvironmentEngagement + 
+           ranking.averageScores.biokulturalEngagement + 
            ranking.averageScores.inovasiPotensiReplikasi + 
            ranking.averageScores.kualitasPresentasi
   }
@@ -209,6 +222,8 @@ export default function JudgmentDetailPage() {
           dampakCapaianNyata: scores.dampakCapaianNyata,
           inklusivitas: scores.inklusivitas,
           keberlanjutan: scores.keberlanjutan,
+          socialEnvironmentEngagement: scores.socialEnvironmentEngagement,
+          biokulturalEngagement: scores.biokulturalEngagement,
           inovasiPotensiReplikasi: scores.inovasiPotensiReplikasi,
           kualitasPresentasi: scores.kualitasPresentasi
         }
@@ -223,6 +238,8 @@ export default function JudgmentDetailPage() {
           dampakCapaianNyata: scores.dampakCapaianNyata,
           inklusivitas: scores.inklusivitas,
           keberlanjutan: scores.keberlanjutan,
+          socialEnvironmentEngagement: scores.socialEnvironmentEngagement,
+          biokulturalEngagement: scores.biokulturalEngagement,
           inovasiPotensiReplikasi: scores.inovasiPotensiReplikasi,
           kualitasPresentasi: scores.kualitasPresentasi
         }
@@ -405,7 +422,12 @@ export default function JudgmentDetailPage() {
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center space-x-3">
                         <Target className="h-5 w-5 text-green-600" />
-                        <span className="font-medium text-gray-700 dark:text-gray-300">Relevansi Program</span>
+                        <div>
+                          <span className="font-medium text-gray-700 dark:text-gray-300">Relevansi Program</span>
+                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                            Kuantitas Hasil Sesuai Inpres 8 Tahun 2025: (1) Pengurangan Beban Pengeluaran; (2) Pengurangan Kantong Kemiskinan; (3) Peningkatan Lapangan Kerja
+                          </p>
+                        </div>
                       </div>
                       <span className="text-sm text-gray-500 dark:text-gray-400">
                         Skor: {
@@ -432,6 +454,30 @@ export default function JudgmentDetailPage() {
                         </Button>
                       ))}
                     </div>
+                    <div className="mt-3 p-3 bg-gray-100 dark:bg-gray-600 rounded-lg">
+                      <div className="space-y-2 text-xs">
+                        <div className="flex items-start space-x-2">
+                          <span className="font-medium text-gray-700 dark:text-gray-300">1️⃣</span>
+                          <span className="text-gray-600 dark:text-gray-400">Sangat Kurang – Program tidak relevan dengan kebutuhan masyarakat; tidak berbasis potensi lokal atau pemetaan sosial.</span>
+                        </div>
+                        <div className="flex items-start space-x-2">
+                          <span className="font-medium text-gray-700 dark:text-gray-300">2️⃣</span>
+                          <span className="text-gray-600 dark:text-gray-400">Kurang – Program cukup relevan tetapi tidak berbasis data lapangan; sasaran dan manfaat masih umum.</span>
+                        </div>
+                        <div className="flex items-start space-x-2">
+                          <span className="font-medium text-gray-700 dark:text-gray-300">3️⃣</span>
+                          <span className="text-gray-600 dark:text-gray-400">Cukup – Program relevan dengan konteks lokal dan menjawab sebagian kebutuhan masyarakat.</span>
+                        </div>
+                        <div className="flex items-start space-x-2">
+                          <span className="font-medium text-gray-700 dark:text-gray-300">4️⃣</span>
+                          <span className="text-gray-600 dark:text-gray-400">Baik – Program dirancang partisipatif, sesuai kebutuhan warga, dan mendukung peningkatan kapasitas lokal.</span>
+                        </div>
+                        <div className="flex items-start space-x-2">
+                          <span className="font-medium text-gray-700 dark:text-gray-300">5️⃣</span>
+                          <span className="text-gray-600 dark:text-gray-400">Sangat Baik – Program sangat relevan, kontekstual, dan responsif terhadap dinamika sosial-ekonomi masyarakat setempat.</span>
+                        </div>
+                      </div>
+                    </div>
                   </div>
 
                   {/* Dampak Capaian Nyata */}
@@ -439,7 +485,12 @@ export default function JudgmentDetailPage() {
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center space-x-3">
                         <TrendingUp className="h-5 w-5 text-blue-600" />
-                        <span className="font-medium text-gray-700 dark:text-gray-300">Dampak & Capaian Nyata</span>
+                        <div>
+                          <span className="font-medium text-gray-700 dark:text-gray-300">Dampak & Capaian Nyata</span>
+                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                            Kualitas Hasil: dirasakan penerima manfaat ( ekonomi, pendidikan, kesehatan, sosial ) serta luasnya jangkauan
+                          </p>
+                        </div>
                       </div>
                       <span className="text-sm text-gray-500 dark:text-gray-400">
                         Skor: {
@@ -466,6 +517,30 @@ export default function JudgmentDetailPage() {
                         </Button>
                       ))}
                     </div>
+                    <div className="mt-3 p-3 bg-gray-100 dark:bg-gray-600 rounded-lg">
+                      <div className="space-y-2 text-xs">
+                        <div className="flex items-start space-x-2">
+                          <span className="font-medium text-gray-700 dark:text-gray-300">1️⃣</span>
+                          <span className="text-gray-600 dark:text-gray-400">Sangat Kurang – Tidak ada bukti dampak; manfaat tidak dirasakan warga.</span>
+                        </div>
+                        <div className="flex items-start space-x-2">
+                          <span className="font-medium text-gray-700 dark:text-gray-300">2️⃣</span>
+                          <span className="text-gray-600 dark:text-gray-400">Kurang – Dampak terbatas, hanya pada individu tertentu atau jangka pendek.</span>
+                        </div>
+                        <div className="flex items-start space-x-2">
+                          <span className="font-medium text-gray-700 dark:text-gray-300">3️⃣</span>
+                          <span className="text-gray-600 dark:text-gray-400">Cukup – Ada dampak jelas bagi sebagian penerima manfaat; mulai terjadi perubahan positif.</span>
+                        </div>
+                        <div className="flex items-start space-x-2">
+                          <span className="font-medium text-gray-700 dark:text-gray-300">4️⃣</span>
+                          <span className="text-gray-600 dark:text-gray-400">Baik – Dampak nyata, terukur, dan dirasakan luas oleh komunitas; terjadi peningkatan kapasitas dan ekonomi.</span>
+                        </div>
+                        <div className="flex items-start space-x-2">
+                          <span className="font-medium text-gray-700 dark:text-gray-300">5️⃣</span>
+                          <span className="text-gray-600 dark:text-gray-400">Sangat Baik – Dampak besar, sistemik, dan berkelanjutan; mengubah kondisi sosial-ekonomi secara signifikan.</span>
+                        </div>
+                      </div>
+                    </div>
                   </div>
 
                   {/* Inklusivitas */}
@@ -473,7 +548,12 @@ export default function JudgmentDetailPage() {
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center space-x-3">
                         <Users className="h-5 w-5 text-purple-600" />
-                        <span className="font-medium text-gray-700 dark:text-gray-300">Inklusivitas</span>
+                        <div>
+                          <span className="font-medium text-gray-700 dark:text-gray-300">Inklusivitas</span>
+                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                            Tingkat keterlibatan masyarakat, terutama perempuan, pemuda, dan kelompok marjinal dalam perencanaan, pelaksanaan, dan manfaat program
+                          </p>
+                        </div>
                       </div>
                       <span className="text-sm text-gray-500 dark:text-gray-400">
                         Skor: {
@@ -500,6 +580,30 @@ export default function JudgmentDetailPage() {
                         </Button>
                       ))}
                     </div>
+                    <div className="mt-3 p-3 bg-gray-100 dark:bg-gray-600 rounded-lg">
+                      <div className="space-y-2 text-xs">
+                        <div className="flex items-start space-x-2">
+                          <span className="font-medium text-gray-700 dark:text-gray-300">1️⃣</span>
+                          <span className="text-gray-600 dark:text-gray-400">Sangat Kurang – Tidak melibatkan perempuan, pemuda, atau kelompok marjinal.</span>
+                        </div>
+                        <div className="flex items-start space-x-2">
+                          <span className="font-medium text-gray-700 dark:text-gray-300">2️⃣</span>
+                          <span className="text-gray-600 dark:text-gray-400">Kurang – Keterlibatan kelompok rentan ada, tetapi pasif atau simbolis.</span>
+                        </div>
+                        <div className="flex items-start space-x-2">
+                          <span className="font-medium text-gray-700 dark:text-gray-300">3️⃣</span>
+                          <span className="text-gray-600 dark:text-gray-400">Cukup – Ada partisipasi aktif dari sebagian kelompok perempuan, pemuda, atau marjinal.</span>
+                        </div>
+                        <div className="flex items-start space-x-2">
+                          <span className="font-medium text-gray-700 dark:text-gray-300">4️⃣</span>
+                          <span className="text-gray-600 dark:text-gray-400">Baik – Kelompok perempuan, pemuda, dan marjinal terlibat penuh dalam pelaksanaan dan pengambilan keputusan.</span>
+                        </div>
+                        <div className="flex items-start space-x-2">
+                          <span className="font-medium text-gray-700 dark:text-gray-300">5️⃣</span>
+                          <span className="text-gray-600 dark:text-gray-400">Sangat Baik – Program sangat inklusif; memberdayakan kelompok rentan sebagai penggerak utama perubahan sosial.</span>
+                        </div>
+                      </div>
+                    </div>
                   </div>
 
                   {/* Keberlanjutan */}
@@ -507,7 +611,12 @@ export default function JudgmentDetailPage() {
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center space-x-3">
                         <Zap className="h-5 w-5 text-orange-600" />
-                        <span className="font-medium text-gray-700 dark:text-gray-300">Keberlanjutan</span>
+                        <div>
+                          <span className="font-medium text-gray-700 dark:text-gray-300">Keberlanjutan</span>
+                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                            Menjaga Kelestarian Alam dan Keberlanjutan Program
+                          </p>
+                        </div>
                       </div>
                       <span className="text-sm text-gray-500 dark:text-gray-400">
                         Skor: {
@@ -534,6 +643,30 @@ export default function JudgmentDetailPage() {
                         </Button>
                       ))}
                     </div>
+                    <div className="mt-3 p-3 bg-gray-100 dark:bg-gray-600 rounded-lg">
+                      <div className="space-y-2 text-xs">
+                        <div className="flex items-start space-x-2">
+                          <span className="font-medium text-gray-700 dark:text-gray-300">1️⃣</span>
+                          <span className="text-gray-600 dark:text-gray-400">Sangat Kurang – Program berhenti setelah proyek selesai; tidak ada tindak lanjut.</span>
+                        </div>
+                        <div className="flex items-start space-x-2">
+                          <span className="font-medium text-gray-700 dark:text-gray-300">2️⃣</span>
+                          <span className="text-gray-600 dark:text-gray-400">Kurang – Upaya keberlanjutan ada, tapi belum sistematis atau belum didukung kelembagaan lokal.</span>
+                        </div>
+                        <div className="flex items-start space-x-2">
+                          <span className="font-medium text-gray-700 dark:text-gray-300">3️⃣</span>
+                          <span className="text-gray-600 dark:text-gray-400">Cukup – Ada upaya menjaga keberlanjutan melalui kelompok masyarakat atau dukungan mitra.</span>
+                        </div>
+                        <div className="flex items-start space-x-2">
+                          <span className="font-medium text-gray-700 dark:text-gray-300">4️⃣</span>
+                          <span className="text-gray-600 dark:text-gray-400">Baik – Keberlanjutan dijamin lewat kelembagaan lokal (koperasi, BUMDes, kelompok warga).</span>
+                        </div>
+                        <div className="flex items-start space-x-2">
+                          <span className="font-medium text-gray-700 dark:text-gray-300">5️⃣</span>
+                          <span className="text-gray-600 dark:text-gray-400">Sangat Baik – Program mandiri, lestari secara sosial–ekonomi–lingkungan, dan mampu memperluas dampak tanpa ketergantungan.</span>
+                        </div>
+                      </div>
+                    </div>
                   </div>
 
                   {/* Inovasi Potensi Replikasi */}
@@ -541,7 +674,12 @@ export default function JudgmentDetailPage() {
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center space-x-3">
                         <Brain className="h-5 w-5 text-indigo-600" />
-                        <span className="font-medium text-gray-700 dark:text-gray-300">Inovasi & Potensi Replikasi</span>
+                        <div>
+                          <span className="font-medium text-gray-700 dark:text-gray-300">Inovasi & Potensi Replikasi</span>
+                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                            Perubahan atau transformasi yang dilakukan ( sebelum dan sesudah )
+                          </p>
+                        </div>
                       </div>
                       <span className="text-sm text-gray-500 dark:text-gray-400">
                         Skor: {
@@ -568,6 +706,156 @@ export default function JudgmentDetailPage() {
                         </Button>
                       ))}
                     </div>
+                    <div className="mt-3 p-3 bg-gray-100 dark:bg-gray-600 rounded-lg">
+                      <div className="space-y-2 text-xs">
+                        <div className="flex items-start space-x-2">
+                          <span className="font-medium text-gray-700 dark:text-gray-300">1️⃣</span>
+                          <span className="text-gray-600 dark:text-gray-400">Sangat Kurang – Tidak ada pendekatan baru; sekadar kegiatan rutin.</span>
+                        </div>
+                        <div className="flex items-start space-x-2">
+                          <span className="font-medium text-gray-700 dark:text-gray-300">2️⃣</span>
+                          <span className="text-gray-600 dark:text-gray-400">Kurang – Ada sedikit ide baru, tapi belum efektif atau tidak berkelanjutan.</span>
+                        </div>
+                        <div className="flex items-start space-x-2">
+                          <span className="font-medium text-gray-700 dark:text-gray-300">3️⃣</span>
+                          <span className="text-gray-600 dark:text-gray-400">Cukup – Program menghadirkan inovasi lokal yang mulai berhasil di komunitasnya.</span>
+                        </div>
+                        <div className="flex items-start space-x-2">
+                          <span className="font-medium text-gray-700 dark:text-gray-300">4️⃣</span>
+                          <span className="text-gray-600 dark:text-gray-400">Baik – Inovasi terbukti efektif dan mulai direplikasi di wilayah sekitar.</span>
+                        </div>
+                        <div className="flex items-start space-x-2">
+                          <span className="font-medium text-gray-700 dark:text-gray-300">5️⃣</span>
+                          <span className="text-gray-600 dark:text-gray-400">Sangat Baik – Program menghadirkan inovasi sosial, teknologi, atau budaya yang kuat dan telah direplikasi secara luas.</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Social Environment Engagement */}
+                  <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center space-x-3">
+                        <Activity className="h-5 w-5 text-teal-600" />
+                        <div>
+                          <span className="font-medium text-gray-700 dark:text-gray-300">Social Environment Engagement</span>
+                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                            Jenis Penanganan Kasus Mendesak, Tematik Terencana, atau Sistematik-Integratif serta sifat Program (Advokasi, Pelayanan Sosial Lingkungan, Intervensi Inovatif)
+                          </p>
+                        </div>
+                      </div>
+                      <span className="text-sm text-gray-500 dark:text-gray-400">
+                        Skor: {
+                          ranking?.scoringDetails && ranking.scoringDetails.some(detail => detail.juryId === juryId)
+                            ? `${scores.socialEnvironmentEngagement}/5`
+                            : '---/5'
+                        }
+                      </span>
+                    </div>
+                    <div className="flex space-x-2">
+                      {[1, 2, 3, 4, 5].map((value) => (
+                        <Button
+                          key={value}
+                          variant={scores.socialEnvironmentEngagement === value ? 'default' : 'outline'}
+                          size="sm"
+                          onClick={() => handleScoreChange('socialEnvironmentEngagement', value)}
+                          className={`w-12 h-12 ${
+                            scores.socialEnvironmentEngagement === value 
+                              ? 'bg-teal-600 hover:bg-teal-700 text-white' 
+                              : 'border-teal-300 text-teal-600 hover:bg-teal-50'
+                          }`}
+                        >
+                          {value}
+                        </Button>
+                      ))}
+                    </div>
+                    <div className="mt-3 p-3 bg-gray-100 dark:bg-gray-600 rounded-lg">
+                      <div className="space-y-2 text-xs">
+                        <div className="flex items-start space-x-2">
+                          <span className="font-medium text-gray-700 dark:text-gray-300">1️⃣</span>
+                          <span className="text-gray-600 dark:text-gray-400">Sangat Kurang – Program reaktif tanpa perencanaan atau inovasi sosial/lingkungan.</span>
+                        </div>
+                        <div className="flex items-start space-x-2">
+                          <span className="font-medium text-gray-700 dark:text-gray-300">2️⃣</span>
+                          <span className="text-gray-600 dark:text-gray-400">Kurang – Program tematik namun kurang terencana dan minim inovasi.</span>
+                        </div>
+                        <div className="flex items-start space-x-2">
+                          <span className="font-medium text-gray-700 dark:text-gray-300">3️⃣</span>
+                          <span className="text-gray-600 dark:text-gray-400">Cukup – Program terencana, ada advokasi/pelayanan sosial dasar, tapi belum sistemik.</span>
+                        </div>
+                        <div className="flex items-start space-x-2">
+                          <span className="font-medium text-gray-700 dark:text-gray-300">4️⃣</span>
+                          <span className="text-gray-600 dark:text-gray-400">Baik – Program integratif dan berkelanjutan, dengan advokasi dan intervensi sosial/lingkungan yang inovatif.</span>
+                        </div>
+                        <div className="flex items-start space-x-2">
+                          <span className="font-medium text-gray-700 dark:text-gray-300">5️⃣</span>
+                          <span className="text-gray-600 dark:text-gray-400">Sangat Baik – Program sangat sistemik dan berkelanjutan; advokasi kuat, pelayanan komprehensif, serta inovasi sosial–lingkungan replikatif.</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Biokultural Engagement */}
+                  <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center space-x-3">
+                        <TreePine className="h-5 w-5 text-emerald-600" />
+                        <div>
+                          <span className="font-medium text-gray-700 dark:text-gray-300">Biokultural Engagement</span>
+                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                            Pemberdayaan masyarakat berbasis dan berkonteks pada kekayaan Budaya dan Kekayaan Lokal
+                          </p>
+                        </div>
+                      </div>
+                      <span className="text-sm text-gray-500 dark:text-gray-400">
+                        Skor: {
+                          ranking?.scoringDetails && ranking.scoringDetails.some(detail => detail.juryId === juryId)
+                            ? `${scores.biokulturalEngagement}/5`
+                            : '---/5'
+                        }
+                      </span>
+                    </div>
+                    <div className="flex space-x-2">
+                      {[1, 2, 3, 4, 5].map((value) => (
+                        <Button
+                          key={value}
+                          variant={scores.biokulturalEngagement === value ? 'default' : 'outline'}
+                          size="sm"
+                          onClick={() => handleScoreChange('biokulturalEngagement', value)}
+                          className={`w-12 h-12 ${
+                            scores.biokulturalEngagement === value 
+                              ? 'bg-emerald-600 hover:bg-emerald-700 text-white' 
+                              : 'border-emerald-300 text-emerald-600 hover:bg-emerald-50'
+                          }`}
+                        >
+                          {value}
+                        </Button>
+                      ))}
+                    </div>
+                    <div className="mt-3 p-3 bg-gray-100 dark:bg-gray-600 rounded-lg">
+                      <div className="space-y-2 text-xs">
+                        <div className="flex items-start space-x-2">
+                          <span className="font-medium text-gray-700 dark:text-gray-300">1️⃣</span>
+                          <span className="text-gray-600 dark:text-gray-400">Sangat Kurang – Tidak memperhatikan budaya atau potensi lokal; masyarakat tidak terlibat.</span>
+                        </div>
+                        <div className="flex items-start space-x-2">
+                          <span className="font-medium text-gray-700 dark:text-gray-300">2️⃣</span>
+                          <span className="text-gray-600 dark:text-gray-400">Kurang – Mulai menyinggung aspek budaya, namun minim partisipasi dan konteks lokal.</span>
+                        </div>
+                        <div className="flex items-start space-x-2">
+                          <span className="font-medium text-gray-700 dark:text-gray-300">3️⃣</span>
+                          <span className="text-gray-600 dark:text-gray-400">Cukup – Memanfaatkan budaya dan potensi lokal, tapi belum maksimal dalam pemberdayaan kontekstual.</span>
+                        </div>
+                        <div className="flex items-start space-x-2">
+                          <span className="font-medium text-gray-700 dark:text-gray-300">4️⃣</span>
+                          <span className="text-gray-600 dark:text-gray-400">Baik – Aktif memberdayakan masyarakat melalui budaya dan potensi lokal yang kuat dan relevan.</span>
+                        </div>
+                        <div className="flex items-start space-x-2">
+                          <span className="font-medium text-gray-700 dark:text-gray-300">5️⃣</span>
+                          <span className="text-gray-600 dark:text-gray-400">Sangat Baik – Sangat unggul dan inovatif dalam pemberdayaan berbasis budaya dan potensi lokal yang terintegrasi serta berkelanjutan.</span>
+                        </div>
+                      </div>
+                    </div>
                   </div>
 
                   {/* Kualitas Presentasi */}
@@ -575,7 +863,12 @@ export default function JudgmentDetailPage() {
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center space-x-3">
                         <Award className="h-5 w-5 text-red-600" />
-                        <span className="font-medium text-gray-700 dark:text-gray-300">Kualitas Presentasi</span>
+                        <div>
+                          <span className="font-medium text-gray-700 dark:text-gray-300">Kualitas Presentasi</span>
+                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                            Kejelasan, keteraturan, serta kemampuan menyampaikan dampak program secara meyakinkan
+                          </p>
+                        </div>
                       </div>
                       <span className="text-sm text-gray-500 dark:text-gray-400">
                         Skor: {
@@ -602,15 +895,39 @@ export default function JudgmentDetailPage() {
                         </Button>
                       ))}
                     </div>
+                    <div className="mt-3 p-3 bg-gray-100 dark:bg-gray-600 rounded-lg">
+                      <div className="space-y-2 text-xs">
+                        <div className="flex items-start space-x-2">
+                          <span className="font-medium text-gray-700 dark:text-gray-300">1️⃣</span>
+                          <span className="text-gray-600 dark:text-gray-400">Sangat Kurang – Penyampaian tidak runtut dan minim bukti.</span>
+                        </div>
+                        <div className="flex items-start space-x-2">
+                          <span className="font-medium text-gray-700 dark:text-gray-300">2️⃣</span>
+                          <span className="text-gray-600 dark:text-gray-400">Kurang – Informasi disampaikan seadanya; belum menunjukkan hasil nyata.</span>
+                        </div>
+                        <div className="flex items-start space-x-2">
+                          <span className="font-medium text-gray-700 dark:text-gray-300">3️⃣</span>
+                          <span className="text-gray-600 dark:text-gray-400">Cukup – Presentasi jelas dan menampilkan data serta contoh dasar.</span>
+                        </div>
+                        <div className="flex items-start space-x-2">
+                          <span className="font-medium text-gray-700 dark:text-gray-300">4️⃣</span>
+                          <span className="text-gray-600 dark:text-gray-400">Baik – Terstruktur, komunikatif, dan mampu menggambarkan dampak nyata.</span>
+                        </div>
+                        <div className="flex items-start space-x-2">
+                          <span className="font-medium text-gray-700 dark:text-gray-300">5️⃣</span>
+                          <span className="text-gray-600 dark:text-gray-400">Sangat Baik – Sangat meyakinkan, inspiratif, berbasis data dan narasi lapangan yang kuat.</span>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
                 {/* Total Score Display */}
                 <div className="p-4 bg-gradient-to-r from-yellow-50 to-yellow-100 dark:from-yellow-900/20 dark:to-yellow-800/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
                   <div className="flex items-center justify-between">
-                    <span className="text-lg font-medium text-gray-700 dark:text-gray-300">Total Skor (maksimal 30)</span>
+                    <span className="text-lg font-medium text-gray-700 dark:text-gray-300">Total Skor (maksimal 40)</span>
                     <span className="text-2xl font-bold text-gray-900 dark:text-white">
-                      {Object.values(scores).reduce((sum, score) => sum + score, 0)}/30
+                      {Object.values(scores).reduce((sum, score) => sum + score, 0)}/40
                     </span>
                   </div>
                 </div>

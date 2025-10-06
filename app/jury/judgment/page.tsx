@@ -34,7 +34,8 @@ import {
   ThumbsUp,
   ThumbsDown,
   Send,
-  XCircle
+  XCircle,
+  TreePine
 } from 'lucide-react'
 import { toast } from 'sonner'
 import api from '@/lib/api'
@@ -55,6 +56,8 @@ interface AwardRanking {
     dampakCapaianNyata: number
     inklusivitas: number
     keberlanjutan: number
+    socialEnvironmentEngagement: number
+    biokulturalEngagement: number
     inovasiPotensiReplikasi: number
     kualitasPresentasi: number
     overall: number
@@ -69,6 +72,8 @@ interface AwardRanking {
     dampakCapaianNyata: number
     inklusivitas: number
     keberlanjutan: number
+    socialEnvironmentEngagement: number
+    biokulturalEngagement: number
     inovasiPotensiReplikasi: number
     kualitasPresentasi: number
     createdAt: string
@@ -196,6 +201,8 @@ export default function JuryJudgmentPage() {
            ranking.averageScores.dampakCapaianNyata + 
            ranking.averageScores.inklusivitas + 
            ranking.averageScores.keberlanjutan + 
+           ranking.averageScores.socialEnvironmentEngagement + 
+           ranking.averageScores.biokulturalEngagement + 
            ranking.averageScores.inovasiPotensiReplikasi + 
            ranking.averageScores.kualitasPresentasi
   }
@@ -459,13 +466,13 @@ export default function JuryJudgmentPage() {
                               </div>
                             </div>
                             {/* Scoring Criteria with Conditional Display */}
-                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-3">
+                            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 mt-3">
                               <div className="flex items-center space-x-2 text-xs">
                                 <Target className="h-3 w-3 text-green-600" />
                                 <span>
                                   Relevansi: {
                                     ranking.scoringDetails && ranking.scoringDetails.some(detail => detail.juryId === currentUserId)
-                                      ? (ranking.averageScores.relevansiProgram * 0.15).toFixed(2)
+                                      ? (ranking.averageScores.relevansiProgram * 0.12).toFixed(2)
                                       : '---'
                                   }
                                 </span>
@@ -475,7 +482,7 @@ export default function JuryJudgmentPage() {
                                 <span>
                                   Dampak: {
                                     ranking.scoringDetails && ranking.scoringDetails.some(detail => detail.juryId === currentUserId)
-                                      ? (ranking.averageScores.dampakCapaianNyata * 0.20).toFixed(2)
+                                      ? (ranking.averageScores.dampakCapaianNyata * 0.17).toFixed(2)
                                       : '---'
                                   }
                                 </span>
@@ -485,7 +492,7 @@ export default function JuryJudgmentPage() {
                                 <span>
                                   Inklusivitas: {
                                     ranking.scoringDetails && ranking.scoringDetails.some(detail => detail.juryId === currentUserId)
-                                      ? (ranking.averageScores.inklusivitas * 0.15).toFixed(2)
+                                      ? (ranking.averageScores.inklusivitas * 0.12).toFixed(2)
                                       : '---'
                                   }
                                 </span>
@@ -495,7 +502,27 @@ export default function JuryJudgmentPage() {
                                 <span>
                                   Keberlanjutan: {
                                     ranking.scoringDetails && ranking.scoringDetails.some(detail => detail.juryId === currentUserId)
-                                      ? (ranking.averageScores.keberlanjutan * 0.15).toFixed(2)
+                                      ? (ranking.averageScores.keberlanjutan * 0.12).toFixed(2)
+                                      : '---'
+                                  }
+                                </span>
+                              </div>
+                              <div className="flex items-center space-x-2 text-xs">
+                                <Activity className="h-3 w-3 text-teal-600" />
+                                <span>
+                                  Sosial: {
+                                    ranking.scoringDetails && ranking.scoringDetails.some(detail => detail.juryId === currentUserId)
+                                      ? (ranking.averageScores.socialEnvironmentEngagement * 0.17).toFixed(2)
+                                      : '---'
+                                  }
+                                </span>
+                              </div>
+                              <div className="flex items-center space-x-2 text-xs">
+                                <TreePine className="h-3 w-3 text-emerald-600" />
+                                <span>
+                                  Biokultural: {
+                                    ranking.scoringDetails && ranking.scoringDetails.some(detail => detail.juryId === currentUserId)
+                                      ? (ranking.averageScores.biokulturalEngagement * 0.09).toFixed(2)
                                       : '---'
                                   }
                                 </span>
@@ -505,7 +532,7 @@ export default function JuryJudgmentPage() {
                                 <span>
                                   Inovasi: {
                                     ranking.scoringDetails && ranking.scoringDetails.some(detail => detail.juryId === currentUserId)
-                                      ? (ranking.averageScores.inovasiPotensiReplikasi * 0.20).toFixed(2)
+                                      ? (ranking.averageScores.inovasiPotensiReplikasi * 0.13).toFixed(2)
                                       : '---'
                                   }
                                 </span>
@@ -515,7 +542,7 @@ export default function JuryJudgmentPage() {
                                 <span>
                                   Presentasi: {
                                     ranking.scoringDetails && ranking.scoringDetails.some(detail => detail.juryId === currentUserId)
-                                      ? (ranking.averageScores.kualitasPresentasi * 0.15).toFixed(2)
+                                      ? (ranking.averageScores.kualitasPresentasi * 0.08).toFixed(2)
                                       : '---'
                                   }
                                 </span>
@@ -576,6 +603,14 @@ export default function JuryJudgmentPage() {
                       <span className="font-medium text-gray-900 dark:text-white">{selectedRanking.averageScores.keberlanjutan}</span>
                     </div>
                     <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-600 dark:text-gray-400">Social Environment Engagement:</span>
+                      <span className="font-medium text-gray-900 dark:text-white">{selectedRanking.averageScores.socialEnvironmentEngagement}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-600 dark:text-gray-400">Biokultural Engagement:</span>
+                      <span className="font-medium text-gray-900 dark:text-white">{selectedRanking.averageScores.biokulturalEngagement}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
                       <span className="text-sm text-gray-600 dark:text-gray-400">Inovasi & Potensi Replikasi:</span>
                       <span className="font-medium text-gray-900 dark:text-white">{selectedRanking.averageScores.inovasiPotensiReplikasi}</span>
                     </div>
@@ -587,7 +622,7 @@ export default function JuryJudgmentPage() {
                   <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
                     <div className="flex items-center justify-between">
                       <span className="text-base font-medium text-gray-700 dark:text-gray-300">Total Skor:</span>
-                      <span className="text-lg font-bold text-gray-900 dark:text-white">{calculateTotalScore(selectedRanking)}/600</span>
+                      <span className="text-lg font-bold text-gray-900 dark:text-white">{calculateTotalScore(selectedRanking)}/40</span>
                     </div>
                   </div>
                 </div>

@@ -22,7 +22,8 @@ import {
   RefreshCw,
   BarChart3,
   Activity,
-  Filter
+  Filter,
+  TreePine
 } from 'lucide-react'
 import { toast } from 'sonner'
 import api from '@/lib/api'
@@ -42,6 +43,8 @@ interface AwardRanking {
     dampakCapaianNyata: number
     inklusivitas: number
     keberlanjutan: number
+    socialEnvironmentEngagement: number
+    biokulturalEngagement: number
     inovasiPotensiReplikasi: number
     kualitasPresentasi: number
     overall: number
@@ -56,6 +59,8 @@ interface AwardRanking {
     dampakCapaianNyata: number
     inklusivitas: number
     keberlanjutan: number
+    socialEnvironmentEngagement: number
+    biokulturalEngagement: number
     inovasiPotensiReplikasi: number
     kualitasPresentasi: number
     createdAt: string
@@ -165,12 +170,14 @@ export default function JuryRankingsPage() {
   const calculateWeightedScore = (ranking: AwardRanking) => {
     // Define weights for each criterion (as percentages)
     const weights = {
-      relevansiProgram: 0.15,      // 15%
-      dampakCapaianNyata: 0.20,    // 20%
-      inklusivitas: 0.15,          // 15%
-      keberlanjutan: 0.15,         // 15%
-      inovasiPotensiReplikasi: 0.20, // 20%
-      kualitasPresentasi: 0.15     // 15%
+      relevansiProgram: 0.12,      // 12%
+      dampakCapaianNyata: 0.17,    // 17%
+      inklusivitas: 0.12,          // 12%
+      keberlanjutan: 0.12,         // 12%
+      socialEnvironmentEngagement: 0.17, // 17%
+      biokulturalEngagement: 0.09, // 9%
+      inovasiPotensiReplikasi: 0.13, // 13%
+      kualitasPresentasi: 0.08     // 8%
     }
 
     // Calculate weighted score (each score out of 5, weighted by percentage)
@@ -179,6 +186,8 @@ export default function JuryRankingsPage() {
       (ranking.averageScores.dampakCapaianNyata * weights.dampakCapaianNyata) +
       (ranking.averageScores.inklusivitas * weights.inklusivitas) +
       (ranking.averageScores.keberlanjutan * weights.keberlanjutan) +
+      (ranking.averageScores.socialEnvironmentEngagement * weights.socialEnvironmentEngagement) +
+      (ranking.averageScores.biokulturalEngagement * weights.biokulturalEngagement) +
       (ranking.averageScores.inovasiPotensiReplikasi * weights.inovasiPotensiReplikasi) +
       (ranking.averageScores.kualitasPresentasi * weights.kualitasPresentasi)
 
@@ -190,6 +199,8 @@ export default function JuryRankingsPage() {
            ranking.averageScores.dampakCapaianNyata + 
            ranking.averageScores.inklusivitas + 
            ranking.averageScores.keberlanjutan + 
+           ranking.averageScores.socialEnvironmentEngagement + 
+           ranking.averageScores.biokulturalEngagement + 
            ranking.averageScores.inovasiPotensiReplikasi + 
            ranking.averageScores.kualitasPresentasi
   }
@@ -423,30 +434,38 @@ export default function JuryRankingsPage() {
                                   </div>
                                 </div>
                             {/* Scoring Criteria with Weighted Calculations */}
-                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-3">
+                            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 mt-3">
                               <div className="flex items-center space-x-2 text-xs">
                                 <Target className="h-3 w-3 text-green-600" />
-                                <span>Relevansi: {(ranking.averageScores.relevansiProgram * 0.15).toFixed(2)}</span>
+                                <span>Relevansi: {(ranking.averageScores.relevansiProgram * 0.12).toFixed(2)}</span>
                                 </div>
                               <div className="flex items-center space-x-2 text-xs">
                                 <TrendingUp className="h-3 w-3 text-blue-600" />
-                                <span>Dampak: {(ranking.averageScores.dampakCapaianNyata * 0.20).toFixed(2)}</span>
+                                <span>Dampak: {(ranking.averageScores.dampakCapaianNyata * 0.17).toFixed(2)}</span>
                               </div>
                               <div className="flex items-center space-x-2 text-xs">
                                 <Users className="h-3 w-3 text-purple-600" />
-                                <span>Inklusivitas: {(ranking.averageScores.inklusivitas * 0.15).toFixed(2)}</span>
+                                <span>Inklusivitas: {(ranking.averageScores.inklusivitas * 0.12).toFixed(2)}</span>
                                   </div>
                               <div className="flex items-center space-x-2 text-xs">
                                 <Zap className="h-3 w-3 text-orange-600" />
-                                <span>Keberlanjutan: {(ranking.averageScores.keberlanjutan * 0.15).toFixed(2)}</span>
+                                <span>Keberlanjutan: {(ranking.averageScores.keberlanjutan * 0.12).toFixed(2)}</span>
+                                </div>
+                              <div className="flex items-center space-x-2 text-xs">
+                                <Activity className="h-3 w-3 text-teal-600" />
+                                <span>Sosial: {(ranking.averageScores.socialEnvironmentEngagement * 0.17).toFixed(2)}</span>
+                                </div>
+                              <div className="flex items-center space-x-2 text-xs">
+                                <TreePine className="h-3 w-3 text-emerald-600" />
+                                <span>Biokultural: {(ranking.averageScores.biokulturalEngagement * 0.09).toFixed(2)}</span>
                                 </div>
                               <div className="flex items-center space-x-2 text-xs">
                                 <Brain className="h-3 w-3 text-indigo-600" />
-                                <span>Inovasi: {(ranking.averageScores.inovasiPotensiReplikasi * 0.20).toFixed(2)}</span>
+                                <span>Inovasi: {(ranking.averageScores.inovasiPotensiReplikasi * 0.13).toFixed(2)}</span>
                                   </div>
                               <div className="flex items-center space-x-2 text-xs">
                                 <Award className="h-3 w-3 text-red-600" />
-                                <span>Presentasi: {(ranking.averageScores.kualitasPresentasi * 0.15).toFixed(2)}</span>
+                                <span>Presentasi: {(ranking.averageScores.kualitasPresentasi * 0.08).toFixed(2)}</span>
                                 </div>
                                 </div>
                               </div>
