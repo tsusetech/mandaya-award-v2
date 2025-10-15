@@ -49,9 +49,9 @@ export default function LoginPage() {
       if (role === 'ADMIN' || role === 'SUPERADMIN') {
         router.push('/admin')
       } else if (role === 'JURI') {
-        router.push('/jury')
+        router.push('/jury/thank-you')
       } else {
-        // For PESERTA users, redirect directly to thank you page for testing
+        // For PESERTA users, redirect directly to thank you page
         router.push('/peserta/thank-you')
       }
     } catch (error: any) {
